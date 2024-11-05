@@ -85,6 +85,12 @@ class QuizViewModel @Inject constructor(
                         }
                     }
 
+                    is GameMessage.TimeUpdate -> {
+                        _uiState.update { currentState ->
+                            currentState.copy(timeRemaining = message.timeRemaining)
+                        }
+                    }
+
                     else -> Unit
                 }
             }

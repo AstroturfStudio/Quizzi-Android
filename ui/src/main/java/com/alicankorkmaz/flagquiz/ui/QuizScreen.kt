@@ -1,8 +1,10 @@
 package com.alicankorkmaz.flagquiz.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
@@ -24,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,11 +60,20 @@ private fun QuizContent(
         animationSpec = spring(dampingRatio = 0.3f)
     )
 
+    // Süre animasyonu için state
+    val timeScale by animateFloatAsState(
+        targetValue = if (uiState.timeRemaining?.let { it < 5 } == true) 1.2f else 1f,
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = LinearEasing
+        )
+    )
+
     Box(
         modifier = modifier.fillMaxSize()
     ) {
         GameBar(
-            cursorPosition = uiState.cursorPosition,
+            cursorPosition = 1f - uiState.cursorPosition,
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .height(24.dp)
@@ -76,6 +88,20 @@ private fun QuizContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
+            // Süre göstergesi
+            Text(
+                text = "${uiState.timeRemaining ?: ""}",
+                style = MaterialTheme.typography.headlineMedium,
+                color = when {
+                    uiState.timeRemaining?.let { it <= 3 } == true -> Color.Red
+                    uiState.timeRemaining?.let { it <= 5 } == true -> Color.Yellow
+                    else -> MaterialTheme.colorScheme.primary
+                },
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .scale(timeScale)
+            )
+
             Text(
                 text = "Bu hangi ülkenin bayrağı?",
                 style = MaterialTheme.typography.titleLarge,
