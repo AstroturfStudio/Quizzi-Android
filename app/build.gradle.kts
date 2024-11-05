@@ -43,13 +43,17 @@ android {
             dimension = "environment"
             applicationIdSuffix = ""
             versionNameSuffix = ""
-            buildConfigField("String", "BASE_URL", "\"wss://flagquiz-server-production.up.railway.app/game\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"wss://flagquiz-server-production.up.railway.app\""
+            )
         }
         create("dev") {
             dimension = "environment"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            buildConfigField("String", "BASE_URL", "\"ws://10.0.2.2:8080/game\"")
+            buildConfigField("String", "BASE_URL", "\"ws://10.0.2.2:8080\"")
         }
     }
 

@@ -32,7 +32,7 @@ class WebSocketService {
 
     fun connect() {
         val request = Request.Builder()
-            .url(BuildConfig.BASE_URL)
+            .url("${BuildConfig.BASE_URL}/game")
             .build()
 
         webSocket = client.newWebSocket(request, createWebSocketListener())
