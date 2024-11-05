@@ -4,7 +4,6 @@ package com.alicankorkmaz.flagquiz.ui
 import LobbyUiState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alicankorkmaz.flagquiz.domain.model.ClientQuestion
 import com.alicankorkmaz.flagquiz.domain.model.GameState
 import com.alicankorkmaz.flagquiz.domain.model.websocket.GameMessage
 import com.alicankorkmaz.flagquiz.domain.repository.QuizRepository
@@ -37,15 +36,7 @@ class QuizViewModel @Inject constructor(
                 when (message) {
                     is GameMessage.GameUpdate -> {
                         println("Cursor Position: ${message.cursorPosition}")
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                currentQuestion = message.currentQuestion,
-                                timeRemaining = message.timeRemaining,
-                                gameState = message.gameState,
-                                cursorPosition = message.cursorPosition,
-                                error = null
-                            )
-                        }
+                        handleGameUpdate(message)
                     }
 
                     is GameMessage.RoomCreated -> {
@@ -91,9 +82,35 @@ class QuizViewModel @Inject constructor(
                         }
                     }
 
+                    is GameMessage.AnswerResult -> {
+                        handleAnswerResult(message)
+                    }
+
                     else -> Unit
                 }
             }
+        }
+    }
+
+    private fun handleAnswerResult(result: GameMessage.AnswerResult) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                lastAnswer = result,
+                hasAnswered = true
+            )
+        }
+    }
+
+    private fun handleGameUpdate(update: GameMessage.GameUpdate) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                currentQuestion = update.currentQuestion,
+                gameState = update.gameState,
+                cursorPosition = update.cursorPosition,
+                timeRemaining = update.timeRemaining,
+                lastAnswer = null,
+                hasAnswered = false
+            )
         }
     }
 
@@ -133,20 +150,4 @@ class QuizViewModel @Inject constructor(
         super.onCleared()
         repository.disconnect()
     }
-}
-
-data class QuizUiState(
-    val currentQuestion: ClientQuestion? = null,
-    val timeRemaining: Long? = null,
-    val gameState: GameState? = null,
-    val lastAnswerResult: GameMessage.AnswerResult? = null,
-    val showResult: Boolean = false,
-    val error: String? = null,
-    val score: Int = 0,
-    val totalQuestions: Int = 10,
-    val cursorPosition: Float = 0.5f,
-    val winner: String? = null
-) {
-    val isGameOver: Boolean
-        get() = gameState == GameState.FINISHED
 }
