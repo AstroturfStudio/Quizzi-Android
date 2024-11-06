@@ -4,14 +4,22 @@ import com.alicankorkmaz.flagquiz.domain.model.ClientQuestion
 import com.alicankorkmaz.flagquiz.domain.model.GameState
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonClassDiscriminator
 
 @Serializable
-@SerialName("GameMessage")
+@JsonClassDiscriminator("type")
 sealed class GameMessage {
+    // 1. Oda Yönetimi
     @Serializable
     @SerialName("CreateRoom")
     data class CreateRoom(
         val playerName: String
+    ) : GameMessage()
+
+    @Serializable
+    @SerialName("RoomCreated")
+    data class RoomCreated(
+        val roomId: String
     ) : GameMessage()
 
     @Serializable
@@ -22,11 +30,13 @@ sealed class GameMessage {
     ) : GameMessage()
 
     @Serializable
-    @SerialName("PlayerAnswer")
-    data class PlayerAnswer(
-        val answer: String
+    @SerialName("JoinRoomResponse")
+    data class JoinRoomResponse(
+        val roomId: String,
+        val success: Boolean
     ) : GameMessage()
 
+    // 2. Oyun Akışı
     @Serializable
     @SerialName("GameUpdate")
     data class GameUpdate(
@@ -48,10 +58,11 @@ sealed class GameMessage {
         val correctAnswer: String
     ) : GameMessage()
 
+    // 3. Oyuncu Etkileşimleri
     @Serializable
-    @SerialName("GameOver")
-    data class GameOver(
-        val winner: String
+    @SerialName("PlayerAnswer")
+    data class PlayerAnswer(
+        val answer: String
     ) : GameMessage()
 
     @Serializable
@@ -62,40 +73,35 @@ sealed class GameMessage {
         val correct: Boolean
     ) : GameMessage()
 
+    // 4. Oyun Sonuçları
     @Serializable
-    @SerialName("PlayerDisconnected")
-    data class PlayerDisconnected(
-        val playerName: String
+    @SerialName("GameOver")
+    data class GameOver(
+        val winner: String? = null,
+        val reason: String? = null
+    ) : GameMessage()
+
+    // 5. Bağlantı Durumu
+    @Serializable
+    @SerialName("ConnectionState")
+    data class ConnectionState(
+        val connectionStateType: ConnectionStateType,
+        val playerId: String,
+        val playerName: String? = null,
+        val reason: String? = null
     ) : GameMessage()
 
     @Serializable
-    @SerialName("PlayerReconnected")
-    data class PlayerReconnected(
-        val playerName: String
-    ) : GameMessage()
+    enum class ConnectionStateType {
+        DISCONNECTED,
+        RECONNECT_REQUEST,
+        RECONNECT_SUCCESS,
+        RECONNECT_FAILED
+    }
 
     @Serializable
-    @SerialName("RoomCreated")
-    data class RoomCreated(
-        val roomId: String
-    ) : GameMessage()
-
-    @Serializable
-    @SerialName("JoinRoomResponse")
-    data class JoinRoomResponse(
-        val roomId: String,
-        val success: Boolean
-    ) : GameMessage()
-
-    @Serializable
-    @SerialName("RoomClosed")
-    data class RoomClosed(
-        val reason: String
-    ) : GameMessage()
-
-    @Serializable
-    @SerialName("ErrorMessage")
-    data class ErrorMessage(
-        val reason: String
+    @SerialName("Error")
+    data class Error(
+        val message: String
     ) : GameMessage()
 }

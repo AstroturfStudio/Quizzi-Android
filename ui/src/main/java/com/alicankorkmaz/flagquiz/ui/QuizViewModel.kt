@@ -59,10 +59,10 @@ class QuizViewModel @Inject constructor(
                         }
                     }
 
-                    is GameMessage.ErrorMessage -> {
+                    is GameMessage.Error -> {
                         _lobbyState.update { currentState ->
                             currentState.copy(
-                                error = message.reason
+                                error = message.message
                             )
                         }
                     }
