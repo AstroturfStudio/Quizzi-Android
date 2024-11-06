@@ -16,7 +16,9 @@ data class QuizUiState(
     val cursorPosition: Float = 0.5f,
     val winner: String? = null,
     val lastAnswer: GameMessage.AnswerResult? = null,
-    val hasAnswered: Boolean = false
+    val hasAnswered: Boolean = false,
+    val playerId: String? = null,
+    val playerName: String? = null
 ) {
     val isGameOver: Boolean
         get() = gameState == GameState.FINISHED
