@@ -2,12 +2,14 @@ package com.alicankorkmaz.flagquiz.ui
 
 
 import LobbyUiState
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alicankorkmaz.flagquiz.domain.model.GameState
 import com.alicankorkmaz.flagquiz.domain.model.websocket.GameMessage
 import com.alicankorkmaz.flagquiz.domain.repository.QuizRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -86,6 +88,10 @@ class QuizViewModel @Inject constructor(
                         handleAnswerResult(message)
                     }
 
+                    is GameMessage.RoundResult -> {
+                        handleRoundResult(message)
+                    }
+
                     else -> Unit
                 }
             }
@@ -111,6 +117,26 @@ class QuizViewModel @Inject constructor(
                 lastAnswer = null,
                 hasAnswered = false
             )
+        }
+    }
+
+    private fun handleRoundResult(result: GameMessage.RoundResult) {
+        Log.d("QuizViewModel", "Round sonucu alındı: $result")
+        _uiState.update { currentState ->
+            currentState.copy(
+                showRoundResult = true,
+                correctAnswer = result.correctAnswer,
+                winnerPlayerName = result.winnerPlayerName,
+                isWinner = result.winnerPlayerId == currentState.playerId
+            ).also {
+                Log.d("QuizViewModel", "showRoundResult: ${it.showRoundResult}")
+            }
+        }
+
+        viewModelScope.launch {
+            delay(2000)
+            _uiState.update { it.copy(showRoundResult = false) }
+            Log.d("QuizViewModel", "Round sonucu gizlendi")
         }
     }
 

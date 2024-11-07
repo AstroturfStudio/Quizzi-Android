@@ -28,10 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.alicankorkmaz.flagquiz.domain.model.ClientQuestion
 import com.alicankorkmaz.flagquiz.domain.model.GameState
 import com.alicankorkmaz.flagquiz.domain.model.Option
+import com.alicankorkmaz.flagquiz.ui.components.RoundResultOverlay
 
 @Composable
 fun QuizScreen(
@@ -144,7 +146,7 @@ private fun QuizContent(
                                 )
                             }
                         }
-                        
+
                         // İkinci satır (C ve D şıkları)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -180,6 +182,22 @@ private fun QuizContent(
                     )
                 }
             }
+        }
+    }
+
+    // Round sonucu overlay'i
+    if (uiState.showRoundResult) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(1f)  // Overlay'i diğer içeriğin üzerine çıkar
+        ) {
+            RoundResultOverlay(
+                correctAnswer = uiState.correctAnswer ?: "",
+                winnerName = uiState.winnerPlayerName,
+                isWinner = uiState.isWinner,
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }

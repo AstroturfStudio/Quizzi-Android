@@ -105,4 +105,12 @@ sealed class GameMessage {
     data class Error(
         val message: String
     ) : GameMessage()
+
+    @Serializable
+    @SerialName("RoundResult")
+    data class RoundResult(
+        val correctAnswer: String,
+        val winnerPlayerId: String?,
+        val winnerPlayerName: String?
+    ) : GameMessage()
 }
