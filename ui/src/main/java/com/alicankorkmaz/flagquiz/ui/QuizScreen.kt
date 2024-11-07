@@ -1,31 +1,43 @@
 package com.alicankorkmaz.flagquiz.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -33,6 +45,8 @@ import coil.compose.AsyncImage
 import com.alicankorkmaz.flagquiz.domain.model.ClientQuestion
 import com.alicankorkmaz.flagquiz.domain.model.GameState
 import com.alicankorkmaz.flagquiz.domain.model.Option
+import com.alicankorkmaz.flagquiz.ui.components.AnswerOptionsGrid
+import com.alicankorkmaz.flagquiz.ui.components.GameOverOverlay
 import com.alicankorkmaz.flagquiz.ui.components.RoundResultOverlay
 
 @Composable
@@ -41,162 +55,184 @@ fun QuizScreen(
     uiState: QuizUiState,
     submitAnswer: (String) -> Unit
 ) {
-    QuizContent(
-        uiState = uiState,
-        submitAnswer = submitAnswer,
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun QuizContent(
-    uiState: QuizUiState,
-    submitAnswer: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Süre animasyonu için state
-    val timeScale by animateFloatAsState(
-        targetValue = if (uiState.timeRemaining?.let { it < 5 } == true) 1.2f else 1f,
-        animationSpec = tween(
-            durationMillis = 500,
-            easing = LinearEasing
-        )
-    )
-
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
-        GameBar(
-            cursorPosition = 1f - uiState.cursorPosition,
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(24.dp)
-                .align(Alignment.TopCenter)
-                .padding(top = 16.dp)
-        )
-
+    Box(modifier = modifier.fillMaxSize()) {
+        // Ana oyun içeriği
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 64.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Süre göstergesi
-            Text(
-                text = "${uiState.timeRemaining ?: ""}",
-                style = MaterialTheme.typography.headlineMedium,
-                color = when {
-                    uiState.timeRemaining?.let { it <= 3 } == true -> Color.Red
-                    uiState.timeRemaining?.let { it <= 5 } == true -> Color.Yellow
-                    else -> MaterialTheme.colorScheme.primary
-                },
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .scale(timeScale)
+            // Üst bilgi çubuğu
+            GameInfoBar(
+                timeRemaining = uiState.timeRemaining,
+                cursorPosition = uiState.cursorPosition
             )
 
-            Text(
-                text = "Bu hangi ülkenin bayrağı?",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Bayrak ve soru alanı
+            FlagQuestionCard(
+                question = uiState.currentQuestion,
+                modifier = Modifier.weight(1f)
             )
 
-            // Bayrak için arka plan ekleyelim
-            AsyncImage(
-                model = uiState.currentQuestion?.flagUrl,
-                contentDescription = "Bayrak",
-                modifier = Modifier
-                    .size(200.dp)
-                    .padding(16.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(8.dp),
-                contentScale = ContentScale.Fit
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Cevap şıkları
+            AnswerOptionsGrid(
+                question = uiState.currentQuestion,
+                lastAnswer = uiState.lastAnswer,
+                hasAnswered = uiState.hasAnswered,
+                onAnswerSelected = submitAnswer,
+                modifier = Modifier.padding(bottom = 24.dp)
             )
-
-            // Şıklar için yeni bir Composable kullanalım
-            uiState.currentQuestion?.let { question ->
-                AnimatedVisibility(
-                    visible = true,
-                    enter = slideInHorizontally() + fadeIn(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        // İlk satır (A ve B şıkları)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            question.options.take(2).forEachIndexed { index, option ->
-                                AnswerOptionButton(
-                                    text = option.name,
-                                    letter = ('A' + index),
-                                    isSelected = uiState.lastAnswer?.answer == option.id,
-                                    isCorrect = uiState.lastAnswer?.let { it.correct && it.answer == option.id } == true,
-                                    enabled = !uiState.hasAnswered,
-                                    onClick = { submitAnswer(option.id) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-
-                        // İkinci satır (C ve D şıkları)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            question.options.drop(2).forEachIndexed { index, option ->
-                                AnswerOptionButton(
-                                    text = option.name,
-                                    letter = ('C' + index),
-                                    isSelected = uiState.lastAnswer?.answer == option.id,
-                                    isCorrect = uiState.lastAnswer?.let { it.correct && it.answer == option.id } == true,
-                                    enabled = !uiState.hasAnswered,
-                                    onClick = { submitAnswer(option.id) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Oyun sonu göstergesi
-            if (uiState.gameState == GameState.FINISHED) {
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn()
-                ) {
-                    Text(
-                        text = "Oyun Bitti!",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
         }
-    }
 
-    // Round sonucu overlay'i
-    if (uiState.showRoundResult) {
-        Box(
+        // Round sonucu overlay
+        AnimatedVisibility(
+            visible = uiState.showRoundResult,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut(),
             modifier = Modifier
                 .fillMaxSize()
-                .zIndex(1f)  // Overlay'i diğer içeriğin üzerine çıkar
+                .zIndex(2f)
         ) {
             RoundResultOverlay(
                 correctAnswer = uiState.correctAnswer ?: "",
                 winnerName = uiState.winnerPlayerName,
-                isWinner = uiState.isWinner,
-                modifier = Modifier.fillMaxSize()
+                isWinner = uiState.isWinner
+            )
+        }
+
+        // Oyun sonu overlay
+        AnimatedVisibility(
+            visible = uiState.gameState == GameState.FINISHED,
+            enter = fadeIn() + slideInVertically(),
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(3f)
+        ) {
+            GameOverOverlay(
+                winner = uiState.winner,
+                score = uiState.score,
+                totalQuestions = uiState.totalQuestions
+            )
+        }
+    }
+}
+
+@Composable
+private fun GameInfoBar(
+    timeRemaining: Long?,
+    cursorPosition: Float,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TimeCounter(timeRemaining = timeRemaining)
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        GameProgressBar(
+            progress = 1f - cursorPosition,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun TimeCounter(
+    timeRemaining: Long?,
+    modifier: Modifier = Modifier
+) {
+    val scale by animateFloatAsState(
+        targetValue = if (timeRemaining?.let { it <= 3 } == true) 1.2f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+
+    Surface(
+        shape = CircleShape,
+        color = when {
+            timeRemaining?.let { it <= 3 } == true -> Color.Red
+            timeRemaining?.let { it <= 5 } == true -> Color(0xFFFFA000)
+            else -> MaterialTheme.colorScheme.primary
+        },
+        modifier = modifier
+            .size(56.dp)
+            .scale(scale)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = "${timeRemaining ?: ""}",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+private fun GameProgressBar(
+    progress: Float,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .height(12.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(progress)
+                .clip(RoundedCornerShape(6.dp))
+                .background(MaterialTheme.colorScheme.primary)
+        )
+    }
+}
+
+@Composable
+private fun FlagQuestionCard(
+    question: ClientQuestion?,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Bu hangi ülkenin bayrağı?",
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            AsyncImage(
+                model = question?.flagUrl,
+                contentDescription = "Bayrak",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(280.dp)
+                    .padding(16.dp)
             )
         }
     }
@@ -204,7 +240,7 @@ private fun QuizContent(
 
 @Preview(showBackground = true)
 @Composable
-fun QuizContentPreview() {
+private fun QuizScreenPreview() {
     val previewQuestion = ClientQuestion(
         flagUrl = "https://example.com/flag.png",
         options = listOf(
@@ -219,12 +255,49 @@ fun QuizContentPreview() {
         currentQuestion = previewQuestion,
         timeRemaining = 10L,
         gameState = GameState.PLAYING,
-        cursorPosition = 0.5f
+        cursorPosition = 0.5f,
+        showRoundResult = true,
+        correctAnswer = "Türkiye",
+        winnerPlayerName = "Oyuncu 1",
+        isWinner = true,
+        score = 5,
+        totalQuestions = 10
     )
 
-    QuizContent(
+    QuizScreen(
         uiState = previewUiState,
         submitAnswer = {}
+    )
+}
+
+@Preview
+@Composable
+private fun GameInfoBarPreview() {
+    GameInfoBar(
+        timeRemaining = 5L,
+        cursorPosition = 0.7f
+    )
+}
+
+@Preview
+@Composable
+private fun TimeCounterPreview() {
+    TimeCounter(timeRemaining = 3L)
+}
+
+@Preview
+@Composable
+private fun FlagQuestionCardPreview() {
+    FlagQuestionCard(
+        question = ClientQuestion(
+            flagUrl = "https://example.com/flag.png",
+            options = listOf(
+                Option("1", "Türkiye"),
+                Option("2", "Almanya"),
+                Option("3", "Fransa"),
+                Option("4", "İtalya")
+            )
+        )
     )
 }
 
