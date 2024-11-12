@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.alicankorkmaz.flagquiz.ui"
+    namespace = "com.alicankorkmaz.quizzi.ui"
     compileSdk = 34
 
     defaultConfig {

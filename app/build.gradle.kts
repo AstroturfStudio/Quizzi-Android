@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.alicankorkmaz.flagquiz"
+    namespace = "com.alicankorkmaz.quizzi"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.alicankorkmaz.flagquiz"
+        applicationId = "com.alicankorkmaz.quizzi"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
