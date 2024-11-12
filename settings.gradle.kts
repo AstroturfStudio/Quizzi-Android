@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FlagQuiz Client"
+rootProject.name = "Quizzi"
 include(":app")
 include(":domain")
 include(":ui")
