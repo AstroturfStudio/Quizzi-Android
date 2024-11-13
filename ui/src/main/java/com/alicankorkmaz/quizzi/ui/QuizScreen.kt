@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
-import com.alicankorkmaz.quizzi.domain.model.GameState
 import com.alicankorkmaz.quizzi.domain.model.Option
+import com.alicankorkmaz.quizzi.domain.model.RoomState
 import com.alicankorkmaz.quizzi.ui.components.AnswerOptionsGrid
 import com.alicankorkmaz.quizzi.ui.components.GameOverOverlay
 import com.alicankorkmaz.quizzi.ui.components.RoundResultOverlay
@@ -53,7 +53,7 @@ import com.alicankorkmaz.quizzi.ui.components.RoundResultOverlay
 fun QuizScreen(
     modifier: Modifier = Modifier,
     uiState: QuizUiState,
-    submitAnswer: (String) -> Unit
+    submitAnswer: (Int) -> Unit
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         // Ana oyun içeriği
@@ -99,7 +99,7 @@ fun QuizScreen(
                 .zIndex(2f)
         ) {
             RoundResultOverlay(
-                correctAnswer = uiState.correctAnswer ?: "",
+                correctAnswer = uiState.correctAnswer ?: -1,
                 winnerName = uiState.winnerPlayerName,
                 isWinner = uiState.isWinner
             )
@@ -107,7 +107,7 @@ fun QuizScreen(
 
         // Oyun sonu overlay
         AnimatedVisibility(
-            visible = uiState.gameState == GameState.FINISHED,
+            visible = uiState.roomState == RoomState.FINISHED,
             enter = fadeIn() + slideInVertically(),
             modifier = Modifier
                 .fillMaxSize()
@@ -227,7 +227,7 @@ private fun FlagQuestionCard(
             )
 
             AsyncImage(
-                model = question?.flagUrl,
+                model = question?.imageUrl,
                 contentDescription = "Bayrak",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -242,22 +242,24 @@ private fun FlagQuestionCard(
 @Composable
 private fun QuizScreenPreview() {
     val previewQuestion = ClientQuestion(
-        flagUrl = "https://example.com/flag.png",
+        id = 8758,
+        content = "conceptam",
+        imageUrl = "https://example.com/flag.png",
         options = listOf(
-            Option("1", "Türkiye"),
-            Option("2", "Almanya"),
-            Option("3", "Fransa"),
-            Option("4", "İtalya")
+            Option(1, "Türkiye"),
+            Option(2, "Almanya"),
+            Option(3, "Fransa"),
+            Option(4, "İtalya")
         )
     )
 
     val previewUiState = QuizUiState(
         currentQuestion = previewQuestion,
         timeRemaining = 10L,
-        gameState = GameState.PLAYING,
+        roomState = RoomState.PLAYING,
         cursorPosition = 0.5f,
         showRoundResult = true,
-        correctAnswer = "Türkiye",
+        correctAnswer = 1,
         winnerPlayerName = "Oyuncu 1",
         isWinner = true,
         score = 5,
@@ -290,12 +292,14 @@ private fun TimeCounterPreview() {
 private fun FlagQuestionCardPreview() {
     FlagQuestionCard(
         question = ClientQuestion(
-            flagUrl = "https://example.com/flag.png",
+            id = 1,
+            content = "Hangi ülkedir?",
+            imageUrl = "https://example.com/flag.png",
             options = listOf(
-                Option("1", "Türkiye"),
-                Option("2", "Almanya"),
-                Option("3", "Fransa"),
-                Option("4", "İtalya")
+                Option(1, "Türkiye"),
+                Option(2, "Almanya"),
+                Option(3, "Fransa"),
+                Option(4, "İtalya")
             )
         )
     )

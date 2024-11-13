@@ -10,8 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
-import com.alicankorkmaz.quizzi.domain.model.GameState
 import com.alicankorkmaz.quizzi.domain.model.Option
+import com.alicankorkmaz.quizzi.domain.model.RoomState
 
 @Composable
 fun HomeScreen(
@@ -36,10 +36,10 @@ fun HomeScreen(
 private fun HomeContent(
     uiState: QuizUiState,
     lobbyState: LobbyUiState,
-    onCreateRoom: (String) -> Unit,
-    onJoinRoom: (String, String) -> Unit,
+    onCreateRoom: () -> Unit,
+    onJoinRoom: (String) -> Unit,
     onBackToLobby: () -> Unit,
-    onSubmitAnswer: (String) -> Unit,
+    onSubmitAnswer: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -55,14 +55,14 @@ private fun HomeContent(
                 )
             }
 
-            uiState.gameState == null || uiState.gameState == GameState.WAITING -> {
+            uiState.roomState == null || uiState.roomState == RoomState.WAITING -> {
                 WaitingRoomScreen(
                     lobbyState = lobbyState,
                     onBackToLobby = onBackToLobby
                 )
             }
 
-            uiState.gameState == GameState.FINISHED -> {
+            uiState.roomState == RoomState.FINISHED -> {
                 GameOverScreen(
                     uiState = uiState,
                     backToLobby = onBackToLobby
@@ -85,15 +85,17 @@ fun HomeContentPreview() {
     HomeContent(
         uiState = QuizUiState(
             currentQuestion = ClientQuestion(
-                flagUrl = "https://example.com/flag.png",
+                id = 1,
+                content = "Hangi ülkedir?",
+                imageUrl = "https://example.com/flag.png",
                 options = listOf(
-                    Option("1", "Türkiye"),
-                    Option("2", "Almanya"),
-                    Option("3", "Fransa"),
-                    Option("4", "İtalya")
+                    Option(1, "Türkiye"),
+                    Option(2, "Almanya"),
+                    Option(3, "Fransa"),
+                    Option(4, "İtalya")
                 )
             ),
-            gameState = GameState.PLAYING,
+            roomState = RoomState.PLAYING,
             score = 0,
             totalQuestions = 10,
             cursorPosition = 0.5f
@@ -104,7 +106,7 @@ fun HomeContentPreview() {
             players = listOf("Player1", "Player2")
         ),
         onCreateRoom = {},
-        onJoinRoom = { _, _ -> },
+        onJoinRoom = { _ -> },
         onBackToLobby = {},
         onSubmitAnswer = {}
     )

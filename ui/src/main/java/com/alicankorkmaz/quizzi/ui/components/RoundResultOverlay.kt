@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun RoundResultOverlay(
-    correctAnswer: String,
+    correctAnswer: Int,
     winnerName: String?,
     isWinner: Boolean,
     modifier: Modifier = Modifier
@@ -55,7 +55,7 @@ fun RoundResultOverlay(
                     )
 
                     Text(
-                        text = correctAnswer,
+                        text = correctAnswer.toString(),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -78,7 +78,7 @@ fun RoundResultOverlay(
 @Composable
 fun RoundResultOverlayPreview() {
     RoundResultOverlay(
-        correctAnswer = "Turkey",
+        correctAnswer = 1,
         winnerName = "Alice",
         isWinner = true
     )

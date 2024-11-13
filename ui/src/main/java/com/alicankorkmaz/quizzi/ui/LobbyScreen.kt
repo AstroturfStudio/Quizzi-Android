@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 fun LobbyScreen(
     modifier: Modifier = Modifier,
     lobbyState: LobbyUiState,
-    createRoom: (String) -> Unit,
-    joinRoom: (String, String) -> Unit,
+    createRoom: () -> Unit,
+    joinRoom: (String) -> Unit,
 ) {
 
     LobbyContent(
@@ -42,8 +42,8 @@ fun LobbyScreen(
 @Composable
 private fun LobbyContent(
     lobbyState: LobbyUiState,
-    createRoom: (String) -> Unit,
-    joinRoom: (String, String) -> Unit,
+    createRoom: () -> Unit,
+    joinRoom: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var playerName by remember { mutableStateOf("") }
@@ -73,7 +73,7 @@ private fun LobbyContent(
         )
 
         Button(
-            onClick = { createRoom(playerName) },
+            onClick = { createRoom() },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
@@ -114,7 +114,7 @@ private fun LobbyContent(
             confirmButton = {
                 Button(
                     onClick = {
-                        joinRoom(roomId, playerName)
+                        joinRoom(roomId)
                         showJoinDialog = false
                     },
                     enabled = roomId.isNotBlank() && playerName.isNotBlank()
@@ -143,6 +143,6 @@ private fun LobbyScreenPreview() {
             players = listOf("Player1", "Player2")
         ),
         createRoom = { },
-        joinRoom = { _, _ -> }
+        joinRoom = { _ -> }
     )
 }

@@ -5,8 +5,14 @@ import LobbyUiState
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alicankorkmaz.quizzi.domain.model.GameState
-import com.alicankorkmaz.quizzi.domain.model.websocket.GameMessage
+import com.alicankorkmaz.quizzi.domain.model.RoomState
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.AnswerResult
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.GameOver
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.JoinedRoom
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.RoomCreated
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.RoomUpdate
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.RoundResult
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.TimeUpdate
 import com.alicankorkmaz.quizzi.domain.repository.QuizRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -36,12 +42,12 @@ class QuizViewModel @Inject constructor(
         viewModelScope.launch {
             repository.observeMessages().collect { message ->
                 when (message) {
-                    is GameMessage.GameUpdate -> {
+                    is RoomUpdate -> {
                         println("Cursor Position: ${message.cursorPosition}")
-                        handleGameUpdate(message)
+                        handleRoomUpdate(message)
                     }
 
-                    is GameMessage.RoomCreated -> {
+                    is RoomCreated -> {
                         println("Joined room: ${message.roomId}")
                         _lobbyState.update { currentState ->
                             currentState.copy(
@@ -51,7 +57,7 @@ class QuizViewModel @Inject constructor(
                         }
                     }
 
-                    is GameMessage.JoinRoomResponse -> {
+                    is JoinedRoom -> {
                         println("Joined room: ${message.roomId}")
                         _lobbyState.update { currentState ->
                             currentState.copy(
@@ -61,7 +67,7 @@ class QuizViewModel @Inject constructor(
                         }
                     }
 
-                    is GameMessage.Error -> {
+                    is Error -> {
                         _lobbyState.update { currentState ->
                             currentState.copy(
                                 error = message.message
@@ -69,26 +75,26 @@ class QuizViewModel @Inject constructor(
                         }
                     }
 
-                    is GameMessage.GameOver -> {
+                    is GameOver -> {
                         _uiState.update { currentState ->
                             currentState.copy(
-                                gameState = GameState.FINISHED,
-                                winner = message.winner
+                                roomState = RoomState.FINISHED,
+                                winner = message.winnerPlayerId
                             )
                         }
                     }
 
-                    is GameMessage.TimeUpdate -> {
+                    is TimeUpdate -> {
                         _uiState.update { currentState ->
-                            currentState.copy(timeRemaining = message.timeRemaining)
+                            currentState.copy(timeRemaining = message.remaining)
                         }
                     }
 
-                    is GameMessage.AnswerResult -> {
+                    is AnswerResult -> {
                         handleAnswerResult(message)
                     }
 
-                    is GameMessage.RoundResult -> {
+                    is RoundResult -> {
                         handleRoundResult(message)
                     }
 
@@ -98,7 +104,7 @@ class QuizViewModel @Inject constructor(
         }
     }
 
-    private fun handleAnswerResult(result: GameMessage.AnswerResult) {
+    private fun handleAnswerResult(result: AnswerResult) {
         _uiState.update { currentState ->
             currentState.copy(
                 lastAnswer = result,
@@ -107,11 +113,11 @@ class QuizViewModel @Inject constructor(
         }
     }
 
-    private fun handleGameUpdate(update: GameMessage.GameUpdate) {
+    private fun handleRoomUpdate(update: RoomUpdate) {
         _uiState.update { currentState ->
             currentState.copy(
                 currentQuestion = update.currentQuestion,
-                gameState = update.gameState,
+                roomState = update.state,
                 cursorPosition = update.cursorPosition,
                 timeRemaining = update.timeRemaining,
                 lastAnswer = null,
@@ -120,13 +126,13 @@ class QuizViewModel @Inject constructor(
         }
     }
 
-    private fun handleRoundResult(result: GameMessage.RoundResult) {
+    private fun handleRoundResult(result: RoundResult) {
         Log.d("QuizViewModel", "Round sonucu alındı: $result")
         _uiState.update { currentState ->
             currentState.copy(
                 showRoundResult = true,
                 correctAnswer = result.correctAnswer,
-                winnerPlayerName = result.winnerPlayerName,
+                winnerPlayerName = result.winnerPlayerId,
                 isWinner = result.winnerPlayerId == currentState.playerId
             ).also {
                 Log.d("QuizViewModel", "showRoundResult: ${it.showRoundResult}")
@@ -140,22 +146,21 @@ class QuizViewModel @Inject constructor(
         }
     }
 
-    fun submitAnswer(answer: String) {
+    fun submitAnswer(answer: Int) {
         repository.sendAnswer(answer)
         _uiState.update { it.copy(showResult = false) }
     }
 
-    fun createRoom(playerName: String) {
+    fun createRoom() {
         viewModelScope.launch {
-            repository.createRoom(playerName = playerName)
+            repository.createRoom()
         }
     }
 
-    fun joinRoom(roomId: String, playerName: String) {
+    fun joinRoom(roomId: String) {
         viewModelScope.launch {
             repository.joinRoom(
-                roomId = roomId,
-                playerName = playerName
+                roomId = roomId
             )
         }
     }
@@ -175,5 +180,45 @@ class QuizViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         repository.disconnect()
+    }
+
+    fun login(playerId: String) {
+        viewModelScope.launch {
+            repository.login(playerId)
+                .onSuccess { player ->
+                    _uiState.update {
+                        it.copy(
+                            playerId = player.id,
+                            playerName = player.name
+                        )
+                    }
+                    repository.connect()
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(error = error.message)
+                    }
+                }
+        }
+    }
+
+    fun createPlayer(name: String, avatarUrl: String) {
+        viewModelScope.launch {
+            repository.createPlayer(name, avatarUrl)
+                .onSuccess { player ->
+                    _uiState.update {
+                        it.copy(
+                            playerId = player.id,
+                            playerName = player.name
+                        )
+                    }
+                    repository.connect()
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(error = error.message)
+                    }
+                }
+        }
     }
 }

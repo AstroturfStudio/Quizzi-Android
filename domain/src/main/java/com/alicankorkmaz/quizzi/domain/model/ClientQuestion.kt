@@ -4,12 +4,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ClientQuestion(
-    val flagUrl: String,
-    val options: List<Option>,
+    val id: Int,
+    val imageUrl: String?,
+    val content: String,
+    val options: List<Option>
 )
 
 @Serializable
 data class Option(
-    val id: String,
-    val name: String
+    val id: Int,
+    val value: String
 )

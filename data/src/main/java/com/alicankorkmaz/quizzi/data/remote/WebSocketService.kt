@@ -1,8 +1,8 @@
 package com.alicankorkmaz.quizzi.data.remote
 
 import com.alicankorkmaz.quizzi.data.BuildConfig
-import com.alicankorkmaz.quizzi.domain.model.websocket.GameMessage
-import com.alicankorkmaz.quizzi.domain.model.websocket.GameMessage.ConnectionStateType
+import com.alicankorkmaz.quizzi.domain.model.websocket.ClientSocketMessage
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,7 +18,6 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
 import kotlin.math.pow
@@ -37,16 +36,20 @@ class WebSocketService {
         isLenient = true
     }
     private var webSocket: WebSocket? = null
-    private val messageChannel = Channel<GameMessage>()
+    private val messageChannel = Channel<ServerSocketMessage>()
     private var playerId: String? = null
     private var isReconnecting = false
     private val reconnectJob = Job()
     private val reconnectScope = CoroutineScope(Dispatchers.IO + reconnectJob)
     private var reconnectAttempt = 0
 
-    fun connect(existingPlayerId: String? = null) {
-        playerId = existingPlayerId ?: UUID.randomUUID().toString()
+    private fun createReconnectMessage(playerId: String) =
+        ClientSocketMessage.PlayerReconnected(playerId = playerId)
+
+    fun connect(playerId: String? = null) {
+        this.playerId = playerId
         connectWebSocket()
+        playerId?.let { send(createReconnectMessage(it)) }
     }
 
     private fun connectWebSocket() {
@@ -63,19 +66,11 @@ class WebSocketService {
 
         reconnectScope.launch {
             try {
-                val delayMs = min(
-                    INITIAL_BACKOFF_MS * (2.0.pow(reconnectAttempt - 1)).toLong(),
-                    MAX_BACKOFF_MS
-                )
+                val delayMs = calculateBackoffDelay()
                 delay(delayMs)
-
                 playerId?.let { existingId ->
                     connectWebSocket()
-                    val reconnectMessage = GameMessage.ConnectionState(
-                        connectionStateType = ConnectionStateType.RECONNECT_REQUEST,
-                        playerId = existingId
-                    )
-                    send(reconnectMessage)
+                    send(createReconnectMessage(existingId))
                 }
             } catch (e: Exception) {
                 handleReconnectFailure()
@@ -83,15 +78,19 @@ class WebSocketService {
         }
     }
 
+    private fun calculateBackoffDelay() = min(
+        INITIAL_BACKOFF_MS * (2.0.pow(reconnectAttempt - 1)).toLong(),
+        MAX_BACKOFF_MS
+    )
+
     private fun handleReconnectFailure() {
         if (reconnectAttempt < MAX_RECONNECT_ATTEMPTS) {
             handleReconnect()
         } else {
             messageChannel.trySend(
-                GameMessage.ConnectionState(
-                    connectionStateType = ConnectionStateType.RECONNECT_FAILED,
+                ServerSocketMessage.PlayerDisconnected(
                     playerId = playerId ?: "",
-                    reason = "Maximum reconnection attempts reached"
+                    playerName = ""
                 )
             )
             resetReconnectState()
@@ -109,10 +108,10 @@ class WebSocketService {
         webSocket = null
     }
 
-    fun observeMessages(): Flow<GameMessage> = messageChannel.receiveAsFlow()
+    fun observeMessages(): Flow<ServerSocketMessage> = messageChannel.receiveAsFlow()
 
-    fun send(message: GameMessage) {
-        val jsonString = json.encodeToString(GameMessage.serializer(), message)
+    fun send(message: ClientSocketMessage) {
+        val jsonString = json.encodeToString(ClientSocketMessage.serializer(), message)
         webSocket?.send(jsonString)
     }
 
@@ -123,15 +122,21 @@ class WebSocketService {
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             try {
-                val message = json.decodeFromString<GameMessage>(text)
-                messageChannel.trySend(message)
+                val message = json.decodeFromString<ServerSocketMessage>(text)
+                when (message) {
+                    is ServerSocketMessage.JoinedRoom -> handleJoinedRoom(message)
+                    else -> messageChannel.trySend(message)
+                }
             } catch (e: Exception) {
                 Timber.e(e, "Error parsing WebSocket message")
-                messageChannel.trySend(
-                    GameMessage.Error(
-                        message = "Error parsing message: ${e.message}"
-                    )
-                )
+            }
+        }
+
+        private fun handleJoinedRoom(message: ServerSocketMessage.JoinedRoom) {
+            if (message.success) {
+                messageChannel.trySend(message)
+            } else {
+                messageChannel.trySend(ServerSocketMessage.Error("Failed to join room"))
             }
         }
 

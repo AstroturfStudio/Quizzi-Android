@@ -10,14 +10,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
 import com.alicankorkmaz.quizzi.domain.model.Option
-import com.alicankorkmaz.quizzi.domain.model.websocket.GameMessage.AnswerResult
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage
 
 @Composable
 fun AnswerOptionsGrid(
     question: ClientQuestion?,
-    lastAnswer: AnswerResult?,
+    lastAnswer: ServerSocketMessage.AnswerResult?,
     hasAnswered: Boolean,
-    onAnswerSelected: (String) -> Unit,
+    onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     question?.let {
@@ -32,7 +32,7 @@ fun AnswerOptionsGrid(
             ) {
                 question.options.take(2).forEachIndexed { index, option ->
                     AnswerOptionButton(
-                        text = option.name,
+                        text = option.value,
                         letter = ('A' + index),
                         isSelected = lastAnswer?.answer == option.id,
                         isCorrect = lastAnswer?.let { it.correct && it.answer == option.id } == true,
@@ -50,7 +50,7 @@ fun AnswerOptionsGrid(
             ) {
                 question.options.drop(2).forEachIndexed { index, option ->
                     AnswerOptionButton(
-                        text = option.name,
+                        text = option.value,
                         letter = ('C' + index),
                         isSelected = lastAnswer?.answer == option.id,
                         isCorrect = lastAnswer?.let { it.correct && it.answer == option.id } == true,
@@ -69,13 +69,17 @@ fun AnswerOptionsGrid(
 private fun AnswerOptionsGridPreview() {
     AnswerOptionsGrid(
         question = ClientQuestion(
-            flagUrl = "https://example.com/flag.png",
+            id = 1,
+            content = "Hangi ülkedir?",
+            imageUrl = "https://example.com/flag.png",
             options = listOf(
-                Option("1", "Türkiye"),
-                Option("2", "Almanya"),
-                Option("3", "Fransa"),
-                Option("4", "İtalya")
-            )
+                Option(id = 1, value = "Türkiye"),
+                Option(id = 2, value = "Almanya"),
+                Option(id = 3, value = "Fransa"),
+                Option(
+                    id = 4, value = "İtalya"
+                )
+            ),
         ),
         lastAnswer = null,
         hasAnswered = false,

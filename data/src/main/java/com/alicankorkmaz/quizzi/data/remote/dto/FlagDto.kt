@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 data class FlagDto(
     @SerialName("id") val id: Int,
     @SerialName("name") val name: String,
-    @SerialName("flagUrl") val imageUrl: String
+    @SerialName("imageUrl") val imageUrl: String
 ) {
     fun toFlag(): Flag {
         return Flag(
