@@ -1,7 +1,7 @@
-package com.alicankorkmaz.quizzi.domain.model.websocket
+package com.alicankorkmaz.quizzi.data.remote
 
+import com.alicankorkmaz.quizzi.data.remote.model.PlayerDto
 import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
-import com.alicankorkmaz.quizzi.domain.model.Player
 import com.alicankorkmaz.quizzi.domain.model.RoomState
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,7 +26,7 @@ sealed class ServerSocketMessage {
     @Serializable
     @SerialName("RoomUpdate")
     data class RoomUpdate(
-        val players: List<Player>,
+        val playerDtos: List<PlayerDto>,
         val state: RoomState,
         val cursorPosition: Float,
         val timeRemaining: Long? = null,

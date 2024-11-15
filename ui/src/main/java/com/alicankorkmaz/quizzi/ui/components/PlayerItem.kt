@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui
+package com.alicankorkmaz.quizzi.ui.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement

@@ -1,19 +1,21 @@
-package com.alicankorkmaz.quizzi.ui
+package com.alicankorkmaz.quizzi.ui.game
 
 
-import LobbyUiState
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alicankorkmaz.quizzi.domain.model.RoomState
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.AnswerResult
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.GameOver
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.JoinedRoom
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.RoomCreated
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.RoomUpdate
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.RoundResult
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage.TimeUpdate
+import com.alicankorkmaz.quizzi.domain.model.websocket.ClientMessage
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.AnswerResult
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.Error
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.GameOver
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.RoomJoined
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.RoomCreated
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.RoomUpdate
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.RoundResult
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.TimeUpdate
 import com.alicankorkmaz.quizzi.domain.repository.QuizRepository
+import com.alicankorkmaz.quizzi.ui.lobby.LobbyUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,7 +59,7 @@ class QuizViewModel @Inject constructor(
                         }
                     }
 
-                    is JoinedRoom -> {
+                    is RoomJoined -> {
                         println("Joined room: ${message.roomId}")
                         _lobbyState.update { currentState ->
                             currentState.copy(
@@ -147,33 +149,25 @@ class QuizViewModel @Inject constructor(
     }
 
     fun submitAnswer(answer: Int) {
-        repository.sendAnswer(answer)
+        repository.sendMessage(ClientMessage.PlayerAnswer(answer))
         _uiState.update { it.copy(showResult = false) }
     }
 
     fun createRoom() {
-        viewModelScope.launch {
-            repository.createRoom()
-        }
+        repository.sendMessage(ClientMessage.CreateRoom)
     }
 
     fun joinRoom(roomId: String) {
-        viewModelScope.launch {
-            repository.joinRoom(
-                roomId = roomId
-            )
-        }
+        repository.sendMessage(ClientMessage.JoinRoom(roomId))
     }
 
     fun backToLobby() {
-        viewModelScope.launch {
-            repository.disconnect()
-            _lobbyState.update {
-                it.copy(currentRoom = null)
-            }
-            _uiState.update {
-                QuizUiState()
-            }
+        repository.disconnect()
+        _lobbyState.update {
+            it.copy(currentRoom = null)
+        }
+        _uiState.update {
+            QuizUiState()
         }
     }
 
@@ -182,43 +176,39 @@ class QuizViewModel @Inject constructor(
         repository.disconnect()
     }
 
-    fun login(playerId: String) {
-        viewModelScope.launch {
-            repository.login(playerId)
-                .onSuccess { player ->
-                    _uiState.update {
-                        it.copy(
-                            playerId = player.id,
-                            playerName = player.name
-                        )
-                    }
-                    repository.connect()
+    fun login(playerId: String) = viewModelScope.launch {
+        repository.login(playerId)
+            .onSuccess { player ->
+                _uiState.update {
+                    it.copy(
+                        playerId = player.id,
+                        playerName = player.name
+                    )
                 }
-                .onFailure { error ->
-                    _uiState.update {
-                        it.copy(error = error.message)
-                    }
+                repository.connect()
+            }
+            .onFailure { error ->
+                _uiState.update {
+                    it.copy(error = error.message)
                 }
-        }
+            }
     }
 
-    fun createPlayer(name: String, avatarUrl: String) {
-        viewModelScope.launch {
-            repository.createPlayer(name, avatarUrl)
-                .onSuccess { player ->
-                    _uiState.update {
-                        it.copy(
-                            playerId = player.id,
-                            playerName = player.name
-                        )
-                    }
-                    repository.connect()
+    fun createPlayer(name: String, avatarUrl: String) = viewModelScope.launch {
+        repository.createPlayer(name, avatarUrl)
+            .onSuccess { player ->
+                _uiState.update {
+                    it.copy(
+                        playerId = player.id,
+                        playerName = player.name
+                    )
                 }
-                .onFailure { error ->
-                    _uiState.update {
-                        it.copy(error = error.message)
-                    }
+                repository.connect()
+            }
+            .onFailure { error ->
+                _uiState.update {
+                    it.copy(error = error.message)
                 }
-        }
+            }
     }
 }

@@ -1,6 +1,6 @@
-package com.alicankorkmaz.quizzi.ui
+package com.alicankorkmaz.quizzi.ui.waitingroom
 
-import LobbyUiState
+import com.alicankorkmaz.quizzi.ui.lobby.LobbyUiState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

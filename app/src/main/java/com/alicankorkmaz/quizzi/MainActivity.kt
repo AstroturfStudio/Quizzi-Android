@@ -1,5 +1,6 @@
 package com.alicankorkmaz.quizzi
 
+import QuizziNavGraph
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,8 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.alicankorkmaz.quizzi.ui.HomeScreen
+import androidx.navigation.compose.rememberNavController
 import com.alicankorkmaz.quizzi.ui.theme.QuizziTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,10 +20,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             QuizziTheme {
+                val navController = rememberNavController()
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen(
-                        viewModel = hiltViewModel(),
-                        modifier = Modifier.padding(innerPadding)
+                    QuizziNavGraph(
+                        navController = navController, modifier = Modifier.padding(innerPadding)
                     )
                 }
             }

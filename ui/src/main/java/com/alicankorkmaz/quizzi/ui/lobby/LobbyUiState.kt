@@ -1,3 +1,5 @@
+package com.alicankorkmaz.quizzi.ui.lobby
+
 data class LobbyUiState(
     val isConnected: Boolean = false,
     val rooms: List<String> = emptyList(),

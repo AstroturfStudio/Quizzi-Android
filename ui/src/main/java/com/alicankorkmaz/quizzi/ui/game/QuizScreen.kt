@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui
+package com.alicankorkmaz.quizzi.ui.game
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring

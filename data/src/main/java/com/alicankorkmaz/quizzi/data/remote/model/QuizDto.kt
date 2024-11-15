@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.data.remote.dto
+package com.alicankorkmaz.quizzi.data.remote.model
 
 import com.alicankorkmaz.quizzi.domain.model.Quiz
 import kotlinx.serialization.SerialName

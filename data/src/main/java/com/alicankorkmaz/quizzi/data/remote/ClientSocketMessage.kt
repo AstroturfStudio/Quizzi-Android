@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.domain.model.websocket
+package com.alicankorkmaz.quizzi.data.remote
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName

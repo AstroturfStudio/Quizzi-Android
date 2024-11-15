@@ -10,12 +10,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
 import com.alicankorkmaz.quizzi.domain.model.Option
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage
 
 @Composable
 fun AnswerOptionsGrid(
     question: ClientQuestion?,
-    lastAnswer: ServerSocketMessage.AnswerResult?,
+    lastAnswer: ServerMessage.AnswerResult?,
     hasAnswered: Boolean,
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier

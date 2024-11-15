@@ -1,6 +1,6 @@
-package com.alicankorkmaz.quizzi.ui
+package com.alicankorkmaz.quizzi.ui.home
 
-import LobbyUiState
+import com.alicankorkmaz.quizzi.ui.lobby.LobbyUiState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -12,6 +12,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
 import com.alicankorkmaz.quizzi.domain.model.Option
 import com.alicankorkmaz.quizzi.domain.model.RoomState
+import com.alicankorkmaz.quizzi.ui.game.QuizScreen
+import com.alicankorkmaz.quizzi.ui.game.QuizUiState
+import com.alicankorkmaz.quizzi.ui.game.QuizViewModel
+import com.alicankorkmaz.quizzi.ui.waitingroom.WaitingRoomScreen
+import com.alicankorkmaz.quizzi.ui.gameover.GameOverScreen
+import com.alicankorkmaz.quizzi.ui.lobby.LobbyScreen
 
 @Composable
 fun HomeScreen(

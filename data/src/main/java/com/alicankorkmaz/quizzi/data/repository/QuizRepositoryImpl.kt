@@ -1,14 +1,19 @@
 package com.alicankorkmaz.quizzi.data.repository
 
-import com.alicankorkmaz.quizzi.domain.model.websocket.ClientSocketMessage
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage
 import com.alicankorkmaz.quizzi.data.remote.WebSocketService
-import com.alicankorkmaz.quizzi.data.remote.api.CreatePlayerRequest
-import com.alicankorkmaz.quizzi.data.remote.api.LoginRequest
 import com.alicankorkmaz.quizzi.data.remote.api.QuizApi
+import com.alicankorkmaz.quizzi.data.remote.model.CreatePlayerRequestDto
+import com.alicankorkmaz.quizzi.data.remote.model.LoginRequestDto
+import com.alicankorkmaz.quizzi.data.remote.model.PlayerDto
+import com.alicankorkmaz.quizzi.domain.model.GameRoom
 import com.alicankorkmaz.quizzi.domain.model.Player
+import com.alicankorkmaz.quizzi.domain.model.websocket.ClientMessage
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage
 import com.alicankorkmaz.quizzi.domain.repository.QuizRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import toDto
+import toDomain
 import javax.inject.Inject
 
 class QuizRepositoryImpl @Inject constructor(
@@ -16,54 +21,48 @@ class QuizRepositoryImpl @Inject constructor(
     private val api: QuizApi
 ) : QuizRepository {
 
-    private var currentPlayer: Player? = null
+    private var currentPlayerDto: PlayerDto? = null
 
     override suspend fun login(playerId: String): Result<Player> =
         runCatching {
             api.login(
-                LoginRequest(
+                LoginRequestDto(
                     id = playerId
                 )
-            ).also { player ->
-                currentPlayer = player
-                webSocketService.connect(player.id)
-            }
+            ).also {
+                currentPlayerDto = it
+            }.toDomain()
         }
 
     override suspend fun createPlayer(name: String, avatarUrl: String): Result<Player> {
         return runCatching {
             api.createPlayer(
-                CreatePlayerRequest(
+                CreatePlayerRequestDto(
                     name = name,
                     avatarUrl = avatarUrl
                 )
-            ).also { player ->
-                currentPlayer = player
-                webSocketService.connect(player.id)
-            }
+            ).also {
+                currentPlayerDto = it
+            }.toDomain()
+        }
+    }
+
+    override suspend fun getRooms(): Result<List<GameRoom>> {
+        return runCatching {
+            api.getRooms().rooms.map { it.toDomain() }
         }
     }
 
     override fun connect() {
-        webSocketService.connect()
+        webSocketService.connect(playerId = currentPlayerDto?.id)
     }
 
-    override fun createRoom() {
-        webSocketService.send(ClientSocketMessage.CreateRoom)
+    override fun observeMessages(): Flow<ServerMessage> {
+        return webSocketService.observeMessages().map { it.toDomain() }
     }
 
-    override fun joinRoom(roomId: String) {
-        currentPlayer?.let { player ->
-            webSocketService.send(ClientSocketMessage.JoinRoom(roomId))
-        }
-    }
-
-    override fun sendAnswer(answer: Int) {
-        webSocketService.send(ClientSocketMessage.PlayerAnswer(answer))
-    }
-
-    override fun observeMessages(): Flow<ServerSocketMessage> {
-        return webSocketService.observeMessages()
+    override fun sendMessage(message: ClientMessage) {
+        webSocketService.send(message.toDto())
     }
 
     override fun disconnect() {

@@ -1,8 +1,6 @@
 package com.alicankorkmaz.quizzi.data.remote
 
 import com.alicankorkmaz.quizzi.data.BuildConfig
-import com.alicankorkmaz.quizzi.domain.model.websocket.ClientSocketMessage
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerSocketMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -54,7 +52,7 @@ class WebSocketService {
 
     private fun connectWebSocket() {
         val request = Request.Builder()
-            .url("${BuildConfig.BASE_URL}/game")
+            .url("${BuildConfig.BASE_URL}/game?playerId=${playerId}")
             .build()
         webSocket = client.newWebSocket(request, createWebSocketListener())
     }

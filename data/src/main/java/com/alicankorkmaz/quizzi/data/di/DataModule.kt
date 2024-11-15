@@ -9,6 +9,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -19,8 +21,25 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideQuizApi(): QuizApi {
+    fun createOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = if (BuildConfig.DEBUG) {
+                    HttpLoggingInterceptor.Level.BODY
+                } else {
+                    HttpLoggingInterceptor.Level.NONE
+                }
+            })
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideQuizApi(
+        okHttpClient: OkHttpClient
+    ): QuizApi {
         return Retrofit.Builder()
+            .client(okHttpClient)
             .baseUrl(BuildConfig.BASE_URL.replace("ws", "http"))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
