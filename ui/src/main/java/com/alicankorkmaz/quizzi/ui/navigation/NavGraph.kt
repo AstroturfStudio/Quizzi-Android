@@ -1,9 +1,9 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.alicankorkmaz.quizzi.ui.game.GameScreen
 import com.alicankorkmaz.quizzi.ui.landing.LandingScreen
 
 const val ROUTE_LANDING = "landing"
@@ -23,7 +23,6 @@ fun QuizziNavGraph(
     ) {
         composable(ROUTE_LANDING) {
             LandingScreen(
-                viewModel = hiltViewModel(),
                 onNavigateToRooms = {
                     navController.navigate(ROUTE_ROOMS) {
                         popUpTo(ROUTE_LANDING) { inclusive = true }
@@ -34,7 +33,6 @@ fun QuizziNavGraph(
 
         composable(ROUTE_ROOMS) {
             RoomsScreen(
-                viewModel = hiltViewModel(),
                 onNavigateToRoom = {
                     navController.navigate(ROUTE_GAME) {
                         popUpTo(ROUTE_ROOMS) { saveState = true }
@@ -44,8 +42,7 @@ fun QuizziNavGraph(
         }
 
         composable(ROUTE_GAME) {
-            // TODO: Implement GameScreen
-            // GameScreen(viewModel = hiltViewModel())
+            GameScreen()
         }
     }
 } 

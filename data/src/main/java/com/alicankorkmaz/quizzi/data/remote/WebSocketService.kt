@@ -52,7 +52,7 @@ class WebSocketService {
 
     private fun connectWebSocket() {
         val request = Request.Builder()
-            .url("${BuildConfig.BASE_URL}/game?playerId=${playerId}")
+            .url("${BuildConfig.BASE_URL.replace("https", "wss")}/game?playerId=${playerId}")
             .build()
         webSocket = client.newWebSocket(request, createWebSocketListener())
     }

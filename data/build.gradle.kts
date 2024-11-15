@@ -45,12 +45,12 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"wss://flagquiz-server-production.up.railway.app\""
+                "\"https://quizzi-production-16a0.up.railway.app\""
             )
         }
         create("dev") {
             dimension = "environment"
-            buildConfigField("String", "BASE_URL", "\"ws://10.0.2.2:8080\"")
+            buildConfigField("String", "BASE_URL", "\"https://10.0.2.2:8080\"")
         }
     }
 }

@@ -14,12 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.alicankorkmaz.quizzi.ui.game.QuizUiState
+import com.alicankorkmaz.quizzi.ui.game.GameUiState
 
 @Composable
 fun GameOverScreen(
     modifier: Modifier = Modifier,
-    uiState: QuizUiState,
+    uiState: GameUiState,
     backToLobby: () -> Unit
 ) {
     GameOverContent(

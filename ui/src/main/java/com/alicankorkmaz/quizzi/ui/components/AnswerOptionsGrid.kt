@@ -8,13 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
 import com.alicankorkmaz.quizzi.domain.model.Option
+import com.alicankorkmaz.quizzi.domain.model.Question
 import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage
 
 @Composable
 fun AnswerOptionsGrid(
-    question: ClientQuestion?,
+    question: Question?,
     lastAnswer: ServerMessage.AnswerResult?,
     hasAnswered: Boolean,
     onAnswerSelected: (Int) -> Unit,
@@ -68,10 +68,9 @@ fun AnswerOptionsGrid(
 @Composable
 private fun AnswerOptionsGridPreview() {
     AnswerOptionsGrid(
-        question = ClientQuestion(
-            id = 1,
-            content = "Hangi ülkedir?",
+        question = Question(
             imageUrl = "https://example.com/flag.png",
+            content = "Hangi ülkedir?",
             options = listOf(
                 Option(id = 1, value = "Türkiye"),
                 Option(id = 2, value = "Almanya"),

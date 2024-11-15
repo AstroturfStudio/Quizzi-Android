@@ -1,6 +1,5 @@
 package com.alicankorkmaz.quizzi.ui.home
 
-import com.alicankorkmaz.quizzi.ui.lobby.LobbyUiState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -9,19 +8,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
 import com.alicankorkmaz.quizzi.domain.model.Option
+import com.alicankorkmaz.quizzi.domain.model.Question
 import com.alicankorkmaz.quizzi.domain.model.RoomState
-import com.alicankorkmaz.quizzi.ui.game.QuizScreen
-import com.alicankorkmaz.quizzi.ui.game.QuizUiState
-import com.alicankorkmaz.quizzi.ui.game.QuizViewModel
-import com.alicankorkmaz.quizzi.ui.waitingroom.WaitingRoomScreen
+import com.alicankorkmaz.quizzi.ui.game.GameScreen
+import com.alicankorkmaz.quizzi.ui.game.GameUiState
+import com.alicankorkmaz.quizzi.ui.game.GameViewModel
 import com.alicankorkmaz.quizzi.ui.gameover.GameOverScreen
 import com.alicankorkmaz.quizzi.ui.lobby.LobbyScreen
+import com.alicankorkmaz.quizzi.ui.lobby.LobbyUiState
+import com.alicankorkmaz.quizzi.ui.waitingroom.WaitingRoomScreen
 
 @Composable
 fun HomeScreen(
-    viewModel: QuizViewModel,
+    viewModel: GameViewModel,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -40,7 +40,7 @@ fun HomeScreen(
 
 @Composable
 private fun HomeContent(
-    uiState: QuizUiState,
+    uiState: GameUiState,
     lobbyState: LobbyUiState,
     onCreateRoom: () -> Unit,
     onJoinRoom: (String) -> Unit,
@@ -76,10 +76,7 @@ private fun HomeContent(
             }
 
             else -> {
-                QuizScreen(
-                    uiState = uiState,
-                    submitAnswer = onSubmitAnswer
-                )
+                GameScreen()
             }
         }
     }
@@ -89,11 +86,10 @@ private fun HomeContent(
 @Composable
 fun HomeContentPreview() {
     HomeContent(
-        uiState = QuizUiState(
-            currentQuestion = ClientQuestion(
-                id = 1,
-                content = "Hangi ülkedir?",
+        uiState = GameUiState(
+            currentQuestion = Question(
                 imageUrl = "https://example.com/flag.png",
+                content = "Hangi ülkedir?",
                 options = listOf(
                     Option(1, "Türkiye"),
                     Option(2, "Almanya"),

@@ -1,7 +1,7 @@
 package com.alicankorkmaz.quizzi.data.remote
 
 import com.alicankorkmaz.quizzi.data.remote.model.PlayerDto
-import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
+import com.alicankorkmaz.quizzi.data.remote.model.QuestionDto
 import com.alicankorkmaz.quizzi.domain.model.RoomState
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,11 +26,11 @@ sealed class ServerSocketMessage {
     @Serializable
     @SerialName("RoomUpdate")
     data class RoomUpdate(
-        val playerDtos: List<PlayerDto>,
+        val players: List<PlayerDto>,
         val state: RoomState,
         val cursorPosition: Float,
         val timeRemaining: Long? = null,
-        val currentQuestion: ClientQuestion? = null
+        val currentQuestion: QuestionDto? = null
     ) : ServerSocketMessage()
 
     @Serializable

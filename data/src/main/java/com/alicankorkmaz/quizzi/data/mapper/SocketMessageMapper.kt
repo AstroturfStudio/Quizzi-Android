@@ -7,11 +7,11 @@ fun ServerSocketMessage.toDomain(): ServerMessage = when (this) {
     is ServerSocketMessage.RoomCreated -> ServerMessage.RoomCreated(roomId)
     is ServerSocketMessage.JoinedRoom -> ServerMessage.RoomJoined(roomId, success)
     is ServerSocketMessage.RoomUpdate -> ServerMessage.RoomUpdate(
-        players = playerDtos.map { it.toDomain() },
+        players = players.map { it.toDomain() },
         state = state,
         cursorPosition = cursorPosition,
         timeRemaining = timeRemaining,
-        currentQuestion = currentQuestion
+        currentQuestion = currentQuestion?.toDomain()
     )
 
     is ServerSocketMessage.AnswerResult -> ServerMessage.AnswerResult(playerId, answer, correct)

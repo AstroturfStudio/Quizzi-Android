@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,19 +42,34 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
 import com.alicankorkmaz.quizzi.domain.model.Option
+import com.alicankorkmaz.quizzi.domain.model.Question
 import com.alicankorkmaz.quizzi.domain.model.RoomState
 import com.alicankorkmaz.quizzi.ui.components.AnswerOptionsGrid
 import com.alicankorkmaz.quizzi.ui.components.GameOverOverlay
 import com.alicankorkmaz.quizzi.ui.components.RoundResultOverlay
 
 @Composable
-fun QuizScreen(
+fun GameScreen(
     modifier: Modifier = Modifier,
-    uiState: QuizUiState,
-    submitAnswer: (Int) -> Unit
+    viewModel: GameViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    GameScreenContent(
+        modifier = modifier,
+        uiState = uiState,
+        onSubmitAnswer = { viewModel.submitAnswer(it) }
+    )
+}
+
+@Composable
+private fun GameScreenContent(
+    modifier: Modifier,
+    uiState: GameUiState,
+    onSubmitAnswer: (Int) -> Unit
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         // Ana oyun içeriği
@@ -84,7 +100,7 @@ fun QuizScreen(
                 question = uiState.currentQuestion,
                 lastAnswer = uiState.lastAnswer,
                 hasAnswered = uiState.hasAnswered,
-                onAnswerSelected = submitAnswer,
+                onAnswerSelected = onSubmitAnswer,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
@@ -204,7 +220,7 @@ private fun GameProgressBar(
 
 @Composable
 private fun FlagQuestionCard(
-    question: ClientQuestion?,
+    question: Question?,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -220,7 +236,7 @@ private fun FlagQuestionCard(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Bu hangi ülkenin bayrağı?",
+                text = question?.content ?: "",
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 24.dp)
@@ -240,11 +256,10 @@ private fun FlagQuestionCard(
 
 @Preview(showBackground = true)
 @Composable
-private fun QuizScreenPreview() {
-    val previewQuestion = ClientQuestion(
-        id = 8758,
-        content = "conceptam",
+private fun GameScreenContentPreview() {
+    val previewQuestion = Question(
         imageUrl = "https://example.com/flag.png",
+        content = "conceptam",
         options = listOf(
             Option(1, "Türkiye"),
             Option(2, "Almanya"),
@@ -253,7 +268,7 @@ private fun QuizScreenPreview() {
         )
     )
 
-    val previewUiState = QuizUiState(
+    val previewUiState = GameUiState(
         currentQuestion = previewQuestion,
         timeRemaining = 10L,
         roomState = RoomState.PLAYING,
@@ -266,9 +281,10 @@ private fun QuizScreenPreview() {
         totalQuestions = 10
     )
 
-    QuizScreen(
+    GameScreenContent(
+        modifier = Modifier.fillMaxSize(),
         uiState = previewUiState,
-        submitAnswer = {}
+        onSubmitAnswer = {}
     )
 }
 
@@ -291,10 +307,9 @@ private fun TimeCounterPreview() {
 @Composable
 private fun FlagQuestionCardPreview() {
     FlagQuestionCard(
-        question = ClientQuestion(
-            id = 1,
-            content = "Hangi ülkedir?",
+        question = Question(
             imageUrl = "https://example.com/flag.png",
+            content = "Hangi ülkedir?",
             options = listOf(
                 Option(1, "Türkiye"),
                 Option(2, "Almanya"),

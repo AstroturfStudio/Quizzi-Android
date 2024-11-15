@@ -9,8 +9,8 @@ import com.alicankorkmaz.quizzi.domain.model.websocket.ClientMessage
 import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.AnswerResult
 import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.Error
 import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.GameOver
-import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.RoomJoined
 import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.RoomCreated
+import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.RoomJoined
 import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.RoomUpdate
 import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.RoundResult
 import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage.TimeUpdate
@@ -25,11 +25,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class QuizViewModel @Inject constructor(
+class GameViewModel @Inject constructor(
     private val repository: QuizRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(QuizUiState())
+    private val _uiState = MutableStateFlow(GameUiState())
     val uiState = _uiState.asStateFlow()
 
     private val _lobbyState = MutableStateFlow(LobbyUiState())
@@ -167,48 +167,12 @@ class QuizViewModel @Inject constructor(
             it.copy(currentRoom = null)
         }
         _uiState.update {
-            QuizUiState()
+            GameUiState()
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         repository.disconnect()
-    }
-
-    fun login(playerId: String) = viewModelScope.launch {
-        repository.login(playerId)
-            .onSuccess { player ->
-                _uiState.update {
-                    it.copy(
-                        playerId = player.id,
-                        playerName = player.name
-                    )
-                }
-                repository.connect()
-            }
-            .onFailure { error ->
-                _uiState.update {
-                    it.copy(error = error.message)
-                }
-            }
-    }
-
-    fun createPlayer(name: String, avatarUrl: String) = viewModelScope.launch {
-        repository.createPlayer(name, avatarUrl)
-            .onSuccess { player ->
-                _uiState.update {
-                    it.copy(
-                        playerId = player.id,
-                        playerName = player.name
-                    )
-                }
-                repository.connect()
-            }
-            .onFailure { error ->
-                _uiState.update {
-                    it.copy(error = error.message)
-                }
-            }
     }
 }

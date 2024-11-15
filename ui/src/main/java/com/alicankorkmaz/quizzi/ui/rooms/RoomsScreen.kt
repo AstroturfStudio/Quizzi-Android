@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.alicankorkmaz.quizzi.domain.model.GameRoom
 import com.alicankorkmaz.quizzi.domain.model.RoomState
 import com.alicankorkmaz.quizzi.ui.rooms.RoomsEvent
@@ -28,7 +29,7 @@ import com.alicankorkmaz.quizzi.ui.util.observeWithLifecycle
 @Composable
 fun RoomsScreen(
     modifier: Modifier = Modifier,
-    viewModel: RoomsViewModel,
+    viewModel: RoomsViewModel = hiltViewModel(),
     onNavigateToRoom: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()

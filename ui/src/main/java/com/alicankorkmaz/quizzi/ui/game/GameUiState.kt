@@ -1,11 +1,11 @@
 package com.alicankorkmaz.quizzi.ui.game
 
-import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
+import com.alicankorkmaz.quizzi.domain.model.Question
 import com.alicankorkmaz.quizzi.domain.model.RoomState
 import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage
 
-data class QuizUiState(
-    val currentQuestion: ClientQuestion? = null,
+data class GameUiState(
+    val currentQuestion: Question? = null,
     val timeRemaining: Long? = null,
     val roomState: RoomState? = null,
     val lastAnswerResult: ServerMessage.AnswerResult? = null,
@@ -23,7 +23,4 @@ data class QuizUiState(
     val correctAnswer: Int? = null,
     val winnerPlayerName: String? = null,
     val isWinner: Boolean = false
-) {
-    val isGameOver: Boolean
-        get() = roomState == RoomState.FINISHED
-}
+)

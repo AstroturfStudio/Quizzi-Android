@@ -1,7 +1,7 @@
 package com.alicankorkmaz.quizzi.data.repository
 
 import com.alicankorkmaz.quizzi.data.remote.WebSocketService
-import com.alicankorkmaz.quizzi.data.remote.api.QuizApi
+import com.alicankorkmaz.quizzi.data.remote.api.QuizziApi
 import com.alicankorkmaz.quizzi.data.remote.model.CreatePlayerRequestDto
 import com.alicankorkmaz.quizzi.data.remote.model.LoginRequestDto
 import com.alicankorkmaz.quizzi.data.remote.model.PlayerDto
@@ -12,13 +12,13 @@ import com.alicankorkmaz.quizzi.domain.model.websocket.ServerMessage
 import com.alicankorkmaz.quizzi.domain.repository.QuizRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import toDto
 import toDomain
+import toDto
 import javax.inject.Inject
 
 class QuizRepositoryImpl @Inject constructor(
     private val webSocketService: WebSocketService,
-    private val api: QuizApi
+    private val api: QuizziApi
 ) : QuizRepository {
 
     private var currentPlayerDto: PlayerDto? = null

@@ -2,7 +2,7 @@ package com.alicankorkmaz.quizzi.data.di
 
 import com.alicankorkmaz.quizzi.data.BuildConfig
 import com.alicankorkmaz.quizzi.data.remote.WebSocketService
-import com.alicankorkmaz.quizzi.data.remote.api.QuizApi
+import com.alicankorkmaz.quizzi.data.remote.api.QuizziApi
 import com.alicankorkmaz.quizzi.data.repository.QuizRepositoryImpl
 import com.alicankorkmaz.quizzi.domain.repository.QuizRepository
 import dagger.Module
@@ -37,20 +37,20 @@ object DataModule {
     @Singleton
     fun provideQuizApi(
         okHttpClient: OkHttpClient
-    ): QuizApi {
+    ): QuizziApi {
         return Retrofit.Builder()
             .client(okHttpClient)
-            .baseUrl(BuildConfig.BASE_URL.replace("ws", "http"))
+            .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(QuizApi::class.java)
+            .create(QuizziApi::class.java)
     }
 
     @Provides
     @Singleton
     fun provideQuizRepository(
         webSocketService: WebSocketService,
-        api: QuizApi
+        api: QuizziApi
     ): QuizRepository {
         return QuizRepositoryImpl(webSocketService, api)
     }

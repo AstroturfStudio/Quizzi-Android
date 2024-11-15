@@ -1,7 +1,7 @@
 package com.alicankorkmaz.quizzi.domain.model.websocket
 
-import com.alicankorkmaz.quizzi.domain.model.ClientQuestion
 import com.alicankorkmaz.quizzi.domain.model.Player
+import com.alicankorkmaz.quizzi.domain.model.Question
 import com.alicankorkmaz.quizzi.domain.model.RoomState
 
 sealed class ServerMessage {
@@ -19,7 +19,7 @@ sealed class ServerMessage {
         val state: RoomState,
         val cursorPosition: Float,
         val timeRemaining: Long?,
-        val currentQuestion: ClientQuestion?
+        val currentQuestion: Question?
     ) : ServerMessage()
 
     data class TimeUpdate(
