@@ -25,6 +25,9 @@ class RoomsViewModel @Inject constructor(
     private val _eventChannel = Channel<RoomsEvent>()
     val eventChannel = _eventChannel.receiveAsFlow()
 
+    private var _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
     init {
         repository.connect()
         getRooms()
@@ -73,6 +76,14 @@ class RoomsViewModel @Inject constructor(
 
     fun joinRoom(roomId: String) {
         repository.sendMessage(ClientMessage.JoinRoom(roomId))
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            getRooms()
+            _isRefreshing.value = false
+        }
     }
 
     override fun onCleared() {

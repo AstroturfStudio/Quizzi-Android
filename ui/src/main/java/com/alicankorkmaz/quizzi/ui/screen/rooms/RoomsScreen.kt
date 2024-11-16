@@ -1,3 +1,4 @@
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -6,11 +7,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,34 +32,60 @@ import com.alicankorkmaz.quizzi.domain.model.RoomState
 import com.alicankorkmaz.quizzi.ui.screen.rooms.RoomsEvent
 import com.alicankorkmaz.quizzi.ui.screen.rooms.RoomsViewModel
 import com.alicankorkmaz.quizzi.ui.util.observeWithLifecycle
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomsScreen(
-    modifier: Modifier = Modifier,
     viewModel: RoomsViewModel = hiltViewModel(),
     onNavigateToRoom: () -> Unit
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
-    viewModel.eventChannel.observeWithLifecycle {
-        when (it) {
-            is RoomsEvent.NavigateToRoom -> {
-                onNavigateToRoom()
-            }
+    // Collect events
+    viewModel.eventChannel.observeWithLifecycle { event ->
+        when (event) {
+            is RoomsEvent.NavigateToRoom -> onNavigateToRoom()
         }
     }
 
-    RoomsScreenContent(
-        modifier = modifier,
-        rooms = state.rooms,
-        isConnected = state.isConnected,
-        error = state.error,
-        onCreateRoom = { viewModel.createRoom() },
-        onJoinRoom = { roomId ->
-            viewModel.joinRoom(roomId)
-            onNavigateToRoom()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Available Rooms") },
+                actions = {
+                    IconButton(onClick = { viewModel.refresh() }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh rooms"
+                        )
+                    }
+                }
+            )
         }
-    )
+    ) { paddingValues ->
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(isRefreshing),
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            RoomsScreenContent(
+                modifier = Modifier,
+                rooms = uiState.rooms,
+                isConnected = uiState.isConnected,
+                error = uiState.error,
+                onCreateRoom = { viewModel.createRoom() },
+                onJoinRoom = { roomId ->
+                    viewModel.joinRoom(roomId)
+                    onNavigateToRoom()
+                }
+            )
+        }
+    }
 }
 
 @Composable
@@ -111,32 +145,6 @@ private fun RoomsScreenContent(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun RoomsScreenContentPreview() {
-    MaterialTheme {
-        RoomsScreenContent(
-            rooms = listOf(
-                GameRoom(
-                    id = "Room1",
-                    playerCount = 2,
-                    roomState = RoomState.WAITING,
-                    players = listOf("Player1", "Player2")
-                ),
-                GameRoom(
-                    id = "Room2",
-                    playerCount = 3,
-                    roomState = RoomState.PLAYING,
-                    players = listOf("Player3", "Player4", "Player5")
-                )
-            ),
-            isConnected = true,
-            error = null,
-            onCreateRoom = {},
-            onJoinRoom = {}
-        )
-    }
-}
 
 @Composable
 private fun RoomItem(
@@ -182,5 +190,33 @@ private fun RoomItem(
                 Text("Join")
             }
         }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+private fun RoomsScreenContentPreview() {
+    MaterialTheme {
+        RoomsScreenContent(
+            rooms = listOf(
+                GameRoom(
+                    id = "Room1",
+                    playerCount = 2,
+                    roomState = RoomState.WAITING,
+                    players = listOf("Player1", "Player2")
+                ),
+                GameRoom(
+                    id = "Room2",
+                    playerCount = 3,
+                    roomState = RoomState.PLAYING,
+                    players = listOf("Player3", "Player4", "Player5")
+                )
+            ),
+            isConnected = true,
+            error = null,
+            onCreateRoom = {},
+            onJoinRoom = {}
+        )
     }
 }
