@@ -1,5 +1,6 @@
 package com.alicankorkmaz.quizzi.ui.screen.game
 
+import CountdownOverlay
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -115,9 +116,23 @@ private fun GameScreenContent(
                 .zIndex(2f)
         ) {
             RoundResultOverlay(
-                correctAnswer = uiState.correctAnswer ?: -1,
+                correctAnswerText = uiState.correctAnswerText ?: "",
                 winnerName = uiState.winnerPlayerName,
-                isWinner = uiState.isWinner
+                isWinner = uiState.isWinner,
+            )
+        }
+
+        // Countdown overlay
+        AnimatedVisibility(
+            visible = uiState.showCountdown,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut(),
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(4f)
+        ) {
+            CountdownOverlay(
+                countdown = uiState.countdown
             )
         }
 

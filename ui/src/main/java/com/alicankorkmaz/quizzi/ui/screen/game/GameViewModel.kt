@@ -75,17 +75,38 @@ class GameViewModel @Inject constructor(
     }
 
     private fun updateRoomState(message: RoomUpdate) {
-        _uiState.update { current ->
-            val playerMap = message.players.associate { it.id to it.name }
-            current.copy(
-                currentQuestion = message.currentQuestion,
-                roomState = message.state,
-                cursorPosition = message.cursorPosition,
-                timeRemaining = message.timeRemaining,
-                lastAnswer = null,
-                hasAnswered = false,
-                playerIdToNameMap = playerMap
-            )
+        viewModelScope.launch {
+            _uiState.update { current ->
+                val playerMap = message.players.associate { it.id to it.name }
+
+                if (message.state == RoomState.COUNTDOWN && !current.showCountdown) {
+                    // Countdown başlat
+                    startCountdown()
+                }
+
+                current.copy(
+                    currentQuestion = message.currentQuestion,
+                    roomState = message.state,
+                    cursorPosition = message.cursorPosition,
+                    timeRemaining = message.timeRemaining,
+                    lastAnswer = null,
+                    hasAnswered = false,
+                    playerIdToNameMap = playerMap,
+                )
+            }
+        }
+    }
+
+    private fun startCountdown() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(showCountdown = true, countdown = 3) }
+
+            for (i in 3 downTo 1) {
+                _uiState.update { it.copy(countdown = i) }
+                delay(1000)
+            }
+
+            _uiState.update { it.copy(showCountdown = false, countdown = 0) }
         }
     }
 
@@ -105,7 +126,8 @@ class GameViewModel @Inject constructor(
         _uiState.update { current ->
             current.copy(
                 roomState = RoomState.FINISHED,
-                winner = current.playerIdToNameMap[message.winnerPlayerId] ?: message.winnerPlayerId,
+                winner = current.playerIdToNameMap[message.winnerPlayerId]
+                    ?: message.winnerPlayerId,
                 isWinner = message.winnerPlayerId == current.playerId
             )
         }
@@ -124,19 +146,28 @@ class GameViewModel @Inject constructor(
     private fun handleRoundResult(message: RoundResult) {
         viewModelScope.launch {
             _uiState.update { current ->
+                val correctAnswerText = current.currentQuestion?.let { question ->
+                    question.options.find { it.id == message.correctAnswer }?.value
+                }
+
+                val winnerName = message.winnerPlayerId?.let { winnerId ->
+                    current.playerIdToNameMap[winnerId] ?: winnerId
+                }
+
                 current.copy(
                     showRoundResult = true,
                     correctAnswer = message.correctAnswer,
-                    winnerPlayerName = message.winnerPlayerId,
+                    correctAnswerText = correctAnswerText,
+                    winnerPlayerName = winnerName,
                     isWinner = message.winnerPlayerId == current.playerId
                 )
             }
-            // Show round result for 2 seconds
+
             delay(2000)
             _uiState.update { current ->
                 current.copy(
                     showRoundResult = false,
-                    correctAnswer = null,
+                    correctAnswerText = null,
                     winnerPlayerName = null
                 )
             }

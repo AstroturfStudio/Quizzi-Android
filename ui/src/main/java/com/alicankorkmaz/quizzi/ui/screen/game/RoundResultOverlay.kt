@@ -17,12 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun RoundResultOverlay(
-    correctAnswer: Int,
+    correctAnswerText: String,
     winnerName: String?,
     isWinner: Boolean,
     modifier: Modifier = Modifier
@@ -55,9 +56,10 @@ fun RoundResultOverlay(
                     )
 
                     Text(
-                        text = correctAnswer.toString(),
+                        text = correctAnswerText,
                         style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
                     )
 
                     if (winnerName != null) {
@@ -78,8 +80,8 @@ fun RoundResultOverlay(
 @Composable
 fun RoundResultOverlayPreview() {
     RoundResultOverlay(
-        correctAnswer = 1,
+        correctAnswerText = "Doğru Cevap",
         winnerName = "Alice",
-        isWinner = true
+        isWinner = true,
     )
 }
