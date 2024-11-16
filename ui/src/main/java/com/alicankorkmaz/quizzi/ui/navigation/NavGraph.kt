@@ -42,7 +42,13 @@ fun QuizziNavGraph(
         }
 
         composable(ROUTE_GAME) {
-            GameScreen()
+            GameScreen(
+                onNavigateToRooms = {
+                    navController.navigate(ROUTE_ROOMS) {
+                        popUpTo(ROUTE_ROOMS) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 } 

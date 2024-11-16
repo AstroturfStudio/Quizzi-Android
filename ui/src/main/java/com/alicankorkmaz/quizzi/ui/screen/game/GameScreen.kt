@@ -50,6 +50,7 @@ import com.alicankorkmaz.quizzi.domain.model.RoomState
 
 @Composable
 fun GameScreen(
+    onNavigateToRooms: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GameViewModel = hiltViewModel()
 ) {
@@ -58,15 +59,17 @@ fun GameScreen(
     GameScreenContent(
         modifier = modifier,
         uiState = uiState,
-        onSubmitAnswer = { viewModel.submitAnswer(it) }
+        onSubmitAnswer = { viewModel.submitAnswer(it) },
+        onNavigateBack = onNavigateToRooms
     )
 }
 
 @Composable
 private fun GameScreenContent(
-    modifier: Modifier,
     uiState: GameUiState,
-    onSubmitAnswer: (Int) -> Unit
+    onSubmitAnswer: (Int) -> Unit,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         // Ana oyun içeriği
@@ -129,7 +132,8 @@ private fun GameScreenContent(
             GameOverOverlay(
                 winner = uiState.winner,
                 score = uiState.score,
-                totalQuestions = uiState.totalQuestions
+                totalQuestions = uiState.totalQuestions,
+                onNavigateBack = onNavigateBack
             )
         }
     }
@@ -281,7 +285,8 @@ private fun GameScreenContentPreview() {
     GameScreenContent(
         modifier = Modifier.fillMaxSize(),
         uiState = previewUiState,
-        onSubmitAnswer = {}
+        onSubmitAnswer = {},
+        onNavigateBack = {}
     )
 }
 

@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,6 +29,7 @@ fun GameOverOverlay(
     winner: String?,
     score: Int,
     totalQuestions: Int,
+    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -93,6 +96,13 @@ fun GameOverOverlay(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
+
+                Button(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Odalar Ekranına Dön")
+                }
             }
         }
     }
@@ -105,6 +115,7 @@ private fun GameOverOverlayPreview() {
         winner = "Oyuncu 1",
         score = 7,
         totalQuestions = 10,
+        onNavigateBack = {},
         modifier = Modifier.fillMaxSize()
     )
 } 
