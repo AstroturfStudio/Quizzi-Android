@@ -66,5 +66,5 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.32.0")
+    implementation(libs.lifecycle.runtime.compose)
 }

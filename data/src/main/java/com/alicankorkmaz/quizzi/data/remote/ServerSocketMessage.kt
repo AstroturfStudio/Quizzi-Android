@@ -3,10 +3,12 @@ package com.alicankorkmaz.quizzi.data.remote
 import com.alicankorkmaz.quizzi.data.remote.model.PlayerDto
 import com.alicankorkmaz.quizzi.data.remote.model.QuestionDto
 import com.alicankorkmaz.quizzi.domain.model.RoomState
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("type")
 sealed class ServerSocketMessage {

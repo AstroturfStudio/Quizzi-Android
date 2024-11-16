@@ -1,4 +1,3 @@
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,8 +32,6 @@ import com.alicankorkmaz.quizzi.domain.model.RoomState
 import com.alicankorkmaz.quizzi.ui.screen.rooms.RoomsEvent
 import com.alicankorkmaz.quizzi.ui.screen.rooms.RoomsViewModel
 import com.alicankorkmaz.quizzi.ui.util.observeWithLifecycle
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,37 +42,36 @@ fun RoomsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
-    // Collect events
+    // collect events
     viewModel.eventChannel.observeWithLifecycle { event ->
         when (event) {
             is RoomsEvent.NavigateToRoom -> onNavigateToRoom()
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Available Rooms") },
-                actions = {
-                    IconButton(onClick = { viewModel.refresh() }) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh rooms"
-                        )
+    // Use PullToRefreshBox instead of manual Box implementation
+    PullToRefreshBox(
+        modifier = Modifier.fillMaxSize(),
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.refresh() },
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Quiz Rooms") },
+                    actions = {
+                        IconButton(onClick = { viewModel.refresh() }) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Refresh rooms"
+                            )
+                        }
                     }
-                }
-            )
-        }
-    ) { paddingValues ->
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(isRefreshing),
-            onRefresh = { viewModel.refresh() },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+                )
+            }
+        ) { innerPadding ->
             RoomsScreenContent(
-                modifier = Modifier,
+                modifier = Modifier.padding(innerPadding),
                 rooms = uiState.rooms,
                 isConnected = uiState.isConnected,
                 error = uiState.error,
@@ -103,15 +100,10 @@ private fun RoomsScreenContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Available Rooms",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
         if (!isConnected) {
             Text(
                 text = "Connecting...",
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary
             )
         }
@@ -119,6 +111,7 @@ private fun RoomsScreenContent(
         error?.let {
             Text(
                 text = it,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error
             )
         }
@@ -128,7 +121,10 @@ private fun RoomsScreenContent(
             modifier = Modifier.fillMaxWidth(),
             enabled = isConnected
         ) {
-            Text("Create New Room")
+            Text(
+                text = "Create New Room",
+                style = MaterialTheme.typography.labelLarge
+            )
         }
 
         LazyColumn(
@@ -153,7 +149,11 @@ private fun RoomItem(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp,
+            focusedElevation = 4.dp
+        )
     ) {
         Row(
             modifier = Modifier

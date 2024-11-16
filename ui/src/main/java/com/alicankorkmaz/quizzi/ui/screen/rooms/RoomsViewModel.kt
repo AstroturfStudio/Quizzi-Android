@@ -30,11 +30,13 @@ class RoomsViewModel @Inject constructor(
 
     init {
         repository.connect()
-        getRooms()
+        viewModelScope.launch {
+            getRooms()
+        }
         observeMessages()
     }
 
-    private fun getRooms() = viewModelScope.launch {
+    private suspend fun getRooms() {
         repository.getRooms()
             .onSuccess { rooms ->
                 _uiState.update {
@@ -80,9 +82,12 @@ class RoomsViewModel @Inject constructor(
 
     fun refresh() {
         viewModelScope.launch {
-            _isRefreshing.value = true
-            getRooms()
-            _isRefreshing.value = false
+            try {
+                _isRefreshing.value = true
+                getRooms()
+            } finally {
+                _isRefreshing.value = false
+            }
         }
     }
 
