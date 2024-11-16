@@ -76,13 +76,15 @@ class GameViewModel @Inject constructor(
 
     private fun updateRoomState(message: RoomUpdate) {
         _uiState.update { current ->
+            val playerMap = message.players.associate { it.id to it.name }
             current.copy(
                 currentQuestion = message.currentQuestion,
                 roomState = message.state,
                 cursorPosition = message.cursorPosition,
                 timeRemaining = message.timeRemaining,
                 lastAnswer = null,
-                hasAnswered = false
+                hasAnswered = false,
+                playerIdToNameMap = playerMap
             )
         }
     }
@@ -103,7 +105,7 @@ class GameViewModel @Inject constructor(
         _uiState.update { current ->
             current.copy(
                 roomState = RoomState.FINISHED,
-                winner = message.winnerPlayerId,
+                winner = current.playerIdToNameMap[message.winnerPlayerId] ?: message.winnerPlayerId,
                 isWinner = message.winnerPlayerId == current.playerId
             )
         }

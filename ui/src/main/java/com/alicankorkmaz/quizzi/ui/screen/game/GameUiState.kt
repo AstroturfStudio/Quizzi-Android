@@ -23,5 +23,6 @@ data class GameUiState(
     val correctAnswer: Int? = null,
     val winnerPlayerName: String? = null,
     val isWinner: Boolean = false,
-    val roomId: String? = null
+    val roomId: String? = null,
+    val playerIdToNameMap: Map<String, String> = emptyMap()
 )
