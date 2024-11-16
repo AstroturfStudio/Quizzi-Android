@@ -1,7 +1,5 @@
-package com.alicankorkmaz.quizzi.di
+package com.alicankorkmaz.quizzi.domain.di
 
-
-import com.alicankorkmaz.quizzi.data.remote.WebSocketService
 import com.alicankorkmaz.quizzi.domain.repository.QuizRepository
 import com.alicankorkmaz.quizzi.domain.usecase.ObserveQuizUseCase
 import dagger.Module
@@ -12,14 +10,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
-
-    @Provides
-    @Singleton
-    fun provideWebSocketService(): WebSocketService {
-        return WebSocketService()
-    }
-
+object DomainModule {
     @Provides
     @Singleton
     fun provideObserveQuizUseCase(repository: QuizRepository): ObserveQuizUseCase {

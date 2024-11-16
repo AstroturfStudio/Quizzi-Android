@@ -4,7 +4,9 @@ import com.alicankorkmaz.quizzi.data.BuildConfig
 import com.alicankorkmaz.quizzi.data.remote.WebSocketService
 import com.alicankorkmaz.quizzi.data.remote.api.QuizziApi
 import com.alicankorkmaz.quizzi.data.repository.QuizRepositoryImpl
+import com.alicankorkmaz.quizzi.data.storage.SharedPreferencesStorage
 import com.alicankorkmaz.quizzi.domain.repository.QuizRepository
+import com.alicankorkmaz.quizzi.domain.storage.PreferencesStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,16 +37,26 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideQuizApi(
-        okHttpClient: OkHttpClient
-    ): QuizziApi {
+    fun provideQuizziApi(okHttpClient: OkHttpClient): QuizziApi {
         return Retrofit.Builder()
-            .client(okHttpClient)
             .baseUrl(BuildConfig.BASE_URL)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(QuizziApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideWebSocketService(): WebSocketService {
+        return WebSocketService()
+    }
+
+    @Provides
+    @Singleton
+    fun providePreferencesStorage(
+        sharedPreferencesStorage: SharedPreferencesStorage
+    ): PreferencesStorage = sharedPreferencesStorage
 
     @Provides
     @Singleton

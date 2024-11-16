@@ -1,6 +1,5 @@
 package com.alicankorkmaz.quizzi.ui.screen.landing
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,6 +38,7 @@ fun LandingScreen(
 
     LandingScreenContent(
         modifier = modifier,
+        savedPlayerId = uiState.savedPlayerId,
         error = uiState.error,
         onCreatePlayer = { name, avatarUrl ->
             viewModel.createPlayer(name, avatarUrl)
@@ -53,13 +52,11 @@ fun LandingScreen(
 @Composable
 fun LandingScreenContent(
     modifier: Modifier = Modifier,
+    savedPlayerId: String? = null,
     error: String? = null,
     onCreatePlayer: (String, String) -> Unit = { _, _ -> },
     onLogin: (String) -> Unit = { _ -> }
 ) {
-    val context = LocalContext.current
-    val sharedPrefs = context.getSharedPreferences("QuizziPrefs", Context.MODE_PRIVATE)
-    val savedPlayerId = sharedPrefs.getString("playerId", null)
 
     Column(
         modifier = modifier
