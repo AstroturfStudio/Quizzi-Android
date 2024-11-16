@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui.landing
+package com.alicankorkmaz.quizzi.ui.screen.landing
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

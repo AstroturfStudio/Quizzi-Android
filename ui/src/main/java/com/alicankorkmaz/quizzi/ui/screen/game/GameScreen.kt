@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui.game
+package com.alicankorkmaz.quizzi.ui.screen.game
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -47,9 +47,6 @@ import coil.compose.AsyncImage
 import com.alicankorkmaz.quizzi.domain.model.Option
 import com.alicankorkmaz.quizzi.domain.model.Question
 import com.alicankorkmaz.quizzi.domain.model.RoomState
-import com.alicankorkmaz.quizzi.ui.components.AnswerOptionsGrid
-import com.alicankorkmaz.quizzi.ui.components.GameOverOverlay
-import com.alicankorkmaz.quizzi.ui.components.RoundResultOverlay
 
 @Composable
 fun GameScreen(

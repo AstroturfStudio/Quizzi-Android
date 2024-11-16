@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui.game
+package com.alicankorkmaz.quizzi.ui.screen.game
 
 import com.alicankorkmaz.quizzi.domain.model.Question
 import com.alicankorkmaz.quizzi.domain.model.RoomState
@@ -22,5 +22,6 @@ data class GameUiState(
     val showRoundResult: Boolean = false,
     val correctAnswer: Int? = null,
     val winnerPlayerName: String? = null,
-    val isWinner: Boolean = false
+    val isWinner: Boolean = false,
+    val roomId: String? = null
 )

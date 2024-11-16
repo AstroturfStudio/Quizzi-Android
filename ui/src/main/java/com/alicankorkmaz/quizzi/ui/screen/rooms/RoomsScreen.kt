@@ -1,4 +1,3 @@
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.alicankorkmaz.quizzi.domain.model.GameRoom
 import com.alicankorkmaz.quizzi.domain.model.RoomState
-import com.alicankorkmaz.quizzi.ui.rooms.RoomsEvent
-import com.alicankorkmaz.quizzi.ui.rooms.RoomsViewModel
+import com.alicankorkmaz.quizzi.ui.screen.rooms.RoomsEvent
+import com.alicankorkmaz.quizzi.ui.screen.rooms.RoomsViewModel
 import com.alicankorkmaz.quizzi.ui.util.observeWithLifecycle
 
 @Composable
@@ -48,7 +47,7 @@ fun RoomsScreen(
         isConnected = state.isConnected,
         error = state.error,
         onCreateRoom = { viewModel.createRoom() },
-        onJoinRoom = { roomId -> 
+        onJoinRoom = { roomId ->
             viewModel.joinRoom(roomId)
             onNavigateToRoom()
         }

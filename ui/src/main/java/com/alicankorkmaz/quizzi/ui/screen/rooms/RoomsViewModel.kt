@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui.rooms
+package com.alicankorkmaz.quizzi.ui.screen.rooms
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

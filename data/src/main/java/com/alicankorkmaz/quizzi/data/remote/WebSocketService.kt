@@ -4,10 +4,11 @@ import com.alicankorkmaz.quizzi.data.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -34,12 +35,23 @@ class WebSocketService {
         isLenient = true
     }
     private var webSocket: WebSocket? = null
-    private val messageChannel = Channel<ServerSocketMessage>()
+    private val messageBuffer = ArrayDeque<ServerSocketMessage>(100) // Keep last 100 messages
     private var playerId: String? = null
     private var isReconnecting = false
     private val reconnectJob = Job()
     private val reconnectScope = CoroutineScope(Dispatchers.IO + reconnectJob)
     private var reconnectAttempt = 0
+    private val messageRateLimiter = RateLimiter(
+        maxRequests = 60,
+        timeWindowMs = 1000
+    )
+
+    private val _messageFlow = MutableSharedFlow<ServerSocketMessage>(
+        replay = 1,
+        extraBufferCapacity = 64,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val messageFlow = _messageFlow.asSharedFlow()
 
     private fun createReconnectMessage(playerId: String) =
         ClientSocketMessage.PlayerReconnected(playerId = playerId)
@@ -85,7 +97,7 @@ class WebSocketService {
         if (reconnectAttempt < MAX_RECONNECT_ATTEMPTS) {
             handleReconnect()
         } else {
-            messageChannel.trySend(
+            messageBuffer.addLast(
                 ServerSocketMessage.PlayerDisconnected(
                     playerId = playerId ?: "",
                     playerName = ""
@@ -106,7 +118,7 @@ class WebSocketService {
         webSocket = null
     }
 
-    fun observeMessages(): Flow<ServerSocketMessage> = messageChannel.receiveAsFlow()
+    fun observeMessages(): Flow<ServerSocketMessage> = messageFlow
 
     fun send(message: ClientSocketMessage) {
         val jsonString = json.encodeToString(ClientSocketMessage.serializer(), message)
@@ -121,20 +133,13 @@ class WebSocketService {
         override fun onMessage(webSocket: WebSocket, text: String) {
             try {
                 val message = json.decodeFromString<ServerSocketMessage>(text)
-                when (message) {
-                    is ServerSocketMessage.JoinedRoom -> handleJoinedRoom(message)
-                    else -> messageChannel.trySend(message)
+                CoroutineScope(Dispatchers.IO).launch {
+                    if (messageRateLimiter.tryAcquire()) {
+                        _messageFlow.emit(message)
+                    }
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error parsing WebSocket message")
-            }
-        }
-
-        private fun handleJoinedRoom(message: ServerSocketMessage.JoinedRoom) {
-            if (message.success) {
-                messageChannel.trySend(message)
-            } else {
-                messageChannel.trySend(ServerSocketMessage.Error("Failed to join room"))
             }
         }
 
@@ -160,5 +165,27 @@ class WebSocketService {
         private const val MAX_RECONNECT_ATTEMPTS = 5
         private const val INITIAL_BACKOFF_MS = 1000L
         private const val MAX_BACKOFF_MS = 32000L
+    }
+}
+
+private class RateLimiter(
+    private val maxRequests: Int,
+    private val timeWindowMs: Long
+) {
+    private val requestTimestamps = ArrayDeque<Long>()
+
+    fun tryAcquire(): Boolean = synchronized(this) {
+        val currentTime = System.currentTimeMillis()
+        while (requestTimestamps.isNotEmpty() &&
+            currentTime - requestTimestamps.first() > timeWindowMs
+        ) {
+            requestTimestamps.removeFirst()
+        }
+
+        if (requestTimestamps.size < maxRequests) {
+            requestTimestamps.addLast(currentTime)
+            return true
+        }
+        return false
     }
 } 

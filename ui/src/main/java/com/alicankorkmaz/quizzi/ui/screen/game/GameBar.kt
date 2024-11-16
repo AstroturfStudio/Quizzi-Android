@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui.components
+package com.alicankorkmaz.quizzi.ui.screen.game
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState

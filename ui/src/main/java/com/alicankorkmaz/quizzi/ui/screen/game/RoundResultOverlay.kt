@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui.components
+package com.alicankorkmaz.quizzi.ui.screen.game
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn

@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui.landing
+package com.alicankorkmaz.quizzi.ui.screen.landing
 
 data class LandingUiState(
     val playerId: String? = null,

@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui.rooms
+package com.alicankorkmaz.quizzi.ui.screen.rooms
 
 import com.alicankorkmaz.quizzi.domain.model.GameRoom
 

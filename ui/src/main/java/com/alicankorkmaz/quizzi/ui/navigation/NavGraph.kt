@@ -3,8 +3,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.alicankorkmaz.quizzi.ui.game.GameScreen
-import com.alicankorkmaz.quizzi.ui.landing.LandingScreen
+import com.alicankorkmaz.quizzi.ui.screen.game.GameScreen
+import com.alicankorkmaz.quizzi.ui.screen.landing.LandingScreen
 
 const val ROUTE_LANDING = "landing"
 const val ROUTE_ROOMS = "rooms"

@@ -1,4 +1,4 @@
-package com.alicankorkmaz.quizzi.ui.landing
+package com.alicankorkmaz.quizzi.ui.screen.landing
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +31,7 @@ fun LandingScreen(
     onNavigateToRooms: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
+
     LaunchedEffect(uiState.playerId) {
         if (uiState.playerId != null) {
             onNavigateToRooms()
@@ -41,7 +41,7 @@ fun LandingScreen(
     LandingScreenContent(
         modifier = modifier,
         error = uiState.error,
-        onCreatePlayer = { name, avatarUrl -> 
+        onCreatePlayer = { name, avatarUrl ->
             viewModel.createPlayer(name, avatarUrl)
         },
         onLogin = { playerId ->
@@ -60,7 +60,7 @@ fun LandingScreenContent(
     val context = LocalContext.current
     val sharedPrefs = context.getSharedPreferences("QuizziPrefs", Context.MODE_PRIVATE)
     val savedPlayerId = sharedPrefs.getString("playerId", null)
-    
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -83,13 +83,13 @@ fun LandingScreenContent(
         } else {
             var name by remember { mutableStateOf("") }
             var avatarUrl by remember { mutableStateOf("https://api.dicebear.com/7.x/avataaars/svg") }
-            
+
             Text(
                 text = "Welcome to Quizzi!",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            
+
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -98,9 +98,9 @@ fun LandingScreenContent(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             )
-            
+
             Button(
-                onClick = { 
+                onClick = {
                     onCreatePlayer(name, avatarUrl)
                     // Store player ID will be handled in ViewModel after successful creation
                 },
@@ -112,7 +112,7 @@ fun LandingScreenContent(
                 Text("Start Playing")
             }
         }
-        
+
         if (error != null) {
             Text(
                 text = error,
