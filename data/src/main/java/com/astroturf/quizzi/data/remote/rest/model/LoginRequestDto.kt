@@ -1,4 +1,4 @@
-package com.astroturf.quizzi.data.remote.model
+package com.astroturf.quizzi.data.remote.rest.model
 
 import kotlinx.serialization.Serializable
 

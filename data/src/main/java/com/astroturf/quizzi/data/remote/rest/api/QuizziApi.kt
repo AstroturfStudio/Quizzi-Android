@@ -1,9 +1,9 @@
-package com.astroturf.quizzi.data.remote.api
+package com.astroturf.quizzi.data.remote.rest.api
 
-import com.astroturf.quizzi.data.remote.model.CreatePlayerRequestDto
-import com.astroturf.quizzi.data.remote.model.LoginRequestDto
-import com.astroturf.quizzi.data.remote.model.PlayerDto
-import com.astroturf.quizzi.data.remote.model.RoomsDto
+import com.astroturf.quizzi.data.remote.rest.model.CreatePlayerRequestDto
+import com.astroturf.quizzi.data.remote.rest.model.LoginRequestDto
+import com.astroturf.quizzi.data.remote.rest.model.RoomsDto
+import com.astroturf.quizzi.data.remote.websocket.model.PlayerDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST

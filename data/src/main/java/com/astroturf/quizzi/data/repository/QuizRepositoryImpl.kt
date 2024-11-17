@@ -1,10 +1,10 @@
 package com.astroturf.quizzi.data.repository
 
-import com.astroturf.quizzi.data.remote.WebSocketService
-import com.astroturf.quizzi.data.remote.api.QuizziApi
-import com.astroturf.quizzi.data.remote.model.CreatePlayerRequestDto
-import com.astroturf.quizzi.data.remote.model.LoginRequestDto
-import com.astroturf.quizzi.data.remote.model.PlayerDto
+import com.astroturf.quizzi.data.remote.websocket.service.QuizziWebSocketService
+import com.astroturf.quizzi.data.remote.rest.api.QuizziApi
+import com.astroturf.quizzi.data.remote.rest.model.CreatePlayerRequestDto
+import com.astroturf.quizzi.data.remote.rest.model.LoginRequestDto
+import com.astroturf.quizzi.data.remote.websocket.model.PlayerDto
 import com.astroturf.quizzi.domain.model.GameRoom
 import com.astroturf.quizzi.domain.model.Player
 import com.astroturf.quizzi.domain.model.websocket.ClientMessage
@@ -17,7 +17,7 @@ import toDto
 import javax.inject.Inject
 
 class QuizRepositoryImpl @Inject constructor(
-    private val webSocketService: WebSocketService,
+    private val quizziWebSocketService: QuizziWebSocketService,
     private val api: QuizziApi
 ) : QuizRepository {
 
@@ -54,18 +54,18 @@ class QuizRepositoryImpl @Inject constructor(
     }
 
     override fun connect() {
-        webSocketService.connect(playerId = currentPlayerDto?.id)
+        quizziWebSocketService.connect(playerId = currentPlayerDto?.id)
     }
 
     override fun observeMessages(): Flow<ServerMessage> {
-        return webSocketService.observeMessages().map { it.toDomain() }
+        return quizziWebSocketService.observeMessages().map { it.toDomain() }
     }
 
     override fun sendMessage(message: ClientMessage) {
-        webSocketService.send(message.toDto())
+        quizziWebSocketService.send(message.toDto())
     }
 
     override fun disconnect() {
-        webSocketService.disconnect()
+        quizziWebSocketService.disconnect()
     }
 } 

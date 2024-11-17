@@ -1,7 +1,5 @@
-package com.astroturf.quizzi.data.remote.model.websocket
+package com.astroturf.quizzi.data.remote.websocket.model
 
-import com.astroturf.quizzi.data.remote.model.PlayerDto
-import com.astroturf.quizzi.data.remote.model.QuestionDto
 import com.astroturf.quizzi.domain.model.RoomState
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName

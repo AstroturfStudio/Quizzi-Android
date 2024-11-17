@@ -1,8 +1,8 @@
-package com.astroturf.quizzi.data.remote
+package com.astroturf.quizzi.data.remote.websocket.service
 
 import com.astroturf.quizzi.data.BuildConfig
-import com.astroturf.quizzi.data.remote.model.websocket.ClientSocketMessage
-import com.astroturf.quizzi.data.remote.model.websocket.ServerSocketMessage
+import com.astroturf.quizzi.data.remote.websocket.model.ClientSocketMessage
+import com.astroturf.quizzi.data.remote.websocket.model.ServerSocketMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.min
 import kotlin.math.pow
 
-class WebSocketService {
+class QuizziWebSocketService {
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -169,25 +169,3 @@ class WebSocketService {
         private const val MAX_BACKOFF_MS = 32000L
     }
 }
-
-private class RateLimiter(
-    private val maxRequests: Int,
-    private val timeWindowMs: Long
-) {
-    private val requestTimestamps = ArrayDeque<Long>()
-
-    fun tryAcquire(): Boolean = synchronized(this) {
-        val currentTime = System.currentTimeMillis()
-        while (requestTimestamps.isNotEmpty() &&
-            currentTime - requestTimestamps.first() > timeWindowMs
-        ) {
-            requestTimestamps.removeFirst()
-        }
-
-        if (requestTimestamps.size < maxRequests) {
-            requestTimestamps.addLast(currentTime)
-            return true
-        }
-        return false
-    }
-} 

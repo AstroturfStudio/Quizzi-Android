@@ -1,4 +1,4 @@
-package com.astroturf.quizzi.data.remote.model.websocket
+package com.astroturf.quizzi.data.remote.websocket.model
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName

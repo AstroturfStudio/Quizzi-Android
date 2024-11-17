@@ -1,4 +1,4 @@
-package com.astroturf.quizzi.data.remote.model
+package com.astroturf.quizzi.data.remote.websocket.model
 
 import com.astroturf.quizzi.domain.model.Player
 import kotlinx.serialization.Serializable
