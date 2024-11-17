@@ -2,6 +2,7 @@ package com.astroturf.quizzi.data.di
 
 import com.astroturf.quizzi.data.BuildConfig
 import com.astroturf.quizzi.data.remote.rest.api.QuizziApi
+import com.astroturf.quizzi.data.remote.rest.service.QuizziApiService
 import com.astroturf.quizzi.data.remote.websocket.service.QuizziWebSocketService
 import com.astroturf.quizzi.data.repository.QuizRepositoryImpl
 import com.astroturf.quizzi.data.storage.SharedPreferencesStorage
@@ -48,12 +49,6 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideWebSocketService(): QuizziWebSocketService {
-        return QuizziWebSocketService()
-    }
-
-    @Provides
-    @Singleton
     fun providePreferencesStorage(
         sharedPreferencesStorage: SharedPreferencesStorage
     ): PreferencesStorage = sharedPreferencesStorage
@@ -62,8 +57,8 @@ object DataModule {
     @Singleton
     fun provideQuizRepository(
         quizziWebSocketService: QuizziWebSocketService,
-        api: QuizziApi
+        apiService: QuizziApiService
     ): QuizRepository {
-        return QuizRepositoryImpl(quizziWebSocketService, api)
+        return QuizRepositoryImpl(quizziWebSocketService, apiService)
     }
 }

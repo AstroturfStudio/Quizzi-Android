@@ -20,10 +20,15 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.min
 import kotlin.math.pow
 
-class QuizziWebSocketService {
+@Singleton
+class QuizziWebSocketService @Inject constructor(
+    
+) {
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)

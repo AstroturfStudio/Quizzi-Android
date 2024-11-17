@@ -1,10 +1,8 @@
 package com.astroturf.quizzi.data.repository
 
-import com.astroturf.quizzi.data.remote.websocket.service.QuizziWebSocketService
-import com.astroturf.quizzi.data.remote.rest.api.QuizziApi
-import com.astroturf.quizzi.data.remote.rest.model.CreatePlayerRequestDto
-import com.astroturf.quizzi.data.remote.rest.model.LoginRequestDto
+import com.astroturf.quizzi.data.remote.rest.service.QuizziApiService
 import com.astroturf.quizzi.data.remote.websocket.model.PlayerDto
+import com.astroturf.quizzi.data.remote.websocket.service.QuizziWebSocketService
 import com.astroturf.quizzi.domain.model.GameRoom
 import com.astroturf.quizzi.domain.model.Player
 import com.astroturf.quizzi.domain.model.websocket.ClientMessage
@@ -18,43 +16,26 @@ import javax.inject.Inject
 
 class QuizRepositoryImpl @Inject constructor(
     private val quizziWebSocketService: QuizziWebSocketService,
-    private val api: QuizziApi
+    private val quizziApiService: QuizziApiService
 ) : QuizRepository {
 
     private var currentPlayerDto: PlayerDto? = null
 
     override suspend fun login(playerId: String): Result<Player> =
-        runCatching {
-            api.login(
-                LoginRequestDto(
-                    id = playerId
-                )
-            ).also {
-                currentPlayerDto = it
-            }.toDomain()
-        }
+        quizziApiService.login(playerId).onSuccess {
+            currentPlayerDto = it
+        }.map { it.toDomain() }
 
-    override suspend fun createPlayer(name: String, avatarUrl: String): Result<Player> {
-        return runCatching {
-            api.createPlayer(
-                CreatePlayerRequestDto(
-                    name = name,
-                    avatarUrl = avatarUrl
-                )
-            ).also {
-                currentPlayerDto = it
-            }.toDomain()
-        }
-    }
+    override suspend fun createPlayer(name: String, avatarUrl: String): Result<Player> =
+        quizziApiService.createPlayer(name, avatarUrl).onSuccess {
+            currentPlayerDto = it
+        }.map { it.toDomain() }
 
-    override suspend fun getRooms(): Result<List<GameRoom>> {
-        return runCatching {
-            api.getRooms().rooms.map { it.toDomain() }
-        }
-    }
+    override suspend fun getRooms(): Result<List<GameRoom>> =
+        quizziApiService.getRooms().map { it.rooms.map { roomDto -> roomDto.toDomain() } }
 
     override fun connect() {
-        quizziWebSocketService.connect(playerId = currentPlayerDto?.id)
+        quizziWebSocketService.connect(currentPlayerDto?.id)
     }
 
     override fun observeMessages(): Flow<ServerMessage> {
