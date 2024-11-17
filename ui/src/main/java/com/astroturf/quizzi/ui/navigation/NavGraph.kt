@@ -1,51 +1,55 @@
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.astroturf.quizzi.ui.screen.game.GameScreen
 import com.astroturf.quizzi.ui.screen.landing.LandingScreen
-
-const val ROUTE_LANDING = "landing"
-const val ROUTE_ROOMS = "rooms"
-const val ROUTE_GAME = "game"
 
 @Composable
 fun QuizziNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: String = ROUTE_LANDING
+    startDestination: String = NavDestination.Landing.route
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
-        composable(ROUTE_LANDING) {
+        composable(NavDestination.Landing.route) {
             LandingScreen(
                 onNavigateToRooms = {
-                    navController.navigate(ROUTE_ROOMS) {
-                        popUpTo(ROUTE_LANDING) { inclusive = true }
+                    navController.navigate(NavDestination.Rooms.route) {
+                        popUpTo(NavDestination.Landing.route) { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(ROUTE_ROOMS) {
+        composable(NavDestination.Rooms.route) {
             RoomsScreen(
-                onNavigateToRoom = {
-                    navController.navigate(ROUTE_GAME) {
-                        popUpTo(ROUTE_ROOMS) { saveState = true }
-                    }
+                onNavigateToRoom = { roomId ->
+                    navController.navigate(NavDestination.Game().createRoute(roomId))
                 }
             )
         }
 
-        composable(ROUTE_GAME) {
+        composable(
+            route = NavDestination.Game().route,
+            arguments = listOf(
+                navArgument(NavDestination.Game.ARG_ROOM_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
+        ) {
             GameScreen(
                 onNavigateToRooms = {
-                    navController.navigate(ROUTE_ROOMS) {
-                        popUpTo(ROUTE_ROOMS) { inclusive = true }
+                    navController.navigate(NavDestination.Rooms.route) {
+                        popUpTo(NavDestination.Rooms.route) { inclusive = true }
                     }
                 }
             )

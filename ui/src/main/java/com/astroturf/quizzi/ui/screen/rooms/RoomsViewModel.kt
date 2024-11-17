@@ -22,8 +22,8 @@ class RoomsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RoomsUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _eventChannel = Channel<RoomsEvent>()
-    val eventChannel = _eventChannel.receiveAsFlow()
+    private val _navigationEvent = Channel<String>()
+    val navigationEvent = _navigationEvent.receiveAsFlow()
 
     private var _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
@@ -60,13 +60,13 @@ class RoomsViewModel @Inject constructor(
         repository.observeMessages().collect { message ->
             when (message) {
                 is ServerMessage.RoomCreated -> {
-                    _eventChannel.send(RoomsEvent.NavigateToRoom(message.roomId))
+                    _navigationEvent.send(message.roomId)
                 }
-
                 is ServerMessage.RoomJoined -> {
-                    _eventChannel.send(RoomsEvent.NavigateToRoom(message.roomId))
+                    if (message.success) {
+                        _navigationEvent.send(message.roomId)
+                    }
                 }
-
                 else -> Unit
             }
         }

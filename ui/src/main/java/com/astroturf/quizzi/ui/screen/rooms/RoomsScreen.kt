@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,23 +30,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.astroturf.quizzi.domain.model.GameRoom
 import com.astroturf.quizzi.domain.model.RoomState
-import com.astroturf.quizzi.ui.screen.rooms.RoomsEvent
 import com.astroturf.quizzi.ui.screen.rooms.RoomsViewModel
-import com.astroturf.quizzi.ui.util.observeWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomsScreen(
     viewModel: RoomsViewModel = hiltViewModel(),
-    onNavigateToRoom: () -> Unit
+    onNavigateToRoom: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
-    // collect events
-    viewModel.eventChannel.observeWithLifecycle { event ->
-        when (event) {
-            is RoomsEvent.NavigateToRoom -> onNavigateToRoom()
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { roomId ->
+            onNavigateToRoom(roomId)
         }
     }
 
@@ -78,7 +76,7 @@ fun RoomsScreen(
                 onCreateRoom = { viewModel.createRoom() },
                 onJoinRoom = { roomId ->
                     viewModel.joinRoom(roomId)
-                    onNavigateToRoom()
+                    onNavigateToRoom(roomId)
                 }
             )
         }

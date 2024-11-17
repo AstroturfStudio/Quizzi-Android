@@ -24,7 +24,8 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     QuizziNavGraph(
-                        navController = navController, modifier = Modifier.padding(innerPadding)
+                        navController = navController,
+                        modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
