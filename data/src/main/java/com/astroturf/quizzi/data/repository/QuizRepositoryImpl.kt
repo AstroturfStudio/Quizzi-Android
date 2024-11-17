@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import toDomain
 import toDto
+import javax.inject.Inject
 
-class QuizRepositoryImpl(
+class QuizRepositoryImpl @Inject constructor(
     private val quizziWebSocketService: QuizziWebSocketService,
     private val quizziApiService: QuizziApiService
 ) : QuizRepository {

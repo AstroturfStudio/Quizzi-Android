@@ -2,8 +2,6 @@ package com.astroturf.quizzi.data.di
 
 import com.astroturf.quizzi.data.BuildConfig
 import com.astroturf.quizzi.data.remote.rest.api.QuizziApi
-import com.astroturf.quizzi.data.remote.rest.service.QuizziApiService
-import com.astroturf.quizzi.data.remote.websocket.service.QuizziWebSocketService
 import com.astroturf.quizzi.data.repository.QuizRepositoryImpl
 import com.astroturf.quizzi.data.storage.SharedPreferencesStorage
 import com.astroturf.quizzi.domain.repository.QuizRepository
@@ -92,9 +90,8 @@ object DataModule {
     @Provides
     @Singleton
     fun provideQuizRepository(
-        quizziWebSocketService: QuizziWebSocketService,
-        apiService: QuizziApiService
+        quizziRepositoryImpl: QuizRepositoryImpl
     ): QuizRepository {
-        return QuizRepositoryImpl(quizziWebSocketService, apiService)
+        return quizziRepositoryImpl
     }
 }

@@ -5,7 +5,6 @@ import com.astroturf.quizzi.domain.storage.PreferencesStorage
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 class SharedPreferencesStorage @Inject constructor(
     private val sharedPreferences: SharedPreferences
 ) : PreferencesStorage {
