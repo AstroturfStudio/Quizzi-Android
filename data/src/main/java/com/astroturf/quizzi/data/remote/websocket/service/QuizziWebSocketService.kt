@@ -1,6 +1,7 @@
 package com.astroturf.quizzi.data.remote.websocket.service
 
 import com.astroturf.quizzi.data.BuildConfig
+import com.astroturf.quizzi.data.di.WebSocketClient
 import com.astroturf.quizzi.data.remote.websocket.model.ClientSocketMessage
 import com.astroturf.quizzi.data.remote.websocket.model.ServerSocketMessage
 import kotlinx.coroutines.CoroutineScope
@@ -19,7 +20,6 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.min
@@ -27,22 +27,11 @@ import kotlin.math.pow
 
 @Singleton
 class QuizziWebSocketService @Inject constructor(
-    
+    @WebSocketClient private val client: OkHttpClient,
+    private val json: Json
 ) {
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .retryOnConnectionFailure(true)
-        .build()
-
-    private val json = Json {
-        ignoreUnknownKeys = true
-        classDiscriminator = "type"
-        isLenient = true
-    }
     private var webSocket: WebSocket? = null
-    private val messageBuffer = ArrayDeque<ServerSocketMessage>(100) // Keep last 100 messages
+    private val messageBuffer = ArrayDeque<ServerSocketMessage>(100)
     private var playerId: String? = null
     private var isReconnecting = false
     private val reconnectJob = Job()
