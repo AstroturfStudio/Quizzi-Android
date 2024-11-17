@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.alicankorkmaz.quizzi"
+    namespace = "com.astroturf.quizzi"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.alicankorkmaz.quizzi"
+        applicationId = "com.astroturf.quizzi"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

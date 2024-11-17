@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.alicankorkmaz.quizzi.domain"
+    namespace = "com.astroturf.quizzi.domain"
     compileSdk = 34
 
     defaultConfig {
