@@ -1,5 +1,5 @@
-import com.astroturf.quizzi.data.remote.ClientSocketMessage
-import com.astroturf.quizzi.data.remote.ServerSocketMessage
+import com.astroturf.quizzi.data.remote.model.websocket.ClientSocketMessage
+import com.astroturf.quizzi.data.remote.model.websocket.ServerSocketMessage
 import com.astroturf.quizzi.domain.model.websocket.ClientMessage
 import com.astroturf.quizzi.domain.model.websocket.ServerMessage
 

@@ -1,4 +1,4 @@
-package com.astroturf.quizzi.data.remote
+package com.astroturf.quizzi.data.remote.model.websocket
 
 import com.astroturf.quizzi.data.remote.model.PlayerDto
 import com.astroturf.quizzi.data.remote.model.QuestionDto

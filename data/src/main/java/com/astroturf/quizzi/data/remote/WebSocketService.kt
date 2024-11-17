@@ -1,6 +1,8 @@
 package com.astroturf.quizzi.data.remote
 
 import com.astroturf.quizzi.data.BuildConfig
+import com.astroturf.quizzi.data.remote.model.websocket.ClientSocketMessage
+import com.astroturf.quizzi.data.remote.model.websocket.ServerSocketMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
