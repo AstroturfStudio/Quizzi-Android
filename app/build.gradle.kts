@@ -27,8 +27,19 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../upload-key.jks")
+            storePassword =
+                System.getenv("STORE_PASSWORD") ?: properties["STORE_PASSWORD"].toString()
+            keyAlias = "upload"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: properties["KEY_PASSWORD"].toString()
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
