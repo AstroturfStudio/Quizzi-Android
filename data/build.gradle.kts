@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.astroturf.quizzi.data"
+    namespace = "studio.astroturf.quizzi.data"
     compileSdk = 34
 
     defaultConfig {

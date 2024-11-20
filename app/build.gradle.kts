@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.astroturf.quizzi"
+    namespace = "studio.astroturf.quizzi"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.astroturf.quizzi"
+        applicationId = "studio.astroturf.quizzi"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
