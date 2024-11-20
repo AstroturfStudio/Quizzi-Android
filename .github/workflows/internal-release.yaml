@@ -1,0 +1,60 @@
+name: Internal Release Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_FILE_BASE64 }}" > keystore.b64
+          base64 -d keystore.b64 > upload-key.jks
+
+      - name: Build & Test
+        run: |
+          ./gradlew test
+          ./gradlew bundleProdRelease  # prod flavor için
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle
+          path: app/build/outputs/bundle/prodRelease/app-prodRelease.aab  # prod path'i
+
+      - name: Upload Mapping File
+        uses: actions/upload-artifact@v4
+        with:
+          name: proguard-mapping
+          path: app/build/outputs/mapping/prodRelease/mapping.txt  # prod mapping path'i
+
+      - name: Deploy to Play Store Internal
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: ${{ secrets.PLAY_STORE_CREDENTIALS }}
+          packageName: "studio.astroturfstudio.quizzi"  # prod package name
+          releaseFiles: app/build/outputs/bundle/prodRelease/app-prodRelease.aab
+          track: internal
+          mappingFile: app/build/outputs/mapping/prodRelease/mapping.txt
+          status: completed
