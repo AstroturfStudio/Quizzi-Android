@@ -3,7 +3,6 @@ package com.astroturf.quizzi.data.storage
 import android.content.SharedPreferences
 import com.astroturf.quizzi.domain.storage.PreferencesStorage
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class SharedPreferencesStorage @Inject constructor(
     private val sharedPreferences: SharedPreferences
