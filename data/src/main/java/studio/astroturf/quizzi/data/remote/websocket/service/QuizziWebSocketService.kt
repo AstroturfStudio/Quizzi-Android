@@ -61,7 +61,7 @@ class QuizziWebSocketService @Inject constructor(
 
     private fun connectWebSocket() {
         val request = Request.Builder()
-            .url("${BuildConfig.BASE_URL.replace("https", "wss")}/game?playerId=${playerId}")
+            .url("${BuildConfig.BASE_URL.replace("http", "ws")}/game?playerId=${playerId}")
             .build()
         webSocket = client.newWebSocket(request, createWebSocketListener())
     }

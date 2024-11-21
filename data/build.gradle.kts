@@ -50,7 +50,7 @@ android {
         }
         create("dev") {
             dimension = "environment"
-            buildConfigField("String", "BASE_URL", "\"https://10.0.2.2:8080\"")
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080\"")
         }
     }
 }
