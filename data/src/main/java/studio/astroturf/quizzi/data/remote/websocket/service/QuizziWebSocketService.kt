@@ -56,7 +56,7 @@ class QuizziWebSocketService @Inject constructor(
     fun connect(playerId: String? = null) {
         this.playerId = playerId
         connectWebSocket()
-        playerId?.let { send(createReconnectMessage(it)) }
+        // playerId?.let { send(createReconnectMessage(it)) }
     }
 
     private fun connectWebSocket() {
