@@ -61,4 +61,4 @@ jobs:
           releaseFiles: app/build/outputs/bundle/prodRelease/app-prod-release.aab
           track: internal
           mappingFile: app/build/outputs/mapping/prodRelease/mapping.txt
-          status: completed
+          status: draft
