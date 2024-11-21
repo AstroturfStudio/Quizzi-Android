@@ -14,11 +14,12 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
-#-renamesourcefileattribute SourceFile
+-renamesourcefileattribute SourceFile
+
 # Crash reporting için
 -keepattributes *Annotation*
 -keepattributes SourceFile,LineNumberTable
@@ -36,4 +37,28 @@
 -keepclassmembers class * {
     @com.squareup.moshi.* <methods>;
     @kotlinx.serialization.* <methods>;
+}
+# Keep all classes with @Serializable or @SerialName annotations
+-keepattributes *Annotation*
+-keep,allowobfuscation class kotlinx.serialization.json.** { *; }
+
+# Keep all classes with @Serializable
+-keep,includedescriptorclasses @kotlinx.serialization.Serializable class * {
+    *;
+}
+
+# Keep all classes with @SerialName
+-keep,includedescriptorclasses @kotlinx.serialization.SerialName class * {
+    *;
+}
+
+# Keep serializer classes
+-keepclassmembers class * {
+    kotlinx.serialization.KSerializer serializer(...);
+    static kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Keep properties annotated with @SerialName
+-keepclassmembers class * {
+    @kotlinx.serialization.SerialName <fields>;
 }
