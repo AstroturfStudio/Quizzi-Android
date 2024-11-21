@@ -274,7 +274,6 @@ private fun FlagQuestionCard(
 @Composable
 private fun GameScreenContentPreview() {
     val previewQuestion = Question(
-        categoryId = 1,
         imageUrl = "https://example.com/flag.png",
         content = "conceptam",
         options = listOf(
@@ -326,7 +325,6 @@ private fun TimeCounterPreview() {
 private fun FlagQuestionCardPreview() {
     FlagQuestionCard(
         question = Question(
-            categoryId = 1,
             imageUrl = "https://example.com/flag.png",
             content = "Hangi ülkedir?",
             options = listOf(

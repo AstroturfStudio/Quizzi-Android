@@ -69,7 +69,6 @@ fun AnswerOptionsGrid(
 private fun AnswerOptionsGridPreview() {
     AnswerOptionsGrid(
         question = Question(
-            categoryId = 1,
             imageUrl = "https://example.com/flag.png",
             content = "Hangi ülkedir?",
             options = listOf(
