@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-bundle
-          path: app/build/outputs/bundle/prodRelease/app-prodRelease.aab  # prod path'i
+          path: app/build/outputs/bundle/prodRelease/app-prod-release.aab  # prod path'i
 
       - name: Upload Mapping File
         uses: actions/upload-artifact@v4
@@ -54,7 +54,7 @@ jobs:
         with:
           serviceAccountJson: ${{ secrets.PLAY_STORE_CREDENTIALS }}
           packageName: "studio.astroturfstudio.quizzi"  # prod package name
-          releaseFiles: app/build/outputs/bundle/prodRelease/app-prodRelease.aab
+          releaseFiles: app/build/outputs/bundle/prodRelease/app-prod-release.aab
           track: internal
           mappingFile: app/build/outputs/mapping/prodRelease/mapping.txt
           status: completed
