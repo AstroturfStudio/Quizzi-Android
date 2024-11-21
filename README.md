@@ -1,0 +1,1 @@
+[![Internal Release Pipeline](https://github.com/alicankorkmaz-sudo/Quizzi-Android/actions/workflows/internal-release.yaml/badge.svg)](https://github.com/alicankorkmaz-sudo/Quizzi-Android/actions/workflows/internal-release.yaml)
