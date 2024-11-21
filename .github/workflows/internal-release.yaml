@@ -53,7 +53,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ secrets.PLAY_STORE_CREDENTIALS }}
-          packageName: "studio.astroturfstudio.quizzi"  # prod package name
+          packageName: "studio.astroturf.quizzi"  # prod package name
           releaseFiles: app/build/outputs/bundle/prodRelease/app-prod-release.aab
           track: internal
           mappingFile: app/build/outputs/mapping/prodRelease/mapping.txt
