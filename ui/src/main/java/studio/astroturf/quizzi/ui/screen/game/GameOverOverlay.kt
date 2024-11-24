@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun GameOverOverlay(
     winner: String?,
-    score: Int,
-    totalQuestions: Int,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -81,22 +79,6 @@ fun GameOverOverlay(
                     }
                 }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Skorunuz",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "$score / $totalQuestions",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
                 Button(
                     onClick = onNavigateBack,
                     modifier = Modifier.fillMaxWidth()
@@ -113,8 +95,6 @@ fun GameOverOverlay(
 private fun GameOverOverlayPreview() {
     GameOverOverlay(
         winner = "Oyuncu 1",
-        score = 7,
-        totalQuestions = 10,
         onNavigateBack = {},
         modifier = Modifier.fillMaxSize()
     )

@@ -200,13 +200,11 @@ private fun RoomsScreenContentPreview() {
             rooms = listOf(
                 GameRoom(
                     id = "Room1",
-                    playerCount = 2,
                     roomState = RoomState.WAITING,
                     players = listOf("Player1", "Player2")
                 ),
                 GameRoom(
                     id = "Room2",
-                    playerCount = 3,
                     roomState = RoomState.PLAYING,
                     players = listOf("Player3", "Player4", "Player5")
                 )

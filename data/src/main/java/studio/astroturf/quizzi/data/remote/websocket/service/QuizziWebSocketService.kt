@@ -136,7 +136,7 @@ class QuizziWebSocketService @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Error parsing WebSocket message")
+                Timber.e(e, "Error parsing WebSocket answerResult")
             }
         }
 

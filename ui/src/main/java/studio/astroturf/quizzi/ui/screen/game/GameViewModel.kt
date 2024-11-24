@@ -5,13 +5,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import studio.astroturf.quizzi.domain.gamestatemachine.GameStateMachine
 import studio.astroturf.quizzi.domain.model.RoomState
+import studio.astroturf.quizzi.domain.model.statemachine.GameEffect
+import studio.astroturf.quizzi.domain.model.statemachine.GameIntent
+import studio.astroturf.quizzi.domain.model.statemachine.GameState
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.AnswerResult
@@ -27,12 +32,22 @@ class GameViewModel @Inject constructor(
     private val repository: QuizRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(GameUiState())
-    val uiState = _uiState.asStateFlow()
+    private val gsm = GameStateMachine(viewModelScope)
+
+    val gameFlow: StateFlow<GameState> = gsm.stateFlow
+
+    val gameEffectFlow: Flow<GameEffect> = gsm.effectFlow
+
+    private val _events = Channel<GameEvent>(Channel.CONFLATED)
+    val events = _events.receiveAsFlow()
 
     init {
         repository.connect()
         observeGameMessages()
+    }
+
+    fun processIntent(intent: GameIntent) {
+        gsm.reduce(intent)
     }
 
     private fun observeGameMessages() {
@@ -48,72 +63,44 @@ class GameViewModel @Inject constructor(
                             delay(minUpdateInterval - (currentTime - lastUpdateTime))
                         }
 
-                        processMessage(message)
+                        processServerMessage(message)
                         lastUpdateTime = System.currentTimeMillis()
                     }
                 }
         }
     }
 
-    private suspend fun processMessage(message: ServerMessage) {
+    private suspend fun processServerMessage(message: ServerMessage) {
         withContext(Dispatchers.Main) {
             when (message) {
-                is TimeUpdate -> updateTimeState(message)
-                is RoomUpdate -> updateRoomState(message)
-                is GameOver -> handleGameOver(message)
-                is AnswerResult -> handleAnswerResult(message)
-                is RoundResult -> handleRoundResult(message)
+                is TimeUpdate -> processIntent(GameIntent.TimeUpdate(message))
+                is RoomUpdate -> handleRoomUpdateMessage(message)
+                is GameOver -> processIntent(GameIntent.GameOver(message))
+                is AnswerResult -> processIntent(GameIntent.AnswerResult(message))
+                is RoundResult -> processIntent(GameIntent.RoundResult(message))
                 else -> handleOtherMessages(message)
             }
         }
     }
 
-    private fun updateTimeState(message: TimeUpdate) {
-        _uiState.update { current ->
-            current.copy(timeRemaining = message.remaining)
-        }
-    }
-
-    private fun updateRoomState(message: RoomUpdate) {
-        viewModelScope.launch {
-            _uiState.update { current ->
-                val playerMap = message.players.associate { it.id to it.name }
-
-                if (message.state == RoomState.COUNTDOWN && !current.showCountdown) {
-                    // Countdown başlat
-                    startCountdown()
+    private fun handleRoomUpdateMessage(message: RoomUpdate) {
+        if (message.state == RoomState.COUNTDOWN) {
+            viewModelScope.launch {
+                for (i in 3 downTo 1) {
+                    processIntent(GameIntent.Countdown(timeRemaining = i))
+                    delay(1000)
                 }
-
-                current.copy(
-                    currentQuestion = message.currentQuestion,
-                    roomState = message.state,
-                    cursorPosition = message.cursorPosition,
-                    timeRemaining = message.timeRemaining,
-                    lastAnswer = null,
-                    hasAnswered = false,
-                    playerIdToNameMap = playerMap,
-                )
             }
-        }
-    }
-
-    private fun startCountdown() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(showCountdown = true, countdown = 3) }
-
-            for (i in 3 downTo 1) {
-                _uiState.update { it.copy(countdown = i) }
-                delay(1000)
-            }
-
-            _uiState.update { it.copy(showCountdown = false, countdown = 0) }
+        } else if (message.state == RoomState.PLAYING) {
+            processIntent(
+                GameIntent.UpdateRoom(message)
+            )
         }
     }
 
     fun submitAnswer(answer: Int) {
         viewModelScope.launch(Dispatchers.Main.immediate) {
             repository.sendMessage(ClientMessage.PlayerAnswer(answer))
-            _uiState.value = _uiState.value.copy(showResult = false)
         }
     }
 
@@ -122,82 +109,18 @@ class GameViewModel @Inject constructor(
         repository.disconnect()
     }
 
-    private fun handleGameOver(message: GameOver) {
-        _uiState.update { current ->
-            current.copy(
-                roomState = RoomState.FINISHED,
-                winner = current.playerIdToNameMap[message.winnerPlayerId]
-                    ?: message.winnerPlayerId,
-                isWinner = message.winnerPlayerId == current.playerId
-            )
-        }
-    }
-
-    private fun handleAnswerResult(message: AnswerResult) {
-        _uiState.update { current ->
-            current.copy(
-                lastAnswer = message,
-                hasAnswered = message.playerId == current.playerId,
-                showResult = true
-            )
-        }
-    }
-
-    private fun handleRoundResult(message: RoundResult) {
-        viewModelScope.launch {
-            _uiState.update { current ->
-                val correctAnswerText = current.currentQuestion?.let { question ->
-                    question.options.find { it.id == message.correctAnswer }?.value
-                }
-
-                val winnerName = message.winnerPlayerId?.let { winnerId ->
-                    current.playerIdToNameMap[winnerId] ?: winnerId
-                }
-
-                current.copy(
-                    showRoundResult = true,
-                    correctAnswer = message.correctAnswer,
-                    correctAnswerText = correctAnswerText,
-                    winnerPlayerName = winnerName,
-                    isWinner = message.winnerPlayerId == current.playerId
-                )
-            }
-
-            delay(2000)
-            _uiState.update { current ->
-                current.copy(
-                    showRoundResult = false,
-                    correctAnswerText = null,
-                    winnerPlayerName = null
-                )
-            }
-        }
-    }
-
     private fun handleOtherMessages(message: ServerMessage) {
         when (message) {
             is ServerMessage.RoomCreated -> {
-                _uiState.update { current ->
-                    current.copy(
-                        roomId = message.roomId,
-                        error = null
-                    )
-                }
+                _events.trySend(GameEvent.RoomCreated(message.roomId))
             }
 
             is ServerMessage.RoomJoined -> {
-                _uiState.update { current ->
-                    current.copy(
-                        roomId = message.roomId,
-                        error = null
-                    )
-                }
+                _events.trySend(GameEvent.RoomJoined(message.roomId))
             }
 
             is ServerMessage.Error -> {
-                _uiState.update { current ->
-                    current.copy(error = message.message)
-                }
+                _events.trySend(GameEvent.Error(message.message))
             }
 
             else -> Unit

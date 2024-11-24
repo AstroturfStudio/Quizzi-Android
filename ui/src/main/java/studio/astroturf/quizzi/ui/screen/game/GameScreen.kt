@@ -146,8 +146,6 @@ private fun GameScreenContent(
         ) {
             GameOverOverlay(
                 winner = uiState.winner,
-                score = uiState.score,
-                totalQuestions = uiState.totalQuestions,
                 onNavigateBack = onNavigateBack
             )
         }
@@ -292,9 +290,7 @@ private fun GameScreenContentPreview() {
         showRoundResult = true,
         correctAnswer = 1,
         winnerPlayerName = "Oyuncu 1",
-        isWinner = true,
-        score = 5,
-        totalQuestions = 10
+        isWinner = true
     )
 
     GameScreenContent(

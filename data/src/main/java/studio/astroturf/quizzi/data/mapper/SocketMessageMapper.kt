@@ -9,8 +9,8 @@ fun ServerSocketMessage.toDomain(): ServerMessage = when (this) {
     is ServerSocketMessage.RoomUpdate -> ServerMessage.RoomUpdate(
         players = players.map { it.toDomain() },
         state = state,
-        cursorPosition = cursorPosition,
         timeRemaining = timeRemaining,
+        cursorPosition = cursorPosition,
         currentQuestion = currentQuestion?.toDomain()
     )
 

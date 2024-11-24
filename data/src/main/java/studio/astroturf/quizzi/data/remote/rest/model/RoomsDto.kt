@@ -14,11 +14,10 @@ data class GameRoomDto(
     val id: String,
     val playerCount: Int,
     val roomState: RoomState,
-    val players: List<String> // oyuncu isimleri
+    val players: List<String>
 ) {
     fun toDomain() = GameRoom(
         id = id,
-        playerCount = playerCount,
         roomState = roomState,
         players = players
     )
