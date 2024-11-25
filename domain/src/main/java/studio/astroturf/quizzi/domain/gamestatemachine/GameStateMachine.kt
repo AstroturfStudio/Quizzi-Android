@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.model.GameStatistics
+import studio.astroturf.quizzi.domain.model.statemachine.Destination
 import studio.astroturf.quizzi.domain.model.statemachine.GameEffect
 import studio.astroturf.quizzi.domain.model.statemachine.GameIntent
 import studio.astroturf.quizzi.domain.model.statemachine.GameState
-import studio.astroturf.quizzi.domain.model.statemachine.NavDestination
 import studio.astroturf.quizzi.domain.model.statemachine.StateMachine
 
 class GameStateMachine(
@@ -27,7 +27,7 @@ class GameStateMachine(
         return _currentStateFlow.value
     }
 
-    override fun effect(effect: GameEffect) {
+    override fun sideEffect(effect: GameEffect) {
         coroutineScope.launch {
             _effectChannel.send(effect)
         }
@@ -38,35 +38,161 @@ class GameStateMachine(
 
         val newState = when (currentState) {
             GameState.Idle -> reduceIdleState(intent)
-            is GameState.GameOver -> reduceGameOverState(intent)
             is GameState.Lobby -> reduceLobbyState(intent)
-            is GameState.RoundActive -> reduceRoundActiveState(intent)
-            is GameState.RoundEnd -> reduceRoundEndState(intent)
             is GameState.Initializing -> reduceInitializingState(intent)
+            is GameState.RoundActive -> reduceRoundActiveState(intent)
+            is GameState.Paused -> reducePausedState(intent)
+            is GameState.RoundEnd -> reduceRoundEndState(intent)
+            is GameState.GameOver -> reduceGameOverState(intent)
         }
 
         _currentStateFlow.value = newState
     }
 
-    private fun reduceInitializingState(intent: GameIntent): GameState {
+    private fun reduceIdleState(intent: GameIntent): GameState {
         return when (intent) {
-            is GameIntent.Countdown -> {
-                (getCurrentState() as GameState.Initializing).copy(
-                    timeRemaining = intent.timeRemaining
+            is GameIntent.RoomCreated -> {
+                GameState.Lobby(
+                    players = listOf(),
+                    isReady = mapOf()
                 )
             }
 
-            is GameIntent.UpdateRoom -> {
+            is GameIntent.RoomJoined -> {
+                GameState.Lobby(
+                    players = listOf(),
+                    isReady = mapOf()
+                )
+            }
+
+            is GameIntent.Initialize -> {
+                GameState.Initializing(intent.message.timeRemaining!!.toInt())
+            }
+
+            is GameIntent.CloseRoom -> {
+                TODO()
+            }
+
+            GameIntent.ExitGame -> {
+                TODO()
+            }
+
+            is GameIntent.PlayerDisconnected -> {
+                TODO()
+            }
+
+            is GameIntent.PlayerReconnected -> {
+                TODO()
+            }
+
+            else -> throw IllegalStateException("$intent couldn't be reduced when current state is Idle}")
+
+        }
+    }
+
+    private fun reduceLobbyState(intent: GameIntent): GameState {
+        return when (intent) {
+            GameIntent.ExitGame -> {
+                sideEffect(GameEffect.NavigateTo(Destination.Rooms))
+                GameState.Idle
+            }
+
+            is GameIntent.CloseRoom -> {
+                sideEffect(GameEffect.ShowError(intent.message.reason))
+                GameState.Idle
+            }
+
+            is GameIntent.Initialize -> {
+                GameState.Initializing(intent.message.timeRemaining!!.toInt())
+            }
+
+            is GameIntent.PlayerDisconnected -> {
+                TODO()
+            }
+
+            is GameIntent.PlayerReconnected -> {
+                TODO()
+            }
+
+            else -> throw IllegalStateException("$intent couldn't be reduced when current state is Lobby}")
+        }
+    }
+
+    private fun reduceInitializingState(intent: GameIntent): GameState {
+        return when (intent) {
+            is GameIntent.Playing -> {
                 GameState.RoundActive(
                     players = intent.roomUpdate.players,
                     currentQuestion = intent.roomUpdate.currentQuestion!!,
                     timeRemaining = intent.roomUpdate.timeRemaining,
                     cursorPosition = intent.roomUpdate.cursorPosition,
-                    currentAnswerIndex = null,
                 )
             }
 
-            else -> getCurrentState()
+            is GameIntent.Initialize -> {
+                GameState.Initializing(intent.message.timeRemaining!!.toInt())
+            }
+
+            else -> throw IllegalStateException("$intent couldn't be reduced when current state is Initializing}")
+        }
+    }
+
+    private fun reduceRoundActiveState(intent: GameIntent): GameState {
+        return when (intent) {
+            GameIntent.ExitGame -> {
+                sideEffect(GameEffect.NavigateTo(Destination.Rooms))
+                getCurrentState()
+            }
+
+            is GameIntent.GameOver -> {
+                GameState.GameOver(
+                    winnerPlayerId = intent.gameOver.winnerPlayerId,
+                    statistics = GameStatistics(
+                        roundCount = 10,
+                        averageResponseTimeMillis = mapOf(),
+                        totalGameLengthMillis = 10
+                    )
+                )
+            }
+
+            is GameIntent.Playing -> {
+                (getCurrentState() as GameState.RoundActive).copy(
+                    players = intent.roomUpdate.players,
+                    currentQuestion = intent.roomUpdate.currentQuestion!!,
+                    timeRemaining = intent.roomUpdate.timeRemaining,
+                    cursorPosition = intent.roomUpdate.cursorPosition,
+                )
+            }
+
+            is GameIntent.RoundCompleted -> {
+                TODO()
+            }
+
+            is GameIntent.RoundTimeUp -> {
+                TODO()
+            }
+
+            else -> throw IllegalStateException("$intent couldn't be reduced when current state is RoundActive}")
+        }
+    }
+
+    private fun reducePausedState(intent: GameIntent): GameState {
+        return when (intent) {
+
+            is GameIntent.PlayerReconnected -> {
+                TODO()
+            }
+
+            is GameIntent.Playing -> {
+                GameState.RoundActive(
+                    players = intent.roomUpdate.players,
+                    currentQuestion = intent.roomUpdate.currentQuestion!!,
+                    timeRemaining = intent.roomUpdate.timeRemaining,
+                    cursorPosition = intent.roomUpdate.cursorPosition,
+                )
+            }
+
+            else -> throw IllegalStateException("$intent couldn't be reduced when current state is Paused}")
         }
     }
 
@@ -78,113 +204,38 @@ class GameStateMachine(
                     statistics = GameStatistics(
                         roundCount = 10,
                         averageResponseTimeMillis = mapOf(),
-                        totalGameLengthMillis = 1
+                        totalGameLengthMillis = 10
                     )
                 )
             }
 
-            is GameIntent.UpdateRoom -> {
+            is GameIntent.Playing -> {
                 GameState.RoundActive(
                     players = intent.roomUpdate.players,
                     currentQuestion = intent.roomUpdate.currentQuestion!!,
                     timeRemaining = intent.roomUpdate.timeRemaining,
                     cursorPosition = intent.roomUpdate.cursorPosition,
-                    currentAnswerIndex = null
                 )
             }
 
-            else -> getCurrentState()
+            else -> throw IllegalStateException("$intent couldn't be reduced when current state is RoundEnd}")
         }
     }
 
-    private fun reduceRoundActiveState(intent: GameIntent): GameState {
-        return when (intent) {
-            is GameIntent.SelectAnswer -> {
-                (getCurrentState() as GameState.RoundActive).copy(
-                    currentAnswerIndex = intent.answerIndex
-                )
-            }
-
-            is GameIntent.TimeUpdate -> {
-                (getCurrentState() as GameState.RoundActive).copy(
-                    timeRemaining = intent.update.remaining
-                )
-            }
-
-            is GameIntent.AnswerResult -> {
-                (getCurrentState() as GameState.RoundActive).copy(
-                    // TODO: highlight index
-                )
-            }
-
-            GameIntent.ReturnToRooms -> {
-                effect(GameEffect.NavigateTo(NavDestination.Rooms))
-                getCurrentState()
-            }
-
-            is GameIntent.RoundResult -> TODO()
-
-            is GameIntent.UpdateRoom -> {
-                (getCurrentState() as GameState.RoundActive).copy(
-                    currentQuestion = intent.roomUpdate.currentQuestion!!,
-                    cursorPosition = intent.roomUpdate.cursorPosition,
-                    timeRemaining = intent.roomUpdate.timeRemaining
-                )
-            }
-
-            else -> getCurrentState()
-        }
-    }
-
-    private fun reduceLobbyState(intent: GameIntent): GameState {
-        return when (intent) {
-            is GameIntent.Countdown -> {
-                GameState.Initializing(
-                    timeRemaining = 3
-                )
-            }
-
-            GameIntent.ReturnToRooms -> {
-                effect(GameEffect.NavigateTo(NavDestination.Rooms))
-                getCurrentState()
-            }
-
-            is GameIntent.UpdateRoom -> {
-                GameState.RoundActive(
-                    players = intent.roomUpdate.players,
-                    currentQuestion = intent.roomUpdate.currentQuestion!!,
-                    timeRemaining = intent.roomUpdate.timeRemaining,
-                    cursorPosition = intent.roomUpdate.cursorPosition,
-                    currentAnswerIndex = null
-                )
-            }
-
-            else -> getCurrentState()
-        }
-    }
-
-    private fun reduceIdleState(intent: GameIntent): GameState {
-        return when (intent) {
-            is GameIntent.CreateLobby -> {
-                GameState.Lobby(
-                    creator = intent.creator,
-                    invitee = null,
-                    isReady = mapOf(),
-                )
-            }
-
-            else -> getCurrentState()
-        }
-    }
 
     private fun reduceGameOverState(intent: GameIntent): GameState {
         return when (intent) {
-            GameIntent.ReturnToRooms -> {
-                effect(GameEffect.NavigateTo(NavDestination.Rooms))
-                getCurrentState()
+            GameIntent.ExitGame -> {
+                sideEffect(GameEffect.NavigateTo(Destination.Rooms))
+                GameState.Idle
             }
 
-            else -> getCurrentState()
+            is GameIntent.CloseRoom -> {
+                sideEffect(GameEffect.ShowError(intent.message.reason))
+                GameState.Idle
+            }
+
+            else -> throw IllegalStateException("$intent couldn't be reduced when current state is GameOver}")
         }
     }
 }

@@ -1,15 +1,8 @@
 package studio.astroturf.quizzi.ui.screen.game
 
-import CountdownOverlay
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,12 +36,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import studio.astroturf.quizzi.domain.model.Option
 import studio.astroturf.quizzi.domain.model.Question
-import studio.astroturf.quizzi.domain.model.RoomState
+import studio.astroturf.quizzi.domain.model.statemachine.GameEffect
+import studio.astroturf.quizzi.domain.model.statemachine.GameState
 
 @Composable
 fun GameScreen(
@@ -55,11 +49,23 @@ fun GameScreen(
     modifier: Modifier = Modifier,
     viewModel: GameViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val gameState by viewModel.gameFlow.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.gameEffectFlow.collect { effect ->
+            when (effect) {
+                is GameEffect.NavigateTo -> TODO()
+                is GameEffect.ShowError -> TODO()
+                is GameEffect.ShowTimeRemaining -> TODO()
+                is GameEffect.ShowToast -> TODO()
+                is GameEffect.ReceiveAnswerResult -> TODO()
+            }
+        }
+    }
 
     GameScreenContent(
         modifier = modifier,
-        uiState = uiState,
+        uiState = gameState,
         onSubmitAnswer = { viewModel.submitAnswer(it) },
         onNavigateBack = onNavigateToRooms
     )
@@ -67,89 +73,89 @@ fun GameScreen(
 
 @Composable
 private fun GameScreenContent(
-    uiState: GameUiState,
+    uiState: GameState,
     onSubmitAnswer: (Int) -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
-        // Ana oyun içeriği
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Üst bilgi çubuğu
-            GameInfoBar(
-                timeRemaining = uiState.timeRemaining,
-                cursorPosition = uiState.cursorPosition
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Bayrak ve soru alanı
-            FlagQuestionCard(
-                question = uiState.currentQuestion,
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Cevap şıkları
-            AnswerOptionsGrid(
-                question = uiState.currentQuestion,
-                lastAnswer = uiState.lastAnswer,
-                hasAnswered = uiState.hasAnswered,
-                onAnswerSelected = onSubmitAnswer,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
-        }
-
-        // Round sonucu overlay
-        AnimatedVisibility(
-            visible = uiState.showRoundResult,
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut(),
-            modifier = Modifier
-                .fillMaxSize()
-                .zIndex(2f)
-        ) {
-            RoundResultOverlay(
-                correctAnswerText = uiState.correctAnswerText ?: "",
-                winnerName = uiState.winnerPlayerName,
-                isWinner = uiState.isWinner,
-            )
-        }
-
-        // Countdown overlay
-        AnimatedVisibility(
-            visible = uiState.showCountdown,
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut(),
-            modifier = Modifier
-                .fillMaxSize()
-                .zIndex(4f)
-        ) {
-            CountdownOverlay(
-                countdown = uiState.countdown
-            )
-        }
-
-        // Oyun sonu overlay
-        AnimatedVisibility(
-            visible = uiState.roomState == RoomState.FINISHED,
-            enter = fadeIn() + slideInVertically(),
-            modifier = Modifier
-                .fillMaxSize()
-                .zIndex(3f)
-        ) {
-            GameOverOverlay(
-                winner = uiState.winner,
-                onNavigateBack = onNavigateBack
-            )
-        }
-    }
+//    Box(modifier = modifier.fillMaxSize()) {
+//        // Ana oyun içeriği
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(16.dp),
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            // Üst bilgi çubuğu
+//            GameInfoBar(
+//                timeRemaining = uiState.timeRemaining,
+//                cursorPosition = uiState.cursorPosition
+//            )
+//
+//            Spacer(modifier = Modifier.height(32.dp))
+//
+//            // Bayrak ve soru alanı
+//            FlagQuestionCard(
+//                question = uiState.currentQuestion,
+//                modifier = Modifier.weight(1f)
+//            )
+//
+//            Spacer(modifier = Modifier.height(24.dp))
+//
+//            // Cevap şıkları
+//            AnswerOptionsGrid(
+//                question = uiState.currentQuestion,
+//                lastAnswer = uiState.lastAnswer,
+//                hasAnswered = uiState.hasAnswered,
+//                onAnswerSelected = onSubmitAnswer,
+//                modifier = Modifier.padding(bottom = 24.dp)
+//            )
+//        }
+//
+//        // Round sonucu overlay
+//        AnimatedVisibility(
+//            visible = uiState.showRoundResult,
+//            enter = fadeIn() + scaleIn(),
+//            exit = fadeOut() + scaleOut(),
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .zIndex(2f)
+//        ) {
+//            RoundResultOverlay(
+//                correctAnswerText = uiState.correctAnswerText ?: "",
+//                winnerName = uiState.winnerPlayerName,
+//                isWinner = uiState.isWinner,
+//            )
+//        }
+//
+//        // Countdown overlay
+//        AnimatedVisibility(
+//            visible = uiState.showCountdown,
+//            enter = fadeIn() + scaleIn(),
+//            exit = fadeOut() + scaleOut(),
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .zIndex(4f)
+//        ) {
+//            CountdownOverlay(
+//                countdown = uiState.countdown
+//            )
+//        }
+//
+//        // Oyun sonu overlay
+//        AnimatedVisibility(
+//            visible = uiState.roomState == RoomState.FINISHED,
+//            enter = fadeIn() + slideInVertically(),
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .zIndex(3f)
+//        ) {
+//            GameOverOverlay(
+//                winner = uiState.winner,
+//                onNavigateBack = onNavigateBack
+//            )
+//        }
+//    }
 }
 
 @Composable
@@ -212,7 +218,7 @@ private fun TimeCounter(
 }
 
 @Composable
-private fun GameProgressBar(
+fun GameProgressBar(
     progress: Float,
     modifier: Modifier = Modifier
 ) {
@@ -282,20 +288,14 @@ private fun GameScreenContentPreview() {
         )
     )
 
-    val previewUiState = GameUiState(
-        currentQuestion = previewQuestion,
-        timeRemaining = 10L,
-        roomState = RoomState.PLAYING,
-        cursorPosition = 0.5f,
-        showRoundResult = true,
-        correctAnswer = 1,
-        winnerPlayerName = "Oyuncu 1",
-        isWinner = true
-    )
-
     GameScreenContent(
         modifier = Modifier.fillMaxSize(),
-        uiState = previewUiState,
+        uiState = GameState.RoundActive(
+            players = listOf(),
+            currentQuestion = previewQuestion,
+            timeRemaining = 10L,
+            cursorPosition = 0.5f
+        ),
         onSubmitAnswer = {},
         onNavigateBack = {}
     )

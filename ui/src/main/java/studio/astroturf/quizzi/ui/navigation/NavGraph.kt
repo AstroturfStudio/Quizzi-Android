@@ -5,7 +5,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import studio.astroturf.quizzi.ui.screen.game.GameScreen
+import studio.astroturf.quizzi.ui.screen.game.GameScreen2
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
 
 @Composable
@@ -46,12 +46,14 @@ fun QuizziNavGraph(
                 }
             )
         ) {
-            GameScreen(
+            GameScreen2(
                 onNavigateToRooms = {
                     navController.navigate(NavDestination.Rooms.route) {
                         popUpTo(NavDestination.Rooms.route) { inclusive = true }
                     }
-                }
+                },
+                onShowError = {},
+                onShowToast = { }
             )
         }
     }

@@ -169,7 +169,7 @@ private fun RoomItem(
                     maxLines = 1
                 )
                 Text(
-                    text = "${room.playerCount}/4 Players",
+                    text = "Created by: ${room.players.first()}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
@@ -183,7 +183,7 @@ private fun RoomItem(
 
             Button(
                 onClick = onJoinRoom,
-                enabled = room.roomState == RoomState.WAITING && room.playerCount < 4
+                enabled = room.roomState == RoomState.WAITING && room.players.count() < 2
             ) {
                 Text("Join")
             }
