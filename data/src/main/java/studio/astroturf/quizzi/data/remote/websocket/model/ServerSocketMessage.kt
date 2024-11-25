@@ -24,6 +24,12 @@ sealed class ServerSocketMessage {
     ) : ServerSocketMessage()
 
     @Serializable
+    @SerialName("CountdownTimeUpdate")
+    data class CountdownTimeUpdate(
+        val remaining: Long
+    ) : ServerSocketMessage()
+
+    @Serializable
     @SerialName("RoomUpdate")
     data class RoomUpdate(
         val players: List<PlayerDto>,
@@ -54,8 +60,17 @@ sealed class ServerSocketMessage {
     ) : ServerSocketMessage()
 
     @Serializable
-    @SerialName("RoundResult")
-    data class RoundResult(
+    @SerialName("RoundStarted")
+    data class RoundUpdate(
+        val roundNumber: Int,
+        val timeRemaining: Long,
+        val currentQuestion: QuestionDto
+    ) : ServerSocketMessage()
+
+    @Serializable
+    @SerialName("RoundEnded")
+    data class RoundEnded(
+        val cursorPosition: Float,
         val correctAnswer: Int,
         val winnerPlayerId: String?
     ) : ServerSocketMessage()

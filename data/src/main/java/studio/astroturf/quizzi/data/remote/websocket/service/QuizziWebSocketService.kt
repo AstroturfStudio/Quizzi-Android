@@ -56,7 +56,6 @@ class QuizziWebSocketService @Inject constructor(
     fun connect(playerId: String? = null) {
         this.playerId = playerId
         connectWebSocket()
-        playerId?.let { send(createReconnectMessage(it)) }
     }
 
     private fun connectWebSocket() {
@@ -80,7 +79,8 @@ class QuizziWebSocketService @Inject constructor(
                     send(createReconnectMessage(existingId))
                 }
             } catch (e: Exception) {
-                handleReconnectFailure()
+                Timber.e(e)
+//                handleReconnectFailure()
             }
         }
     }
@@ -146,14 +146,14 @@ class QuizziWebSocketService @Inject constructor(
 
         override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
             Timber.d("WebSocket Closed: $code - $reason")
-            if (code != NORMAL_CLOSURE_STATUS) {
-                handleReconnect()
-            }
+//            if (code != NORMAL_CLOSURE_STATUS) {
+//                handleReconnect()
+//            }
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             Timber.e(t, "WebSocket Error")
-            handleReconnect()
+//            handleReconnect()
         }
     }
 

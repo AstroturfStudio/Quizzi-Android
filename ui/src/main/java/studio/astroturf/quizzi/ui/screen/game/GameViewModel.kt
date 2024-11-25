@@ -1,6 +1,9 @@
 package studio.astroturf.quizzi.ui.screen.game
 
 
+import NavDestination
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,13 +18,17 @@ import studio.astroturf.quizzi.domain.model.statemachine.GameState
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.AnswerResult
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.Countdown
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.Error
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.GameOver
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.PlayerDisconnected
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.PlayerReconnected
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomClosed
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomCreated
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomJoined
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomUpdate
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoundResult
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoundEnded
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoundUpdate
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.TimeUp
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.TimeUpdate
 import studio.astroturf.quizzi.domain.repository.QuizRepository
@@ -29,8 +36,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val repository: QuizRepository
 ) : ViewModel() {
+
+    private val roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
 
     private val gsm = GameStateMachine(viewModelScope)
     val gameFlow: StateFlow<GameState> = gsm.stateFlow
@@ -45,33 +55,49 @@ class GameViewModel @Inject constructor(
                     processServerMessage(message)
                 }
         }
+
+        roomId?.let {
+            joinRoom(it)
+        } ?: createRoom()
     }
 
     private fun processServerMessage(message: ServerMessage) {
         when (message) {
+            // effects
             is TimeUpdate -> gsm.sideEffect(GameEffect.ShowTimeRemaining(message.remaining))
+            is AnswerResult -> gsm.sideEffect(GameEffect.ReceiveAnswerResult(message))
+            is PlayerDisconnected -> gsm.sideEffect(GameEffect.PlayerDisconnected(message))
+            is Error -> gsm.sideEffect(GameEffect.ShowError(message.message))
+            is PlayerReconnected -> gsm.sideEffect(GameEffect.PlayerReconnected(message))
+            is RoomCreated -> gsm.sideEffect(GameEffect.RoomCreated(message))
+            is RoomJoined -> gsm.sideEffect(GameEffect.RoomJoined(message))
+            is RoundUpdate -> gsm.sideEffect(GameEffect.RoundUpdate(message))
+
+            // intents
+            is Countdown -> gsm.reduce(GameIntent.Countdown(message))
             is RoomUpdate -> {
-                if (message.state == RoomState.COUNTDOWN) {
-                    for (i in 3..1) {
-                        gsm.reduce(GameIntent.Initialize(message.copy(timeRemaining = i.toLong())))
-                    }
+                if (message.state == RoomState.WAITING) {
+                    gsm.reduce(GameIntent.Lobby(message))
                 } else if (message.state == RoomState.PLAYING) {
-                    gsm.reduce(GameIntent.Playing(message))
+                    gsm.reduce(GameIntent.StartRound(message))
                 }
+
+                Log.d("GameViewModel: ", "RoomUpdate: $message")
             }
 
-            is GameOver -> gsm.reduce(GameIntent.GameOver(message))
-            is AnswerResult -> gsm.sideEffect(GameEffect.ReceiveAnswerResult(message))
-            is RoundResult -> gsm.reduce(GameIntent.RoundCompleted(message))
-            is RoomCreated -> gsm.reduce(GameIntent.RoomCreated(message))
-            is RoomJoined -> gsm.reduce(GameIntent.RoomJoined(message))
-            is Error -> gsm.sideEffect(GameEffect.ShowError(message.message))
-            // is PlayerDisconnected -> gsm.reduce(GameIntent.PlayerDisconnected(message))
-            // is PlayerReconnected -> gsm.reduce(GameIntent.PlayerReconnected(message))
-            is RoomClosed -> gsm.reduce(GameIntent.CloseRoom(message))
+            is RoundEnded -> gsm.reduce(GameIntent.RoundEnd(message))
             is TimeUp -> gsm.reduce(GameIntent.RoundTimeUp(message))
-            else -> {}
+            is GameOver -> gsm.reduce(GameIntent.GameOver(message))
+            is RoomClosed -> gsm.reduce(GameIntent.CloseRoom(message))
         }
+    }
+
+    fun createRoom() {
+        repository.sendMessage(ClientMessage.CreateRoom)
+    }
+
+    fun joinRoom(roomId: String) {
+        repository.sendMessage(ClientMessage.JoinRoom(roomId))
     }
 
     fun submitAnswer(answer: Int) {

@@ -1,3 +1,4 @@
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,22 +30,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import studio.astroturf.quizzi.domain.model.GameRoom
 import studio.astroturf.quizzi.domain.model.RoomState
+import studio.astroturf.quizzi.ui.screen.rooms.RoomIntent
 import studio.astroturf.quizzi.ui.screen.rooms.RoomsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomsScreen(
     viewModel: RoomsViewModel = hiltViewModel(),
-    onNavigateToRoom: (String) -> Unit
+    onNavigateToRoom: (RoomIntent) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { roomId ->
-            onNavigateToRoom(roomId)
-        }
-    }
 
     // Use PullToRefreshBox instead of manual Box implementation
     PullToRefreshBox(
@@ -73,10 +68,11 @@ fun RoomsScreen(
                 rooms = uiState.rooms,
                 isConnected = uiState.isConnected,
                 error = uiState.error,
-                onCreateRoom = { viewModel.createRoom() },
+                onCreateRoom = {
+                    onNavigateToRoom(RoomIntent.CreateRoom)
+                },
                 onJoinRoom = { roomId ->
-                    viewModel.joinRoom(roomId)
-                    onNavigateToRoom(roomId)
+                    onNavigateToRoom(RoomIntent.JoinRoom(roomId))
                 }
             )
         }

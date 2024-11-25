@@ -75,7 +75,7 @@ fun LandingScreenContent(
                 onClick = { onLogin(savedPlayerId) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Continue Playing")
+                Text("Continue Play")
             }
         } else {
             var name by remember { mutableStateOf("") }
@@ -106,7 +106,7 @@ fun LandingScreenContent(
                     .padding(vertical = 8.dp),
                 enabled = name.isNotBlank()
             ) {
-                Text("Start Playing")
+                Text("Start Play")
             }
         }
 

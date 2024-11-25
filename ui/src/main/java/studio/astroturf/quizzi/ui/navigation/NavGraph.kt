@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import studio.astroturf.quizzi.ui.screen.game.GameScreen2
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
+import studio.astroturf.quizzi.ui.screen.rooms.RoomIntent
 
 @Composable
 fun QuizziNavGraph(
@@ -31,14 +32,23 @@ fun QuizziNavGraph(
 
         composable(NavDestination.Rooms.route) {
             RoomsScreen(
-                onNavigateToRoom = { roomId ->
-                    navController.navigate(NavDestination.Game().createRoute(roomId))
+                onNavigateToRoom = { roomIntent ->
+                    when (roomIntent) {
+                        RoomIntent.CreateRoom -> {
+                            navController.navigate(NavDestination.Game.createRoute())
+                        }
+
+                        is RoomIntent.JoinRoom -> {
+                            navController.navigate(NavDestination.Game.createRoute(roomId = roomIntent.roomId))
+                        }
+                    }
+
                 }
             )
         }
 
         composable(
-            route = NavDestination.Game().route,
+            route = NavDestination.Game.ROUTE_PATTERN,
             arguments = listOf(
                 navArgument(NavDestination.Game.ARG_ROOM_ID) {
                     type = NavType.StringType

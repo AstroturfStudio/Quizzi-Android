@@ -1,6 +1,7 @@
 package studio.astroturf.quizzi.ui.screen.game
 
 import CountdownOverlay
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -61,14 +62,27 @@ fun GameScreen2(
             when (effect) {
                 is GameEffect.NavigateTo -> onNavigateToRooms()
                 is GameEffect.ShowError -> onShowError(effect.message)
-                is GameEffect.ShowTimeRemaining -> { /* Handle in UI state */
-                }
-
+                is GameEffect.ShowTimeRemaining -> {}
                 is GameEffect.ShowToast -> onShowToast(effect.message)
                 is GameEffect.ReceiveAnswerResult -> {
-                    // Show answer feedback animation
                     val message = if (effect.answerResult.correct) "Correct!" else "Wrong answer!"
                     onShowToast(message)
+                }
+
+                is GameEffect.PlayerDisconnected -> onShowToast(effect.message.playerName + " disconnected")
+                is GameEffect.PlayerReconnected -> onShowToast(effect.message.playerId + " reconnected")
+                is GameEffect.RoomCreated -> Log.d(
+                    "TAG",
+                    "GameScreen2: Room Created: ${effect.message.roomId}"
+                )
+
+                is GameEffect.RoomJoined -> Log.d(
+                    "TAG",
+                    "GameScreen2: Room Joined: ${effect.message.roomId}, success: ${effect.message.success}"
+                )
+
+                is GameEffect.RoundUpdate -> {
+
                 }
             }
         }
@@ -99,11 +113,11 @@ private fun GameScreenContent(
         ) {
             GameTopBar(
                 timeRemaining = when (state) {
-                    is GameState.RoundActive -> state.timeRemaining
+                    is GameState.RoundOn -> state.timeRemaining
                     else -> null
                 },
                 cursorPosition = when (state) {
-                    is GameState.RoundActive -> state.cursorPosition
+                    is GameState.RoundOn -> state.cursorPosition
                     else -> 0f
                 }
             )
@@ -112,7 +126,7 @@ private fun GameScreenContent(
 
             QuestionContent(
                 question = when (state) {
-                    is GameState.RoundActive -> state.currentQuestion
+                    is GameState.RoundOn -> state.currentQuestion
                     else -> null
                 },
                 modifier = Modifier.weight(1f)
@@ -121,7 +135,7 @@ private fun GameScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             when (state) {
-                is GameState.RoundActive -> {
+                is GameState.RoundOn -> {
                     AnswerGrid(
                         question = state.currentQuestion,
                         onAnswerSelected = onSubmitAnswer,
@@ -144,12 +158,12 @@ private fun GameScreenContent(
 
         // Overlay animations
         AnimatedVisibility(
-            visible = state is GameState.Initializing,
+            visible = state is GameState.Starting,
             enter = fadeIn() + scaleIn(),
             exit = fadeOut() + scaleOut(),
             modifier = Modifier.fillMaxSize()
         ) {
-            CountdownOverlay(countdown = (state as? GameState.Initializing)?.timeRemaining ?: 0)
+            CountdownOverlay(countdown = (state as? GameState.Starting)?.timeRemaining ?: 0)
         }
     }
 }

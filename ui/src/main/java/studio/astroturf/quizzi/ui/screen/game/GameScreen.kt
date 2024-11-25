@@ -59,6 +59,11 @@ fun GameScreen(
                 is GameEffect.ShowTimeRemaining -> TODO()
                 is GameEffect.ShowToast -> TODO()
                 is GameEffect.ReceiveAnswerResult -> TODO()
+                is GameEffect.PlayerDisconnected -> TODO()
+                is GameEffect.PlayerReconnected -> TODO()
+                is GameEffect.RoomCreated -> TODO()
+                is GameEffect.RoomJoined -> TODO()
+                is GameEffect.RoundUpdate -> TODO()
             }
         }
     }
@@ -290,7 +295,7 @@ private fun GameScreenContentPreview() {
 
     GameScreenContent(
         modifier = Modifier.fillMaxSize(),
-        uiState = GameState.RoundActive(
+        uiState = GameState.RoundOn(
             players = listOf(),
             currentQuestion = previewQuestion,
             timeRemaining = 10L,

@@ -22,12 +22,18 @@ sealed class ServerMessage {
         val currentQuestion: Question?
     ) : ServerMessage()
 
-    data class TimeUpdate(
+    data class Countdown(
         val remaining: Long
     ) : ServerMessage()
 
-    data class TimeUp(
-        val correctAnswer: Int
+    data class RoundUpdate(
+        val roundNumber: Int,
+        val timeRemaining: Long,
+        val currentQuestion: Question
+    ) : ServerMessage()
+
+    data class TimeUpdate(
+        val remaining: Long
     ) : ServerMessage()
 
     data class AnswerResult(
@@ -36,13 +42,22 @@ sealed class ServerMessage {
         val correct: Boolean
     ) : ServerMessage()
 
-    data class RoundResult(
+    data class RoundEnded(
+        val cursorPosition: Float,
         val correctAnswer: Int,
         val winnerPlayerId: String?
     ) : ServerMessage()
 
+    data class TimeUp(
+        val correctAnswer: Int
+    ) : ServerMessage()
+
     data class GameOver(
         val winnerPlayerId: String
+    ) : ServerMessage()
+
+    data class Error(
+        val message: String
     ) : ServerMessage()
 
     data class PlayerDisconnected(
@@ -56,9 +71,5 @@ sealed class ServerMessage {
 
     data class RoomClosed(
         val reason: String
-    ) : ServerMessage()
-
-    data class Error(
-        val message: String
     ) : ServerMessage()
 } 
