@@ -2,19 +2,21 @@ package studio.astroturf.quizzi.ui.screen.game
 
 
 import NavDestination
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.gamestatemachine.GameStateMachine
 import studio.astroturf.quizzi.domain.model.RoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameEffect
 import studio.astroturf.quizzi.domain.model.statemachine.GameIntent
-import studio.astroturf.quizzi.domain.model.statemachine.GameState
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.AnswerResult
@@ -32,6 +34,7 @@ import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoundUpdate
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.TimeUp
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.TimeUpdate
 import studio.astroturf.quizzi.domain.repository.QuizRepository
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,12 +45,34 @@ class GameViewModel @Inject constructor(
 
     private val roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
 
+    private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
+    val uiState = _uiState.asStateFlow()
+
+    private val _uiEffect = Channel<GameUiEvent>()
+    val uiEffect = _uiEffect.receiveAsFlow()
+
     private val gsm = GameStateMachine(viewModelScope)
-    val gameFlow: StateFlow<GameState> = gsm.stateFlow
-    val gameEffectFlow: Flow<GameEffect> = gsm.effectFlow
 
     init {
-        repository.connect()
+        // Map domain state to UI state
+        viewModelScope.launch {
+            gsm.stateFlow
+                .map { it.toUiState() }
+                .catch { error ->
+                    Timber.e("GameViewModel", "State mapping error", error)
+                }
+                .collect { uiState ->
+                    _uiState.value = uiState
+                }
+        }
+
+        // Handle game effects
+        viewModelScope.launch {
+            gsm.effectFlow.collect { effect ->
+                handleGameEffect(effect)
+            }
+        }
+
         viewModelScope.launch {
             repository
                 .observeMessages()
@@ -55,6 +80,8 @@ class GameViewModel @Inject constructor(
                     processServerMessage(message)
                 }
         }
+
+        repository.connect()
 
         roomId?.let {
             joinRoom(it)
@@ -82,13 +109,66 @@ class GameViewModel @Inject constructor(
                     gsm.reduce(GameIntent.StartRound(message))
                 }
 
-                Log.d("GameViewModel: ", "RoomUpdate: $message")
+                Timber.tag("GameViewModel: ").d("RoomUpdate: $message")
             }
 
             is RoundEnded -> gsm.reduce(GameIntent.RoundEnd(message))
             is TimeUp -> gsm.reduce(GameIntent.RoundTimeUp(message))
             is GameOver -> gsm.reduce(GameIntent.GameOver(message))
             is RoomClosed -> gsm.reduce(GameIntent.CloseRoom(message))
+        }
+    }
+
+    private suspend fun handleGameEffect(effect: GameEffect) {
+        when (effect) {
+            is GameEffect.NavigateTo -> {
+                _uiEffect.send(GameUiEvent.NavigateTo(effect.destination))
+            }
+
+            is GameEffect.PlayerDisconnected -> {
+
+            }
+
+            is GameEffect.PlayerReconnected -> {
+
+            }
+
+            is GameEffect.ReceiveAnswerResult -> {
+
+            }
+
+            is GameEffect.RoomCreated -> {
+
+            }
+
+            is GameEffect.RoomJoined -> {
+
+            }
+
+            is GameEffect.RoundUpdate -> {
+
+            }
+
+            is GameEffect.ShowError -> {
+
+            }
+
+            is GameEffect.ShowTimeRemaining -> {
+                val currentState = _uiState.value
+                _uiState.value = when (currentState) {
+                    is GameUiState.RoundOn -> {
+                        currentState.copy(
+                            timeRemainingInSeconds = effect.timeRemaining.toInt()
+                        )
+                    }
+
+                    else -> currentState
+                }
+            }
+
+            is GameEffect.ShowToast -> {
+
+            }
         }
     }
 

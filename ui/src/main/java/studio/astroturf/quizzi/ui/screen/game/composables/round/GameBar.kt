@@ -1,4 +1,4 @@
-package studio.astroturf.quizzi.ui.screen.game
+package studio.astroturf.quizzi.ui.screen.game.composables.round
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState

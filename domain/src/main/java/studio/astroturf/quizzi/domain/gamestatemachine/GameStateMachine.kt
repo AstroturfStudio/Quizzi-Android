@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.model.GameStatistics
+import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.statemachine.Destination
 import studio.astroturf.quizzi.domain.model.statemachine.GameEffect
 import studio.astroturf.quizzi.domain.model.statemachine.GameIntent
@@ -37,19 +38,19 @@ class GameStateMachine(
         val currentState = getCurrentState()
 
         val newState = when (currentState) {
-            GameState.Idle -> reduceIdleState(intent)
-            is GameState.Lobby -> reduceLobbyState(intent)
-            is GameState.Starting -> reduceStartingState(intent)
-            is GameState.RoundOn -> reduceRoundOnState(intent)
-            is GameState.Paused -> reducePausedState(intent)
-            is GameState.EndOfRound -> reduceEndOfRoundState(intent)
-            is GameState.GameOver -> reduceGameOverState(intent)
+            GameState.Idle -> reduceIdleState(currentState, intent)
+            is GameState.Lobby -> reduceLobbyState(currentState, intent)
+            is GameState.Starting -> reduceStartingState(currentState, intent)
+            is GameState.RoundOn -> reduceRoundOnState(currentState, intent)
+            is GameState.Paused -> reducePausedState(currentState, intent)
+            is GameState.EndOfRound -> reduceEndOfRoundState(currentState, intent)
+            is GameState.GameOver -> reduceGameOverState(currentState, intent)
         }
 
         _currentStateFlow.value = newState
     }
 
-    private fun reduceIdleState(intent: GameIntent): GameState {
+    private fun reduceIdleState(currentState: GameState, intent: GameIntent): GameState {
         return when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
@@ -57,7 +58,8 @@ class GameStateMachine(
             is GameIntent.Lobby -> {
                 // TODO: Idle'da WAITING gelirse roomId lazım mı
                 GameState.Lobby(
-                    roomId = intent.message.toString()
+                    roomId = intent.message.toString(),
+                    players = intent.message.players
                 )
             }
 
@@ -65,7 +67,7 @@ class GameStateMachine(
         }
     }
 
-    private fun reduceLobbyState(intent: GameIntent): GameState {
+    private fun reduceLobbyState(currentState: GameState.Lobby, intent: GameIntent): GameState {
         return when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
@@ -82,7 +84,10 @@ class GameStateMachine(
         }
     }
 
-    private fun reduceStartingState(intent: GameIntent): GameState {
+    private fun reduceStartingState(
+        currentState: GameState.Starting,
+        intent: GameIntent
+    ): GameState {
         return when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
@@ -92,7 +97,7 @@ class GameStateMachine(
                     GameState.RoundOn(
                         players = players,
                         currentQuestion = currentQuestion!!,
-                        timeRemaining = timeRemaining,
+                        timeRemaining = timeRemaining!!,
                         cursorPosition = cursorPosition,
                     )
                 }
@@ -106,7 +111,7 @@ class GameStateMachine(
         }
     }
 
-    private fun reduceRoundOnState(intent: GameIntent): GameState {
+    private fun reduceRoundOnState(currentState: GameState.RoundOn, intent: GameIntent): GameState {
         return when (intent) {
             GameIntent.ExitGame -> {
                 sideEffect(GameEffect.NavigateTo(Destination.Rooms))
@@ -115,7 +120,7 @@ class GameStateMachine(
 
             is GameIntent.GameOver -> {
                 GameState.GameOver(
-                    winnerPlayerId = intent.message.winnerPlayerId,
+                    winner = currentState.players.first { it.id == intent.message.winnerPlayerId },
                     statistics = GameStatistics(
                         roundCount = 10,
                         averageResponseTimeMillis = mapOf(),
@@ -125,20 +130,26 @@ class GameStateMachine(
             }
 
             is GameIntent.RoundEnd -> {
+                val winner: Player? =
+                    currentState.players.find { it.id == intent.message.winnerPlayerId }
+                val correctAnswer =
+                    currentState.currentQuestion.options[intent.message.correctAnswer]
+
                 GameState.EndOfRound(
                     cursorPosition = intent.message.cursorPosition,
-                    correctAnswer = intent.message.correctAnswer,
-                    winnerPlayerId = intent.message.winnerPlayerId
+                    correctAnswer = correctAnswer,
+                    winnerPlayer = winner
                 )
             }
 
             is GameIntent.RoundTimeUp -> {
-                val currentState = getCurrentState() as GameState.RoundOn
+                val correctAnswer =
+                    currentState.currentQuestion.options[intent.message.correctAnswer]
 
                 GameState.EndOfRound(
                     cursorPosition = currentState.cursorPosition,
-                    correctAnswer = intent.message.correctAnswer,
-                    winnerPlayerId = null
+                    correctAnswer = correctAnswer,
+                    winnerPlayer = null
                 )
             }
 
@@ -146,7 +157,7 @@ class GameStateMachine(
         }
     }
 
-    private fun reducePausedState(intent: GameIntent): GameState {
+    private fun reducePausedState(currentState: GameState.Paused, intent: GameIntent): GameState {
         return when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
@@ -155,7 +166,7 @@ class GameStateMachine(
                 GameState.RoundOn(
                     players = intent.message.players,
                     currentQuestion = intent.message.currentQuestion!!,
-                    timeRemaining = intent.message.timeRemaining,
+                    timeRemaining = intent.message.timeRemaining!!,
                     cursorPosition = intent.message.cursorPosition,
                 )
             }
@@ -164,14 +175,22 @@ class GameStateMachine(
         }
     }
 
-    private fun reduceEndOfRoundState(intent: GameIntent): GameState {
+    private fun reduceEndOfRoundState(
+        currentState: GameState.EndOfRound,
+        intent: GameIntent
+    ): GameState {
         return when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
 
             is GameIntent.GameOver -> {
+                val winnerPlayerId = intent.message.winnerPlayerId
                 GameState.GameOver(
-                    winnerPlayerId = intent.message.winnerPlayerId,
+                    winner = Player( // FIXME: currentState.players.first { it.id == intent.message.winnerPlayerId } olmasi lazim
+                        id = winnerPlayerId,
+                        name = intent.message.winnerPlayerId,
+                        avatarUrl = ""
+                    ),
                     statistics = GameStatistics(
                         roundCount = 10,
                         averageResponseTimeMillis = mapOf(),
@@ -184,7 +203,7 @@ class GameStateMachine(
                 GameState.RoundOn(
                     players = intent.message.players,
                     currentQuestion = intent.message.currentQuestion!!,
-                    timeRemaining = intent.message.timeRemaining,
+                    timeRemaining = intent.message.timeRemaining!!,
                     cursorPosition = intent.message.cursorPosition,
                 )
             }
@@ -194,7 +213,10 @@ class GameStateMachine(
     }
 
 
-    private fun reduceGameOverState(intent: GameIntent): GameState {
+    private fun reduceGameOverState(
+        currentState: GameState.GameOver,
+        intent: GameIntent
+    ): GameState {
         return when (intent) {
             GameIntent.ExitGame -> {
                 sideEffect(GameEffect.NavigateTo(Destination.Rooms))

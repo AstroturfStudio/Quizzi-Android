@@ -1,340 +1,160 @@
 package studio.astroturf.quizzi.ui.screen.game
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import CountdownOverlay
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import studio.astroturf.quizzi.domain.model.Option
-import studio.astroturf.quizzi.domain.model.Question
-import studio.astroturf.quizzi.domain.model.statemachine.GameEffect
-import studio.astroturf.quizzi.domain.model.statemachine.GameState
+import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameOverContent
+import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyContent
+import studio.astroturf.quizzi.ui.screen.game.composables.paused.PausedContent
+import studio.astroturf.quizzi.ui.screen.game.composables.round.GameRoundContent
+import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundResultOverlay
+import kotlin.random.Random
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun GameScreen(
     onNavigateToRooms: () -> Unit,
+    onShowError: (String) -> Unit,
+    onShowToast: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GameViewModel = hiltViewModel()
 ) {
-    val gameState by viewModel.gameFlow.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.gameEffectFlow.collect { effect ->
-            when (effect) {
-                is GameEffect.NavigateTo -> TODO()
-                is GameEffect.ShowError -> TODO()
-                is GameEffect.ShowTimeRemaining -> TODO()
-                is GameEffect.ShowToast -> TODO()
-                is GameEffect.ReceiveAnswerResult -> TODO()
-                is GameEffect.PlayerDisconnected -> TODO()
-                is GameEffect.PlayerReconnected -> TODO()
-                is GameEffect.RoomCreated -> TODO()
-                is GameEffect.RoomJoined -> TODO()
-                is GameEffect.RoundUpdate -> TODO()
-            }
-        }
-    }
-
+    val uiState by viewModel.uiState.collectAsState()
     GameScreenContent(
-        modifier = modifier,
-        uiState = gameState,
-        onSubmitAnswer = { viewModel.submitAnswer(it) },
-        onNavigateBack = onNavigateToRooms
+        state = uiState,
+        onNavigateToRooms = onNavigateToRooms,
+        onSubmitAnswer = viewModel::submitAnswer,
+        modifier = modifier
     )
 }
 
 @Composable
 private fun GameScreenContent(
-    uiState: GameState,
+    state: GameUiState,
+    onNavigateToRooms: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
-    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-//    Box(modifier = modifier.fillMaxSize()) {
-//        // Ana oyun içeriği
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(16.dp),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            // Üst bilgi çubuğu
-//            GameInfoBar(
-//                timeRemaining = uiState.timeRemaining,
-//                cursorPosition = uiState.cursorPosition
-//            )
-//
-//            Spacer(modifier = Modifier.height(32.dp))
-//
-//            // Bayrak ve soru alanı
-//            FlagQuestionCard(
-//                question = uiState.currentQuestion,
-//                modifier = Modifier.weight(1f)
-//            )
-//
-//            Spacer(modifier = Modifier.height(24.dp))
-//
-//            // Cevap şıkları
-//            AnswerOptionsGrid(
-//                question = uiState.currentQuestion,
-//                lastAnswer = uiState.lastAnswer,
-//                hasAnswered = uiState.hasAnswered,
-//                onAnswerSelected = onSubmitAnswer,
-//                modifier = Modifier.padding(bottom = 24.dp)
-//            )
-//        }
-//
-//        // Round sonucu overlay
-//        AnimatedVisibility(
-//            visible = uiState.showRoundResult,
-//            enter = fadeIn() + scaleIn(),
-//            exit = fadeOut() + scaleOut(),
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .zIndex(2f)
-//        ) {
-//            RoundResultOverlay(
-//                correctAnswerText = uiState.correctAnswerText ?: "",
-//                winnerName = uiState.winnerPlayerName,
-//                isWinner = uiState.isWinner,
-//            )
-//        }
-//
-//        // Countdown overlay
-//        AnimatedVisibility(
-//            visible = uiState.showCountdown,
-//            enter = fadeIn() + scaleIn(),
-//            exit = fadeOut() + scaleOut(),
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .zIndex(4f)
-//        ) {
-//            CountdownOverlay(
-//                countdown = uiState.countdown
-//            )
-//        }
-//
-//        // Oyun sonu overlay
-//        AnimatedVisibility(
-//            visible = uiState.roomState == RoomState.FINISHED,
-//            enter = fadeIn() + slideInVertically(),
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .zIndex(3f)
-//        ) {
-//            GameOverOverlay(
-//                winner = uiState.winner,
-//                onNavigateBack = onNavigateBack
-//            )
-//        }
-//    }
-}
-
-@Composable
-private fun GameInfoBar(
-    timeRemaining: Long?,
-    cursorPosition: Float,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TimeCounter(timeRemaining = timeRemaining)
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        GameProgressBar(
-            progress = 1f - cursorPosition,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun TimeCounter(
-    timeRemaining: Long?,
-    modifier: Modifier = Modifier
-) {
-    val scale by animateFloatAsState(
-        targetValue = if (timeRemaining?.let { it <= 3 } == true) 1.2f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        )
-    )
-
-    Surface(
-        shape = CircleShape,
-        color = when {
-            timeRemaining?.let { it <= 3 } == true -> Color.Red
-            timeRemaining?.let { it <= 5 } == true -> Color(0xFFFFA000)
-            else -> MaterialTheme.colorScheme.primary
-        },
-        modifier = modifier
-            .size(56.dp)
-            .scale(scale)
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
+    Box(modifier = modifier.fillMaxSize()) {
+        AnimatedContent(
+            targetState = state.toAnimationKey(),
+            transitionSpec = { getTransitionSpec(targetState, initialState) },
             modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                text = "${timeRemaining ?: ""}",
-                style = MaterialTheme.typography.headlineMedium,
-                color = Color.White
+        ) { stateKey ->
+            GameStateContent(
+                currentState = state,
+                stateKey = stateKey,
+                onNavigateToRooms = onNavigateToRooms,
+                onSubmitAnswer = onSubmitAnswer
             )
         }
     }
 }
 
-@Composable
-fun GameProgressBar(
-    progress: Float,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .height(12.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(progress)
-                .clip(RoundedCornerShape(6.dp))
-                .background(MaterialTheme.colorScheme.primary)
-        )
-    }
-}
 
 @Composable
-private fun FlagQuestionCard(
-    question: Question?,
-    modifier: Modifier = Modifier
+private fun GameStateContent(
+    currentState: GameUiState,
+    stateKey: GameStateAnimationKey,
+    onNavigateToRooms: () -> Unit,
+    onSubmitAnswer: (Int) -> Unit
 ) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = question?.content ?: "",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
+    when {
+        stateKey == GameStateAnimationKey.IDLE -> LoadingIndicator()
 
-            AsyncImage(
-                model = question?.imageUrl,
-                contentDescription = "Bayrak",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(280.dp)
-                    .padding(16.dp)
+        stateKey == GameStateAnimationKey.LOBBY && currentState is GameUiState.Lobby -> {
+            LobbyContent(
+                roomName = currentState.roomName,
+                creator = currentState.creator,
+                challenger = currentState.challenger
             )
         }
+
+        stateKey == GameStateAnimationKey.STARTING && currentState is GameUiState.Starting -> {
+            CountdownOverlay(
+                countdown = currentState.timeRemainingInSeconds
+            )
+        }
+
+        stateKey == GameStateAnimationKey.ROUND && currentState is GameUiState.RoundOn -> {
+            GameRoundContent(
+                state = currentState,
+                onSubmitAnswer = onSubmitAnswer
+            )
+        }
+
+        stateKey == GameStateAnimationKey.GAME_OVER && currentState is GameUiState.GameOver -> {
+            GameOverContent(
+                winner = currentState.winner,
+                totalRounds = currentState.totalRoundCount,
+                onNavigateBack = onNavigateToRooms
+            )
+        }
+
+        stateKey == GameStateAnimationKey.PAUSED && currentState is GameUiState.Paused -> {
+            PausedContent(
+                reason = currentState.reason,
+                onlinePlayers = currentState.onlinePlayers,
+                onRetry = {}
+            )
+        }
+
+        stateKey == GameStateAnimationKey.ROUND_END && currentState is GameUiState.RoundEnd -> {
+            RoundResultOverlay(
+                correctAnswerText = currentState.correctAnswerValue,
+                winnerName = currentState.roundWinner?.name ?: "kimse",
+                isWinner = Random.nextBoolean() // fixme
+            )
+        }
+
+        else -> LoadingIndicator()
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun GameScreenContentPreview() {
-    val previewQuestion = Question(
-        imageUrl = "https://example.com/flag.png",
-        content = "conceptam",
-        options = listOf(
-            Option(1, "Türkiye"),
-            Option(2, "Almanya"),
-            Option(3, "Fransa"),
-            Option(4, "İtalya")
-        )
-    )
-
-    GameScreenContent(
-        modifier = Modifier.fillMaxSize(),
-        uiState = GameState.RoundOn(
-            players = listOf(),
-            currentQuestion = previewQuestion,
-            timeRemaining = 10L,
-            cursorPosition = 0.5f
-        ),
-        onSubmitAnswer = {},
-        onNavigateBack = {}
-    )
+private enum class GameStateAnimationKey {
+    IDLE, LOBBY, STARTING, ROUND, GAME_OVER, PAUSED, ROUND_END
 }
 
-@Preview
-@Composable
-private fun GameInfoBarPreview() {
-    GameInfoBar(
-        timeRemaining = 5L,
-        cursorPosition = 0.7f
-    )
+private fun GameUiState.toAnimationKey(): GameStateAnimationKey = when (this) {
+    is GameUiState.Idle -> GameStateAnimationKey.IDLE
+    is GameUiState.Lobby -> GameStateAnimationKey.LOBBY
+    is GameUiState.Starting -> GameStateAnimationKey.STARTING
+    is GameUiState.RoundOn -> GameStateAnimationKey.ROUND
+    is GameUiState.GameOver -> GameStateAnimationKey.GAME_OVER
+    is GameUiState.Paused -> GameStateAnimationKey.PAUSED
+    is GameUiState.RoundEnd -> GameStateAnimationKey.ROUND_END
 }
 
-@Preview
-@Composable
-private fun TimeCounterPreview() {
-    TimeCounter(timeRemaining = 3L)
-}
+private fun getTransitionSpec(
+    targetState: GameStateAnimationKey,
+    initialState: GameStateAnimationKey
+): ContentTransform {
+    return when (targetState) {
+        GameStateAnimationKey.GAME_OVER -> (slideInVertically { height -> height } + fadeIn())
+            .togetherWith(slideOutVertically { height -> -height } + fadeOut())
 
-@Preview
-@Composable
-private fun FlagQuestionCardPreview() {
-    FlagQuestionCard(
-        question = Question(
-            imageUrl = "https://example.com/flag.png",
-            content = "Hangi ülkedir?",
-            options = listOf(
-                Option(1, "Türkiye"),
-                Option(2, "Almanya"),
-                Option(3, "Fransa"),
-                Option(4, "İtalya")
-            )
-        )
-    )
-}
+        GameStateAnimationKey.ROUND -> when (initialState) {
+            GameStateAnimationKey.STARTING -> (expandVertically() + fadeIn())
+                .togetherWith(shrinkVertically() + fadeOut())
 
+            else -> fadeIn() togetherWith fadeOut()
+        }
+
+        else -> fadeIn() togetherWith fadeOut()
+    }
+}

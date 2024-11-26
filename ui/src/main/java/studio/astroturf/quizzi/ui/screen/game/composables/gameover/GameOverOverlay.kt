@@ -1,4 +1,4 @@
-package studio.astroturf.quizzi.ui.screen.game
+package studio.astroturf.quizzi.ui.screen.game.composables.gameover
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package studio.astroturf.quizzi.ui.screen.game
+package studio.astroturf.quizzi.ui.screen.game.composables.roundend
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn

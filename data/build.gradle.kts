@@ -57,7 +57,6 @@ dependencies {
     implementation(libs.kotlinx.serialization)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
-    implementation(libs.timber)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
