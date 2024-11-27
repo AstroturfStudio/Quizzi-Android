@@ -7,25 +7,23 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
-fun LifecycleOwner.launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job {
-    return lifecycleScope.launch {
+fun LifecycleOwner.launchWhenStarted(block: suspend CoroutineScope.() -> Unit): Job =
+    lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
             block()
         }
     }
-}
 
-fun LifecycleOwner.launchWhenResumed(block: suspend CoroutineScope.() -> Unit): Job {
-    return lifecycleScope.launch {
+fun LifecycleOwner.launchWhenResumed(block: suspend CoroutineScope.() -> Unit): Job =
+    lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.RESUMED) {
             block()
         }
     }
-}
 
 fun <T> Flow<T>.collectWhenStarted(
     lifecycleOwner: LifecycleOwner,
-    collector: suspend (T) -> Unit
+    collector: suspend (T) -> Unit,
 ) {
     lifecycleOwner.lifecycleScope.launch {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -36,7 +34,7 @@ fun <T> Flow<T>.collectWhenStarted(
 
 fun <T> Flow<T>.collectWhenResumed(
     lifecycleOwner: LifecycleOwner,
-    collector: suspend (T) -> Unit
+    collector: suspend (T) -> Unit,
 ) {
     lifecycleOwner.lifecycleScope.launch {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {

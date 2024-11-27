@@ -1,4 +1,4 @@
-package studio.astroturf.quizzi.ui.screen.game
+package studio.astroturf.quizzi.ui.screen.game.composables.roundend
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -26,48 +26,53 @@ fun RoundResultOverlay(
     correctAnswerText: String,
     winnerName: String?,
     isWinner: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
         visible = true,
         enter = fadeIn() + slideInHorizontally(),
-        modifier = modifier
+        modifier = modifier,
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.7f)),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.7f)),
+            contentAlignment = Alignment.Center,
         ) {
             Surface(
                 modifier = Modifier.padding(32.dp),
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Text(
                         text = "Doğru Cevap:",
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
 
                     Text(
                         text = correctAnswerText,
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
 
                     if (winnerName != null) {
                         Text(
-                            text = if (isWinner) "Tebrikler! Bu eli kazandınız!"
-                            else "$winnerName bu eli kazandı!",
+                            text =
+                                if (isWinner) {
+                                    "Tebrikler! Bu eli kazandınız!"
+                                } else {
+                                    "$winnerName bu eli kazandı!"
+                                },
                             style = MaterialTheme.typography.titleMedium,
-                            color = if (isWinner) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
+                            color = if (isWinner) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }

@@ -35,7 +35,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://quizzi-production-16a0.up.railway.app\""
+                "\"https://quizzi-production-16a0.up.railway.app\"",
             )
         }
         create("dev") {
@@ -57,11 +57,9 @@ dependencies {
     implementation(libs.kotlinx.serialization)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
-    implementation(libs.timber)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)
-
 }

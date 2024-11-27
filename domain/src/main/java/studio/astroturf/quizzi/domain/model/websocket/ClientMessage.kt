@@ -4,18 +4,18 @@ sealed class ClientMessage {
     data object CreateRoom : ClientMessage()
 
     data class JoinRoom(
-        val roomId: String
+        val roomId: String,
     ) : ClientMessage()
 
     data class PlayerReady(
-        val playerId: String
+        val playerId: String,
     ) : ClientMessage()
 
     data class PlayerAnswer(
-        val answer: Int
+        val answer: Int,
     ) : ClientMessage()
 
     data class PlayerReconnected(
-        val playerId: String
+        val playerId: String,
     ) : ClientMessage()
 } 

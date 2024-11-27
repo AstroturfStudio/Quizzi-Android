@@ -11,18 +11,18 @@ import kotlinx.coroutines.flow.Flow
 fun <T> Flow<T>.collectAsStateWithLifecycle(
     lifecycle: Lifecycle = LocalLifecycleOwner.current.lifecycle,
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-    initial: T
-): State<T> {
-    return remember(this, lifecycle) {
+    initial: T,
+): State<T> =
+    remember(this, lifecycle) {
         flowWithLifecycle(lifecycle, minActiveState)
     }.collectAsState(initial)
-}
 
 @Composable
 fun <T> rememberFlowWithLifecycle(
     flow: Flow<T>,
     lifecycle: Lifecycle = LocalLifecycleOwner.current.lifecycle,
-    minActiveState: Lifecycle.State = Lifecycle.State.STARTED
-): Flow<T> = remember(flow, lifecycle) {
-    flow.flowWithLifecycle(lifecycle, minActiveState)
-}
+    minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
+): Flow<T> =
+    remember(flow, lifecycle) {
+        flow.flowWithLifecycle(lifecycle, minActiveState)
+    }

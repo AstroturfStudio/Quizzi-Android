@@ -4,7 +4,7 @@ enum class RoomState {
     WAITING,
     COUNTDOWN,
     PLAYING,
-    PAUSED,    // Yeni durum
+    PAUSED,
     ROUND_END,
-    FINISHED
-} 
+    FINISHED,
+}

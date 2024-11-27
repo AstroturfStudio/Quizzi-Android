@@ -17,34 +17,34 @@ fun Context.updateLocale(locale: Locale): Context {
     }
 }
 
-fun Context.isRTL(): Boolean {
-    return resources.configuration.layoutDirection ==
-            Configuration.SCREENLAYOUT_LAYOUTDIR_RTL
-}
+fun Context.isRTL(): Boolean =
+    resources.configuration.layoutDirection ==
+        Configuration.SCREENLAYOUT_LAYOUTDIR_RTL
 
-fun Context.getCurrentLocale(): Locale {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+fun Context.getCurrentLocale(): Locale =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         resources.configuration.locales[0]
     } else {
         @Suppress("DEPRECATION")
         resources.configuration.locale
     }
-}
 
 fun String.localizeNumber(locale: Locale = Locale.getDefault()): String {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        val formatter = android.icu.text.NumberFormat.getInstance(locale)
+        val formatter =
+            android.icu.text.NumberFormat
+                .getInstance(locale)
         formatter.format(this.toLongOrNull() ?: return this)
     } else {
         java.text.NumberFormat.getInstance(locale).format(
-            this.toLongOrNull() ?: return this
+            this.toLongOrNull() ?: return this,
         )
     }
 }
 
 fun Context.getLocalizedString(
     resourceId: Int,
-    locale: Locale
+    locale: Locale,
 ): String {
     val configuration = Configuration(resources.configuration)
     configuration.setLocale(locale)

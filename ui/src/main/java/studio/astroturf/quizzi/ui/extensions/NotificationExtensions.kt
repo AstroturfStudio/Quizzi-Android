@@ -15,19 +15,20 @@ data class NotificationConfig(
     val channelName: String,
     val channelDescription: String,
     val importance: Int = NotificationManager.IMPORTANCE_DEFAULT,
-    val showBadge: Boolean = true
+    val showBadge: Boolean = true,
 )
 
 fun Context.createNotificationChannel(config: NotificationConfig) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val channel = NotificationChannel(
-            config.channelId,
-            config.channelName,
-            config.importance
-        ).apply {
-            description = config.channelDescription
-            setShowBadge(config.showBadge)
-        }
+        val channel =
+            NotificationChannel(
+                config.channelId,
+                config.channelName,
+                config.importance,
+            ).apply {
+                description = config.channelDescription
+                setShowBadge(config.showBadge)
+            }
 
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -42,26 +43,29 @@ fun Context.showSimpleNotification(
     content: String,
     notificationId: Int,
     intent: Intent? = null,
-    priority: Int = NotificationCompat.PRIORITY_DEFAULT
+    priority: Int = NotificationCompat.PRIORITY_DEFAULT,
 ) {
-    val pendingIntent = intent?.let {
-        PendingIntent.getActivity(
-            this,
-            0,
-            it,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-    }
-
-    val builder = NotificationCompat.Builder(this, channelId)
-        .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle(title)
-        .setContentText(content)
-        .setPriority(priority)
-        .setAutoCancel(true)
-        .apply {
-            pendingIntent?.let { setContentIntent(it) }
+    val pendingIntent =
+        intent?.let {
+            PendingIntent.getActivity(
+                this,
+                0,
+                it,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
         }
+
+    val builder =
+        NotificationCompat
+            .Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setPriority(priority)
+            .setAutoCancel(true)
+            .apply {
+                pendingIntent?.let { setContentIntent(it) }
+            }
 
     NotificationManagerCompat.from(this).notify(notificationId, builder.build())
 }
@@ -72,15 +76,17 @@ fun Context.showBigTextNotification(
     title: String,
     content: String,
     bigText: String,
-    notificationId: Int
+    notificationId: Int,
 ) {
-    val builder = NotificationCompat.Builder(this, channelId)
-        .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle(title)
-        .setContentText(content)
-        .setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setAutoCancel(true)
+    val builder =
+        NotificationCompat
+            .Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
 
     NotificationManagerCompat.from(this).notify(notificationId, builder.build())
 }
@@ -93,15 +99,17 @@ fun Context.showProgressNotification(
     progress: Int,
     max: Int,
     notificationId: Int,
-    indeterminate: Boolean = false
+    indeterminate: Boolean = false,
 ) {
-    val builder = NotificationCompat.Builder(this, channelId)
-        .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle(title)
-        .setContentText(content)
-        .setPriority(NotificationCompat.PRIORITY_LOW)
-        .setOngoing(true)
-        .setProgress(max, progress, indeterminate)
+    val builder =
+        NotificationCompat
+            .Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setProgress(max, progress, indeterminate)
 
     NotificationManagerCompat.from(this).notify(notificationId, builder.build())
 }
@@ -113,19 +121,21 @@ fun Context.showImageNotification(
     content: String,
     largeIcon: Bitmap,
     bigPicture: Bitmap,
-    notificationId: Int
+    notificationId: Int,
 ) {
-    val builder = NotificationCompat.Builder(this, channelId)
-        .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle(title)
-        .setContentText(content)
-        .setLargeIcon(largeIcon)
-        .setStyle(
-            NotificationCompat.BigPictureStyle()
-                .bigPicture(bigPicture)
-        )
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setAutoCancel(true)
+    val builder =
+        NotificationCompat
+            .Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setLargeIcon(largeIcon)
+            .setStyle(
+                NotificationCompat
+                    .BigPictureStyle()
+                    .bigPicture(bigPicture),
+            ).setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
 
     NotificationManagerCompat.from(this).notify(notificationId, builder.build())
 }
@@ -136,29 +146,33 @@ fun Context.showActionNotification(
     title: String,
     content: String,
     notificationId: Int,
-    vararg actions: NotificationAction
+    vararg actions: NotificationAction,
 ) {
-    val builder = NotificationCompat.Builder(this, channelId)
-        .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle(title)
-        .setContentText(content)
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setAutoCancel(true)
+    val builder =
+        NotificationCompat
+            .Builder(this, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
 
     actions.forEach { action ->
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            action.requestCode,
-            action.intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        val pendingIntent =
+            PendingIntent.getBroadcast(
+                this,
+                action.requestCode,
+                action.intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
 
         builder.addAction(
-            NotificationCompat.Action.Builder(
-                action.icon,
-                action.title,
-                pendingIntent
-            ).build()
+            NotificationCompat.Action
+                .Builder(
+                    action.icon,
+                    action.title,
+                    pendingIntent,
+                ).build(),
         )
     }
 
@@ -169,7 +183,7 @@ data class NotificationAction(
     val icon: IconCompat,
     val title: String,
     val intent: Intent,
-    val requestCode: Int
+    val requestCode: Int,
 )
 
 fun Context.cancelNotification(notificationId: Int) {

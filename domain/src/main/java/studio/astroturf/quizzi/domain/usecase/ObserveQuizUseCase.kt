@@ -7,9 +7,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ObserveQuizUseCase @Inject constructor(
-    private val repository: QuizRepository
-) {
-    operator fun invoke(): Flow<ServerMessage> =
-        repository.observeMessages()
-} 
+class ObserveQuizUseCase
+    @Inject
+    constructor(
+        private val repository: QuizRepository,
+    ) {
+        operator fun invoke(): Flow<ServerMessage> = repository.observeMessages()
+}

@@ -16,24 +16,24 @@ sealed class ClientSocketMessage {
     @Serializable
     @SerialName("JoinRoom")
     data class JoinRoom(
-        val roomId: String
+        val roomId: String,
     ) : ClientSocketMessage()
 
     @Serializable
     @SerialName("PlayerReady")
     data class PlayerReady(
-        val playerId: String
+        val playerId: String,
     ) : ClientSocketMessage()
 
     @Serializable
     @SerialName("PlayerAnswer")
     data class PlayerAnswer(
-        val answer: Int
+        val answer: Int,
     ) : ClientSocketMessage()
 
     @Serializable
     @SerialName("PlayerReconnected")
     data class PlayerReconnected(
-        val playerId: String
+        val playerId: String,
     ) : ClientSocketMessage()
 } 

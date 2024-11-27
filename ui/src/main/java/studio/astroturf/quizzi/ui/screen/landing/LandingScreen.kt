@@ -26,7 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun LandingScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
-    onNavigateToRooms: () -> Unit
+    onNavigateToRooms: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -45,7 +45,7 @@ fun LandingScreen(
         },
         onLogin = { playerId ->
             viewModel.login(playerId)
-        }
+        },
     )
 }
 
@@ -55,27 +55,27 @@ fun LandingScreenContent(
     savedPlayerId: String? = null,
     error: String? = null,
     onCreatePlayer: (String, String) -> Unit = { _, _ -> },
-    onLogin: (String) -> Unit = { _ -> }
+    onLogin: (String) -> Unit = { _ -> },
 ) {
-
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         if (savedPlayerId != null) {
             Text(
                 text = "Welcome Back!",
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
             )
             Button(
                 onClick = { onLogin(savedPlayerId) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Continue Playing")
+                Text("Continue Play")
             }
         } else {
             var name by remember { mutableStateOf("") }
@@ -84,16 +84,17 @@ fun LandingScreenContent(
             Text(
                 text = "Welcome to Quizzi!",
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
             )
 
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Enter your name") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
             )
 
             Button(
@@ -101,12 +102,13 @@ fun LandingScreenContent(
                     onCreatePlayer(name, avatarUrl)
                     // Store player ID will be handled in ViewModel after successful creation
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                enabled = name.isNotBlank()
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                enabled = name.isNotBlank(),
             ) {
-                Text("Start Playing")
+                Text("Start Play")
             }
         }
 
@@ -114,7 +116,7 @@ fun LandingScreenContent(
             Text(
                 text = error,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 8.dp),
             )
         }
     }
@@ -133,7 +135,7 @@ fun LandingScreenPreview_NewUser() {
 fun LandingScreenPreview_ExistingUser() {
     MaterialTheme {
         LandingScreenContent(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }

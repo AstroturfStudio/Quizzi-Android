@@ -14,36 +14,42 @@ import toDomain
 import toDto
 import javax.inject.Inject
 
-class QuizRepositoryImpl @Inject constructor(
-    private val quizziWebSocketService: QuizziWebSocketService,
-    private val quizziApiService: QuizziApiService
-) : QuizRepository {
+class QuizRepositoryImpl
+    @Inject
+    constructor(
+        private val quizziWebSocketService: QuizziWebSocketService,
+        private val quizziApiService: QuizziApiService,
+    ) : QuizRepository {
+        private var currentPlayerDto: PlayerDto? = null
 
-    private var currentPlayerDto: PlayerDto? = null
+        override suspend fun login(playerId: String): Result<Player> =
+            quizziApiService
+                .login(playerId)
+                .onSuccess {
+                    currentPlayerDto = it
+                }.map { it.toDomain() }
 
-    override suspend fun login(playerId: String): Result<Player> =
-        quizziApiService.login(playerId).onSuccess {
-            currentPlayerDto = it
-        }.map { it.toDomain() }
+        override suspend fun createPlayer(
+            name: String,
+            avatarUrl: String,
+        ): Result<Player> =
+            quizziApiService
+                .createPlayer(name, avatarUrl)
+                .onSuccess {
+                    currentPlayerDto = it
+                }.map { it.toDomain() }
 
-    override suspend fun createPlayer(name: String, avatarUrl: String): Result<Player> =
-        quizziApiService.createPlayer(name, avatarUrl).onSuccess {
-            currentPlayerDto = it
-        }.map { it.toDomain() }
+        override suspend fun getRooms(): Result<List<GameRoom>> =
+            quizziApiService.getRooms().map { it.rooms.map { roomDto -> roomDto.toDomain() } }
 
-    override suspend fun getRooms(): Result<List<GameRoom>> =
-        quizziApiService.getRooms().map { it.rooms.map { roomDto -> roomDto.toDomain() } }
+        override fun connect() {
+            quizziWebSocketService.connect(currentPlayerDto?.id)
+        }
 
-    override fun connect() {
-        quizziWebSocketService.connect(currentPlayerDto?.id)
-    }
+        override fun observeMessages(): Flow<ServerMessage> = quizziWebSocketService.observeMessages().map { it.toDomain() }
 
-    override fun observeMessages(): Flow<ServerMessage> {
-        return quizziWebSocketService.observeMessages().map { it.toDomain() }
-    }
-
-    override fun sendMessage(message: ClientMessage) {
-        quizziWebSocketService.send(message.toDto())
+        override fun sendMessage(message: ClientMessage) {
+            quizziWebSocketService.send(message.toDto())
     }
 
     override fun disconnect() {

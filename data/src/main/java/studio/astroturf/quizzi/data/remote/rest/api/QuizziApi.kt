@@ -11,12 +11,12 @@ import studio.astroturf.quizzi.data.remote.websocket.model.PlayerDto
 interface QuizziApi {
     @POST("api/player/login")
     suspend fun login(
-        @Body request: LoginRequestDto
+        @Body request: LoginRequestDto,
     ): PlayerDto
 
     @POST("api/player/create")
     suspend fun createPlayer(
-        @Body request: CreatePlayerRequestDto
+        @Body request: CreatePlayerRequestDto,
     ): PlayerDto
 
     @GET("api/room/all")

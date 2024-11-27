@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 fun <T> ViewModel.safeLaunch(
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
     errorHandler: (Throwable) -> Unit = { },
-    block: suspend () -> T
+    block: suspend () -> T,
 ) = viewModelScope.launch(dispatcher) {
     try {
         block()

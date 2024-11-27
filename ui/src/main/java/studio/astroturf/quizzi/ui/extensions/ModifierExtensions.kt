@@ -12,44 +12,47 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
-    clickable(
-        indication = null,
-        interactionSource = remember { MutableInteractionSource() }
-    ) {
-        onClick()
+fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier =
+    composed {
+        clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+        ) {
+            onClick()
+        }
     }
-}
 
-fun Modifier.conditional(condition: Boolean, modifier: Modifier.() -> Modifier): Modifier {
-    return if (condition) {
+fun Modifier.conditional(
+    condition: Boolean,
+    modifier: Modifier.() -> Modifier,
+): Modifier =
+    if (condition) {
         then(modifier())
     } else {
         this
     }
-}
 
 fun Modifier.bottomBorder(
     strokeWidth: Dp = 1.dp,
-    color: Color = Color.Gray
+    color: Color = Color.Gray,
 ) = drawBehind {
     drawLine(
         color = color,
         start = Offset(0f, size.height),
         end = Offset(size.width, size.height),
-        strokeWidth = strokeWidth.toPx()
+        strokeWidth = strokeWidth.toPx(),
     )
 }
 
 fun Modifier.topBorder(
     strokeWidth: Dp = 1.dp,
-    color: Color = Color.Gray
+    color: Color = Color.Gray,
 ) = drawBehind {
     drawLine(
         color = color,
         start = Offset(0f, 0f),
         end = Offset(size.width, 0f),
-        strokeWidth = strokeWidth.toPx()
+        strokeWidth = strokeWidth.toPx(),
     )
 }
 
@@ -59,9 +62,9 @@ fun Modifier.debugBorder(color: Color = Color.Red) = border(1.dp, color)
 
 fun Modifier.circularBorder(
     color: Color,
-    strokeWidth: Dp = 1.dp
+    strokeWidth: Dp = 1.dp,
 ) = border(
     width = strokeWidth,
     color = color,
-    shape = CircleShape
+    shape = CircleShape,
 )

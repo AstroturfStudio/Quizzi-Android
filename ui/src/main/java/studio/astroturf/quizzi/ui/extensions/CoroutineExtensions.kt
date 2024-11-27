@@ -14,17 +14,18 @@ import kotlin.coroutines.EmptyCoroutineContext
 suspend fun <T> withTimeout(
     timeMillis: Long,
     defaultValue: T,
-    block: suspend () -> T
-): T = try {
-    kotlinx.coroutines.withTimeout(timeMillis) { block() }
-} catch (e: TimeoutCancellationException) {
-    defaultValue
-}
+    block: suspend () -> T,
+): T =
+    try {
+        kotlinx.coroutines.withTimeout(timeMillis) { block() }
+    } catch (e: TimeoutCancellationException) {
+        defaultValue
+    }
 
 fun CoroutineScope.launchPeriodicAsync(
     delayMillis: Long,
     initialDelayMillis: Long = 0L,
-    action: suspend () -> Unit
+    action: suspend () -> Unit,
 ) = async {
     delay(initialDelayMillis)
     while (isActive) {
@@ -38,7 +39,7 @@ suspend fun <T> retryWithExponentialBackoff(
     initialDelayMillis: Long = 100,
     maxDelayMillis: Long = 1000,
     factor: Double = 2.0,
-    block: suspend () -> T
+    block: suspend () -> T,
 ): T {
     var currentDelay = initialDelayMillis
     repeat(times - 1) { attempt ->
@@ -55,30 +56,31 @@ suspend fun <T> retryWithExponentialBackoff(
 fun <T> Flow<T>.throttleLatest(
     windowDuration: Long = 1000L,
     scope: CoroutineScope,
-    context: CoroutineContext = EmptyCoroutineContext
-): Flow<T> = channelFlow {
-    val events = Channel<T>(Channel.CONFLATED)
+    context: CoroutineContext = EmptyCoroutineContext,
+): Flow<T> =
+    channelFlow {
+        val events = Channel<T>(Channel.CONFLATED)
 
-    launch(context) {
-        var lastValue: T? = null
-        while (isActive) {
-            delay(windowDuration)
-            lastValue?.let { send(it) }
-            lastValue = null
+        launch(context) {
+            var lastValue: T? = null
+            while (isActive) {
+                delay(windowDuration)
+                lastValue?.let { send(it) }
+                lastValue = null
+            }
         }
-    }
 
-    collect { value ->
-        events.send(value)
-    }
-}.flowOn(context)
+        collect { value ->
+            events.send(value)
+        }
+    }.flowOn(context)
 
 suspend fun <T> withRetry(
     times: Int = 3,
     initialDelay: Long = 100,
     maxDelay: Long = 1000,
     factor: Double = 2.0,
-    block: suspend () -> T
+    block: suspend () -> T,
 ): T {
     var currentDelay = initialDelay
     repeat(times - 1) {
