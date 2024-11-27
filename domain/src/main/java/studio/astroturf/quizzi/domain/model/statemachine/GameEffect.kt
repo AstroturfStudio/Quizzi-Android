@@ -8,6 +8,7 @@ sealed interface GameEffect {
     data class ShowTimeRemaining(val timeRemaining: Long) : GameEffect
     data class ShowError(val message: String) : GameEffect
     data class RoundUpdate(val message: ServerMessage.RoundUpdate) : GameEffect
+    data class RoundTimeUp(val message: ServerMessage.TimeUp) : GameEffect
     data class ReceiveAnswerResult(val answerResult: ServerMessage.AnswerResult) : GameEffect
     data class PlayerDisconnected(val message: ServerMessage.PlayerDisconnected) : GameEffect
     data class PlayerReconnected(val message: ServerMessage.PlayerReconnected) : GameEffect

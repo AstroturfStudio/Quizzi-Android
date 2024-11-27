@@ -142,17 +142,6 @@ class GameStateMachine(
                 )
             }
 
-            is GameIntent.RoundTimeUp -> {
-                val correctAnswer =
-                    currentState.currentQuestion.options[intent.message.correctAnswer]
-
-                GameState.EndOfRound(
-                    cursorPosition = currentState.cursorPosition,
-                    correctAnswer = correctAnswer,
-                    winnerPlayer = null
-                )
-            }
-
             else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is RoundOn")
         }
     }

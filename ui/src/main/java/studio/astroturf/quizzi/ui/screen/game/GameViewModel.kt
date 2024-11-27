@@ -99,6 +99,8 @@ class GameViewModel @Inject constructor(
             is RoomCreated -> gsm.sideEffect(GameEffect.RoomCreated(message))
             is RoomJoined -> gsm.sideEffect(GameEffect.RoomJoined(message))
             is RoundUpdate -> gsm.sideEffect(GameEffect.RoundUpdate(message))
+            is TimeUp -> gsm.sideEffect(GameEffect.RoundTimeUp(message))
+
 
             // intents
             is Countdown -> gsm.reduce(GameIntent.Countdown(message))
@@ -113,7 +115,6 @@ class GameViewModel @Inject constructor(
             }
 
             is RoundEnded -> gsm.reduce(GameIntent.RoundEnd(message))
-            is TimeUp -> gsm.reduce(GameIntent.RoundTimeUp(message))
             is GameOver -> gsm.reduce(GameIntent.GameOver(message))
             is RoomClosed -> gsm.reduce(GameIntent.CloseRoom(message))
         }
@@ -167,6 +168,10 @@ class GameViewModel @Inject constructor(
             }
 
             is GameEffect.ShowToast -> {
+
+            }
+
+            is GameEffect.RoundTimeUp -> {
 
             }
         }
