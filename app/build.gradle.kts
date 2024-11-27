@@ -44,7 +44,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -58,7 +58,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://quizzi-production-16a0.up.railway.app\""
+                "\"https://quizzi-production-16a0.up.railway.app\"",
             )
         }
         create("dev") {
@@ -106,6 +106,4 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
-
-
 }

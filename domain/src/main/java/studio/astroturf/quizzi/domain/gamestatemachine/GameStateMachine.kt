@@ -32,18 +32,15 @@ import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.TimeUpdate
 import timber.log.Timber
 
 class GameStateMachine(
-    val coroutineScope: CoroutineScope
+    val coroutineScope: CoroutineScope,
 ) : StateMachine<GameState, GameIntent, GameEffect> {
-
     private val _currentStateFlow = MutableStateFlow<GameState>(GameState.Idle)
     val stateFlow = _currentStateFlow.asStateFlow()
 
     private val _effectChannel = Channel<GameEffect>()
     val effectFlow = _effectChannel.receiveAsFlow()
 
-    override fun getCurrentState(): GameState {
-        return _currentStateFlow.value
-    }
+    override fun getCurrentState(): GameState = _currentStateFlow.value
 
     override fun sideEffect(effect: GameEffect) {
         coroutineScope.launch {
@@ -54,21 +51,25 @@ class GameStateMachine(
     override fun reduce(intent: GameIntent) {
         val currentState = getCurrentState()
 
-        val newState = when (currentState) {
-            GameState.Idle -> reduceIdleState(currentState, intent)
-            is GameState.Lobby -> reduceLobbyState(currentState, intent)
-            is GameState.Starting -> reduceStartingState(currentState, intent)
-            is GameState.RoundOn -> reduceRoundOnState(currentState, intent)
-            is GameState.Paused -> reducePausedState(currentState, intent)
-            is GameState.EndOfRound -> reduceEndOfRoundState(currentState, intent)
-            is GameState.GameOver -> reduceGameOverState(currentState, intent)
-        }
+        val newState =
+            when (currentState) {
+                GameState.Idle -> reduceIdleState(currentState, intent)
+                is GameState.Lobby -> reduceLobbyState(currentState, intent)
+                is GameState.Starting -> reduceStartingState(currentState, intent)
+                is GameState.RoundOn -> reduceRoundOnState(currentState, intent)
+                is GameState.Paused -> reducePausedState(currentState, intent)
+                is GameState.EndOfRound -> reduceEndOfRoundState(currentState, intent)
+                is GameState.GameOver -> reduceGameOverState(currentState, intent)
+            }
 
         _currentStateFlow.value = newState
     }
 
-    private fun reduceIdleState(currentState: GameState, intent: GameIntent): GameState {
-        return when (intent) {
+    private fun reduceIdleState(
+        currentState: GameState,
+        intent: GameIntent,
+    ): GameState =
+        when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
 
@@ -76,16 +77,18 @@ class GameStateMachine(
                 // TODO: Idle'da WAITING gelirse roomId lazım mı
                 GameState.Lobby(
                     roomId = intent.message.toString(),
-                    players = intent.message.players
+                    players = intent.message.players,
                 )
             }
 
             else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is Idle")
         }
-    }
 
-    private fun reduceLobbyState(currentState: GameState.Lobby, intent: GameIntent): GameState {
-        return when (intent) {
+    private fun reduceLobbyState(
+        currentState: GameState.Lobby,
+        intent: GameIntent,
+    ): GameState =
+        when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
 
@@ -99,13 +102,12 @@ class GameStateMachine(
 
             else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is Lobby")
         }
-    }
 
     private fun reduceStartingState(
         currentState: GameState.Starting,
-        intent: GameIntent
-    ): GameState {
-        return when (intent) {
+        intent: GameIntent,
+    ): GameState =
+        when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
 
@@ -126,10 +128,12 @@ class GameStateMachine(
 
             else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is Starting")
         }
-    }
 
-    private fun reduceRoundOnState(currentState: GameState.RoundOn, intent: GameIntent): GameState {
-        return when (intent) {
+    private fun reduceRoundOnState(
+        currentState: GameState.RoundOn,
+        intent: GameIntent,
+    ): GameState =
+        when (intent) {
             GameIntent.ExitGame -> {
                 sideEffect(GameEffect.NavigateTo(Destination.Rooms))
                 getCurrentState()
@@ -138,11 +142,12 @@ class GameStateMachine(
             is GameIntent.GameOver -> {
                 GameState.GameOver(
                     winner = currentState.players.first { it.id == intent.message.winnerPlayerId },
-                    statistics = GameStatistics(
-                        roundCount = 10,
-                        averageResponseTimeMillis = mapOf(),
-                        totalGameLengthMillis = 10
-                    )
+                    statistics =
+                        GameStatistics(
+                            roundCount = 10,
+                            averageResponseTimeMillis = mapOf(),
+                            totalGameLengthMillis = 10,
+                        ),
                 )
             }
 
@@ -155,16 +160,18 @@ class GameStateMachine(
                 GameState.EndOfRound(
                     cursorPosition = intent.message.cursorPosition,
                     correctAnswer = correctAnswer,
-                    winnerPlayer = winner
+                    winnerPlayer = winner,
                 )
             }
 
             else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is RoundOn")
         }
-    }
 
-    private fun reducePausedState(currentState: GameState.Paused, intent: GameIntent): GameState {
-        return when (intent) {
+    private fun reducePausedState(
+        currentState: GameState.Paused,
+        intent: GameIntent,
+    ): GameState =
+        when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
 
@@ -179,29 +186,31 @@ class GameStateMachine(
 
             else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is Paused")
         }
-    }
 
     private fun reduceEndOfRoundState(
         currentState: GameState.EndOfRound,
-        intent: GameIntent
-    ): GameState {
-        return when (intent) {
+        intent: GameIntent,
+    ): GameState =
+        when (intent) {
             is GameIntent.CloseRoom -> TODO()
             GameIntent.ExitGame -> TODO()
 
             is GameIntent.GameOver -> {
                 val winnerPlayerId = intent.message.winnerPlayerId
                 GameState.GameOver(
-                    winner = Player( // FIXME: currentState.players.first { it.id == intent.message.winnerPlayerId } olmasi lazim
-                        id = winnerPlayerId,
-                        name = intent.message.winnerPlayerId,
-                        avatarUrl = ""
+                    winner =
+                        Player(
+                            // FIXME: currentState.players.first { it.id == intent.message.winnerPlayerId } olmasi lazim
+                            id = winnerPlayerId,
+                            name = intent.message.winnerPlayerId,
+                            avatarUrl = "",
+                        ),
+                    statistics =
+                        GameStatistics(
+                            roundCount = 10,
+                            averageResponseTimeMillis = mapOf(),
+                            totalGameLengthMillis = 10,
                     ),
-                    statistics = GameStatistics(
-                        roundCount = 10,
-                        averageResponseTimeMillis = mapOf(),
-                        totalGameLengthMillis = 10
-                    )
                 )
             }
 
@@ -216,14 +225,12 @@ class GameStateMachine(
 
             else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is EndOfRound")
         }
-    }
-
 
     private fun reduceGameOverState(
         currentState: GameState.GameOver,
-        intent: GameIntent
-    ): GameState {
-        return when (intent) {
+        intent: GameIntent,
+    ): GameState =
+        when (intent) {
             GameIntent.ExitGame -> {
                 sideEffect(GameEffect.NavigateTo(Destination.Rooms))
                 GameState.Idle
@@ -236,7 +243,6 @@ class GameStateMachine(
 
             else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is GameOver")
         }
-    }
 
     fun processServerMessage(message: ServerMessage) {
         when (message) {
@@ -250,7 +256,6 @@ class GameStateMachine(
             is RoomJoined -> sideEffect(GameEffect.RoomJoined(message))
             is RoundUpdate -> sideEffect(GameEffect.RoundUpdate(message))
             is TimeUp -> sideEffect(GameEffect.RoundTimeUp(message))
-
 
             // intents
             is Countdown -> reduce(GameIntent.Countdown(message))

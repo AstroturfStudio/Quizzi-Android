@@ -9,11 +9,11 @@ sealed interface GameUiState {
     data class Lobby(
         val roomName: String,
         val creator: Player,
-        val challenger: Player?
+        val challenger: Player?,
     ) : GameUiState
 
     data class Starting(
-        val timeRemainingInSeconds: Int
+        val timeRemainingInSeconds: Int,
     ) : GameUiState
 
     data class RoundOn(
@@ -23,29 +23,28 @@ sealed interface GameUiState {
         val question: Question,
         val timeRemainingInSeconds: Int,
         val selectedAnswerId: Int? = null,
-        val playerRoundResult: PlayerRoundResult? = null
+        val playerRoundResult: PlayerRoundResult? = null,
     ) : GameUiState {
         data class PlayerRoundResult(
             val answerId: Int,
-            val isCorrect: Boolean
+            val isCorrect: Boolean,
         )
     }
 
     data class Paused(
         val reason: String,
-        val onlinePlayers: List<Player>
+        val onlinePlayers: List<Player>,
     ) : GameUiState
 
     data class RoundEnd(
         val roundNo: Int,
         val roundWinner: Player?,
         val correctAnswerValue: String,
-        val newCursorPosition: Float
+        val newCursorPosition: Float,
     ) : GameUiState
 
     data class GameOver(
         val totalRoundCount: Int,
-        val winner: Player
+        val winner: Player,
     ) : GameUiState
 }
-

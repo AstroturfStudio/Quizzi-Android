@@ -22,33 +22,35 @@ import studio.astroturf.quizzi.domain.model.Question
 @Composable
 internal fun QuestionContent(
     question: Question?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
                 text = question?.content ?: "",
                 style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
 
             AsyncImage(
                 model = question?.imageUrl,
                 contentDescription = "Question Image",
                 contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(280.dp)
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .size(280.dp)
+                        .padding(16.dp),
             )
         }
     }

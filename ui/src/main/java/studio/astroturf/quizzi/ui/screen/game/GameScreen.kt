@@ -32,7 +32,7 @@ fun GameScreen(
     onShowError: (String) -> Unit,
     onShowToast: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: GameViewModel = hiltViewModel()
+    viewModel: GameViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -40,7 +40,7 @@ fun GameScreen(
         state = uiState,
         onNavigateToRooms = onNavigateToRooms,
         onSubmitAnswer = viewModel::submitAnswer,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -49,31 +49,30 @@ private fun GameScreenContent(
     state: GameUiState,
     onNavigateToRooms: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         AnimatedContent(
             targetState = state.toAnimationKey(),
             transitionSpec = { getTransitionSpec(targetState, initialState) },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) { stateKey ->
             GameStateContent(
                 currentState = state,
                 stateKey = stateKey,
                 onNavigateToRooms = onNavigateToRooms,
-                onSubmitAnswer = onSubmitAnswer
+                onSubmitAnswer = onSubmitAnswer,
             )
         }
     }
 }
-
 
 @Composable
 private fun GameStateContent(
     currentState: GameUiState,
     stateKey: GameStateAnimationKey,
     onNavigateToRooms: () -> Unit,
-    onSubmitAnswer: (Int) -> Unit
+    onSubmitAnswer: (Int) -> Unit,
 ) {
     when {
         stateKey == GameStateAnimationKey.IDLE -> LoadingIndicator()
@@ -82,20 +81,20 @@ private fun GameStateContent(
             LobbyContent(
                 roomName = currentState.roomName,
                 creator = currentState.creator,
-                challenger = currentState.challenger
+                challenger = currentState.challenger,
             )
         }
 
         stateKey == GameStateAnimationKey.STARTING && currentState is GameUiState.Starting -> {
             CountdownOverlay(
-                countdown = currentState.timeRemainingInSeconds
+                countdown = currentState.timeRemainingInSeconds,
             )
         }
 
         stateKey == GameStateAnimationKey.ROUND && currentState is GameUiState.RoundOn -> {
             GameRoundContent(
                 state = currentState,
-                onSubmitAnswer = onSubmitAnswer
+                onSubmitAnswer = onSubmitAnswer,
             )
         }
 
@@ -103,7 +102,7 @@ private fun GameStateContent(
             GameOverContent(
                 winner = currentState.winner,
                 totalRounds = currentState.totalRoundCount,
-                onNavigateBack = onNavigateToRooms
+                onNavigateBack = onNavigateToRooms,
             )
         }
 
@@ -111,7 +110,7 @@ private fun GameStateContent(
             PausedContent(
                 reason = currentState.reason,
                 onlinePlayers = currentState.onlinePlayers,
-                onRetry = {}
+                onRetry = {},
             )
         }
 
@@ -119,7 +118,7 @@ private fun GameStateContent(
             RoundResultOverlay(
                 correctAnswerText = currentState.correctAnswerValue,
                 winnerName = currentState.roundWinner?.name ?: "kimse",
-                isWinner = Random.nextBoolean() // fixme
+                isWinner = Random.nextBoolean(), // fixme
             )
         }
 
@@ -128,34 +127,43 @@ private fun GameStateContent(
 }
 
 private enum class GameStateAnimationKey {
-    IDLE, LOBBY, STARTING, ROUND, GAME_OVER, PAUSED, ROUND_END
+    IDLE,
+    LOBBY,
+    STARTING,
+    ROUND,
+    GAME_OVER,
+    PAUSED,
+    ROUND_END,
 }
 
-private fun GameUiState.toAnimationKey(): GameStateAnimationKey = when (this) {
-    is GameUiState.Idle -> GameStateAnimationKey.IDLE
-    is GameUiState.Lobby -> GameStateAnimationKey.LOBBY
-    is GameUiState.Starting -> GameStateAnimationKey.STARTING
-    is GameUiState.RoundOn -> GameStateAnimationKey.ROUND
-    is GameUiState.GameOver -> GameStateAnimationKey.GAME_OVER
-    is GameUiState.Paused -> GameStateAnimationKey.PAUSED
-    is GameUiState.RoundEnd -> GameStateAnimationKey.ROUND_END
-}
+private fun GameUiState.toAnimationKey(): GameStateAnimationKey =
+    when (this) {
+        is GameUiState.Idle -> GameStateAnimationKey.IDLE
+        is GameUiState.Lobby -> GameStateAnimationKey.LOBBY
+        is GameUiState.Starting -> GameStateAnimationKey.STARTING
+        is GameUiState.RoundOn -> GameStateAnimationKey.ROUND
+        is GameUiState.GameOver -> GameStateAnimationKey.GAME_OVER
+        is GameUiState.Paused -> GameStateAnimationKey.PAUSED
+        is GameUiState.RoundEnd -> GameStateAnimationKey.ROUND_END
+    }
 
 private fun getTransitionSpec(
     targetState: GameStateAnimationKey,
-    initialState: GameStateAnimationKey
-): ContentTransform {
-    return when (targetState) {
-        GameStateAnimationKey.GAME_OVER -> (slideInVertically { height -> height } + fadeIn())
-            .togetherWith(slideOutVertically { height -> -height } + fadeOut())
+    initialState: GameStateAnimationKey,
+): ContentTransform =
+    when (targetState) {
+        GameStateAnimationKey.GAME_OVER ->
+            (slideInVertically { height -> height } + fadeIn())
+                .togetherWith(slideOutVertically { height -> -height } + fadeOut())
 
-        GameStateAnimationKey.ROUND -> when (initialState) {
-            GameStateAnimationKey.STARTING -> (expandVertically() + fadeIn())
-                .togetherWith(shrinkVertically() + fadeOut())
+        GameStateAnimationKey.ROUND ->
+            when (initialState) {
+                GameStateAnimationKey.STARTING ->
+                    (expandVertically() + fadeIn())
+                        .togetherWith(shrinkVertically() + fadeOut())
 
-            else -> fadeIn() togetherWith fadeOut()
-        }
+                else -> fadeIn() togetherWith fadeOut()
+            }
 
         else -> fadeIn() togetherWith fadeOut()
     }
-}

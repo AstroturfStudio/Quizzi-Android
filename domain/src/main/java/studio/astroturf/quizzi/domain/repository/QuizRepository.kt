@@ -7,12 +7,11 @@ import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
 
 interface QuizRepository {
-
     suspend fun login(playerId: String): Result<Player>
 
     suspend fun createPlayer(
         name: String,
-        avatarUrl: String
+        avatarUrl: String,
     ): Result<Player>
 
     suspend fun getRooms(): Result<List<GameRoom>>

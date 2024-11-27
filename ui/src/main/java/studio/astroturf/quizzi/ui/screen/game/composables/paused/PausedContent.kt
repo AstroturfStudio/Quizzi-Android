@@ -10,7 +10,7 @@ import studio.astroturf.quizzi.domain.model.Player
 internal fun PausedContent(
     reason: String,
     onlinePlayers: List<Player>,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
 ) {
     Column(/*...*/) {
         Text(reason)

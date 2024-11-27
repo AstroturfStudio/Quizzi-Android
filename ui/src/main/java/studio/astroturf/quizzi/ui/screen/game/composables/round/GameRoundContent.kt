@@ -22,20 +22,21 @@ import studio.astroturf.quizzi.ui.theme.QuizziTheme
 @Composable
 internal fun GameRoundContent(
     state: GameUiState.RoundOn,
-    onSubmitAnswer: (Int) -> Unit
+    onSubmitAnswer: (Int) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .systemBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .systemBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // GameTopBar needs specific height constraints
         Box(modifier = Modifier.height(56.dp)) {
             GameTopBar(
                 timeRemaining = state.timeRemainingInSeconds,
-                cursorPosition = 1 - state.gameBarPercentage // fixme
+                cursorPosition = 1 - state.gameBarPercentage, // fixme
             )
         }
 
@@ -44,7 +45,7 @@ internal fun GameRoundContent(
         // Question takes remaining available space
         QuestionContent(
             question = state.question,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -55,7 +56,7 @@ internal fun GameRoundContent(
             selectedAnswerId = state.selectedAnswerId,
             playerRoundResult = state.playerRoundResult,
             onAnswerSelected = onSubmitAnswer,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp),
         )
     }
 }
@@ -65,33 +66,38 @@ internal fun GameRoundContent(
 private fun GameRoundContentPreview() {
     QuizziTheme {
         GameRoundContent(
-            state = GameUiState.RoundOn(
-                player1 = Player(
-                    id = "1",
-                    name = "Player 1",
-                    avatarUrl = "TODO()"
-                ),
-                player2 = Player(
-                    id = "2",
-                    name = "Player 2",
-                    avatarUrl = "TODO()"
-                ),
-                gameBarPercentage = 0.7f,
-                question = Question(
-                    content = "What is the capital of France?",
-                    imageUrl = "https://example.com/paris.jpg",
-                    options = listOf(
-                        Option(id = 1, value = "Paris"),
-                        Option(id = 2, value = "London"),
-                        Option(id = 3, value = "Berlin"),
-                        Option(id = 4, value = "Madrid")
-                    )
+            state =
+                GameUiState.RoundOn(
+                    player1 =
+                        Player(
+                            id = "1",
+                            name = "Player 1",
+                            avatarUrl = "TODO()",
+                        ),
+                    player2 =
+                        Player(
+                            id = "2",
+                            name = "Player 2",
+                            avatarUrl = "TODO()",
+                        ),
+                    gameBarPercentage = 0.7f,
+                    question =
+                        Question(
+                            content = "What is the capital of France?",
+                            imageUrl = "https://example.com/paris.jpg",
+                            options =
+                                listOf(
+                                    Option(id = 1, value = "Paris"),
+                                    Option(id = 2, value = "London"),
+                                    Option(id = 3, value = "Berlin"),
+                                    Option(id = 4, value = "Madrid"),
+                                ),
                 ),
                 timeRemainingInSeconds = 14,
                 selectedAnswerId = null,
-                playerRoundResult = null
+                playerRoundResult = null,
             ),
-            onSubmitAnswer = {}
+            onSubmitAnswer = {},
         )
     }
 }
@@ -101,33 +107,38 @@ private fun GameRoundContentPreview() {
 private fun GameRoundContentWithSelectedAnswerPreview() {
     QuizziTheme {
         GameRoundContent(
-            state = GameUiState.RoundOn(
-                player1 = Player(
-                    id = "1",
-                    name = "Player 1",
-                    avatarUrl = "TODO()"
-                ),
-                player2 = Player(
-                    id = "2",
-                    name = "Player 2",
-                    avatarUrl = "TODO()"
-                ),
-                gameBarPercentage = 0.7f,
-                question = Question(
-                    content = "What is the capital of France?",
-                    imageUrl = "https://example.com/paris.jpg",
-                    options = listOf(
-                        Option(id = 1, value = "Paris"),
-                        Option(id = 2, value = "London"),
+            state =
+                GameUiState.RoundOn(
+                    player1 =
+                        Player(
+                            id = "1",
+                            name = "Player 1",
+                            avatarUrl = "TODO()",
+                        ),
+                    player2 =
+                        Player(
+                            id = "2",
+                            name = "Player 2",
+                            avatarUrl = "TODO()",
+                        ),
+                    gameBarPercentage = 0.7f,
+                    question =
+                        Question(
+                            content = "What is the capital of France?",
+                            imageUrl = "https://example.com/paris.jpg",
+                            options =
+                                listOf(
+                                    Option(id = 1, value = "Paris"),
+                                    Option(id = 2, value = "London"),
                         Option(id = 3, value = "Berlin"),
-                        Option(id = 4, value = "Madrid")
-                    )
+                        Option(id = 4, value = "Madrid"),
+                    ),
                 ),
                 timeRemainingInSeconds = 14,
-                selectedAnswerId = 1, // Paris seçili
-                playerRoundResult = null   // Henüz sonuç gelmemiş
-            ),
-            onSubmitAnswer = {}
+                    selectedAnswerId = 1, // Paris seçili
+                    playerRoundResult = null, // Henüz sonuç gelmemiş
+                ),
+            onSubmitAnswer = {},
         )
     }
 }
@@ -137,36 +148,42 @@ private fun GameRoundContentWithSelectedAnswerPreview() {
 private fun GameRoundContentWithCorrectAnswerPreview() {
     QuizziTheme {
         GameRoundContent(
-            state = GameUiState.RoundOn(
-                player1 = Player(
-                    id = "1",
-                    name = "Player 1",
-                    avatarUrl = "TODO()"
-                ),
-                player2 = Player(
-                    id = "2",
-                    name = "Player 2",
-                    avatarUrl = "TODO()"
-                ),
-                gameBarPercentage = 0.7f,
-                question = Question(
-                    content = "What is the capital of France?",
-                    imageUrl = "https://example.com/paris.jpg",
-                    options = listOf(
-                        Option(id = 1, value = "Paris"),
+            state =
+                GameUiState.RoundOn(
+                    player1 =
+                        Player(
+                            id = "1",
+                            name = "Player 1",
+                            avatarUrl = "TODO()",
+                        ),
+                    player2 =
+                        Player(
+                            id = "2",
+                            name = "Player 2",
+                            avatarUrl = "TODO()",
+                        ),
+                    gameBarPercentage = 0.7f,
+                    question =
+                        Question(
+                            content = "What is the capital of France?",
+                            imageUrl = "https://example.com/paris.jpg",
+                            options =
+                                listOf(
+                                    Option(id = 1, value = "Paris"),
                         Option(id = 2, value = "London"),
                         Option(id = 3, value = "Berlin"),
-                        Option(id = 4, value = "Madrid")
-                    )
+                        Option(id = 4, value = "Madrid"),
+                    ),
                 ),
                 timeRemainingInSeconds = 14,
                 selectedAnswerId = 1, // Paris seçili
-                playerRoundResult = PlayerRoundResult(
+                playerRoundResult =
+                PlayerRoundResult(
                     answerId = 1,
-                    isCorrect = true
-                )
+                    isCorrect = true,
+                ),
             ),
-            onSubmitAnswer = {}
+            onSubmitAnswer = {},
         )
     }
 }

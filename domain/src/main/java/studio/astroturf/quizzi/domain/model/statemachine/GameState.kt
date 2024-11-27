@@ -10,10 +10,12 @@ sealed interface GameState {
 
     data class Lobby(
         val roomId: String,
-        val players: List<Player>
+        val players: List<Player>,
     ) : GameState
 
-    data class Starting(val timeRemaining: Int) : GameState
+    data class Starting(
+        val timeRemaining: Int,
+    ) : GameState
 
     data class RoundOn(
         val players: List<Player>,
@@ -25,17 +27,17 @@ sealed interface GameState {
     data class Paused(
         val reason: String,
         val onlinePlayers: List<Player>,
-        val disconnectedPlayers: List<Player>
+        val disconnectedPlayers: List<Player>,
     ) : GameState
 
     data class EndOfRound(
         val cursorPosition: Float,
         val correctAnswer: Option,
-        val winnerPlayer: Player?
+        val winnerPlayer: Player?,
     ) : GameState
 
     data class GameOver(
         val winner: Player,
-        val statistics: GameStatistics
+        val statistics: GameStatistics,
     ) : GameState
 }

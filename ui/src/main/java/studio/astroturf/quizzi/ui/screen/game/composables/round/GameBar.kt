@@ -34,56 +34,63 @@ import kotlinx.coroutines.delay
 @Composable
 fun GameBar(
     cursorPosition: Float,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val cursorPositionAnimated by animateFloatAsState(
         targetValue = cursorPosition,
-        animationSpec = spring(
-            dampingRatio = 0.7f,
-            stiffness = Spring.StiffnessLow
-        )
+        animationSpec =
+            spring(
+                dampingRatio = 0.7f,
+                stiffness = Spring.StiffnessLow,
+            ),
     )
 
     var containerWidth by remember { mutableStateOf(0) }
 
     Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .onSizeChanged { containerWidth = it.width }
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(4.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .onSizeChanged { containerWidth = it.width },
     ) {
         // Sol taraf (Mavi)
         Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(cursorPositionAnimated)
-                .background(Color(0xFF1A3A6E))
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(cursorPositionAnimated)
+                    .background(Color(0xFF1A3A6E)),
         )
 
         // Sağ taraf (Kırmızı)
         Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(1f - cursorPositionAnimated)
-                .align(Alignment.CenterEnd)
-                .background(Color(0xFFB71C1C))
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(1f - cursorPositionAnimated)
+                    .align(Alignment.CenterEnd)
+                .background(Color(0xFFB71C1C)),
         )
 
         // Cursor
         Box(
-            modifier = Modifier
-                .size(16.dp)
-                .offset {
-                    IntOffset(
-                        x = (cursorPositionAnimated * containerWidth).toInt() - 8.dp
-                            .toPx()
-                            .toInt(),
-                        y = 0
-                    )
-                }
-                .clip(CircleShape)
-                .background(Color.White)
-                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            modifier =
+                Modifier
+                    .size(16.dp)
+                    .offset {
+                        IntOffset(
+                            x =
+                                (cursorPositionAnimated * containerWidth).toInt() -
+                                    8
+                                        .dp
+                                        .toPx()
+                                        .toInt(),
+                            y = 0,
+                        )
+                    }.clip(CircleShape)
+                    .background(Color.White)
+                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
         )
     }
 }
@@ -92,16 +99,18 @@ fun GameBar(
 @Composable
 fun GameBarPreview() {
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .padding(8.dp)
+                .padding(8.dp),
     ) {
         GameBar(
             cursorPosition = 0.2f,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
-                .height(8.dp)
+                .height(8.dp),
         )
     }
 }
@@ -119,16 +128,18 @@ fun GameBarMovingPreview() {
     }
 
     Box(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .padding(8.dp)
+                .padding(8.dp),
     ) {
         GameBar(
             cursorPosition = position,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
-                .height(8.dp)
+                .height(8.dp),
         )
     }
 }

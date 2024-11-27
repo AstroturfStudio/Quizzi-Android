@@ -18,18 +18,19 @@ import studio.astroturf.quizzi.domain.model.Player
 internal fun LobbyContent(
     roomName: String,
     creator: Player,
-    challenger: Player?
+    challenger: Player?,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = roomName,
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineMedium,
         )
         Spacer(modifier = Modifier.height(32.dp))
         PlayerCard(player = creator, isCreator = true)

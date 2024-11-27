@@ -57,5 +57,4 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(libs.lifecycle.runtime.compose)
-
 }

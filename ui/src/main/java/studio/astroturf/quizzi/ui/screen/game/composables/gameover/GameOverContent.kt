@@ -19,28 +19,29 @@ import studio.astroturf.quizzi.domain.model.Player
 internal fun GameOverContent(
     winner: Player,
     totalRounds: Int,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = "Game Over!",
-            style = MaterialTheme.typography.displayMedium
+            style = MaterialTheme.typography.displayMedium,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Winner: ${winner.name}",
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineMedium,
         )
         Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = "Total Rounds: $totalRounds",
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
         )
         Spacer(modifier = Modifier.height(32.dp))
         Button(onClick = onNavigateBack) {

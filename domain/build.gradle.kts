@@ -40,5 +40,4 @@ dependencies {
     implementation(libs.coil.compose)
 
     api(libs.timber)
-
 }

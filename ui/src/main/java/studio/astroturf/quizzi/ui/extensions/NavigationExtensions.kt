@@ -3,7 +3,7 @@ import androidx.navigation.NavOptionsBuilder
 
 fun NavController.navigateSafely(
     route: String,
-    builder: NavOptionsBuilder.() -> Unit = {}
+    builder: NavOptionsBuilder.() -> Unit = {},
 ) {
     try {
         navigate(route, builder)
@@ -23,13 +23,11 @@ fun NavController.clearBackStack() {
     popBackStack(startDestination, false)
 }
 
-fun NavController.isCurrentDestination(route: String): Boolean {
-    return currentDestination?.route == route
-}
+fun NavController.isCurrentDestination(route: String): Boolean = currentDestination?.route == route
 
 fun NavController.navigateWithAnimation(
     route: String,
-    builder: NavOptionsBuilder.() -> Unit = {}
+    builder: NavOptionsBuilder.() -> Unit = {},
 ) {
     navigate(route) {
         anim {

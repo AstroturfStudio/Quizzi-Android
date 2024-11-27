@@ -6,5 +6,5 @@ enum class RoomState {
     PLAYING,
     PAUSED,
     ROUND_END,
-    FINISHED
-} 
+    FINISHED,
+}

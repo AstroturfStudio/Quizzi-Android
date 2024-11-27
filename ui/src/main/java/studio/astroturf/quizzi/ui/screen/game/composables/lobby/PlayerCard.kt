@@ -18,34 +18,36 @@ import studio.astroturf.quizzi.domain.model.Player
 @Composable
 internal fun PlayerCard(
     player: Player,
-    isCreator: Boolean
+    isCreator: Boolean,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(16.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = player.name,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
             )
             Spacer(modifier = Modifier.weight(1f))
             if (isCreator) {
                 Surface(
                     color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(4.dp),
                 ) {
                     Text(
                         text = "Creator",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
             }

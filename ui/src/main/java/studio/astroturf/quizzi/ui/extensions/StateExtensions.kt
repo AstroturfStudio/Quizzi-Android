@@ -15,18 +15,17 @@ import kotlinx.coroutines.flow.Flow
 fun <T> Flow<T>.collectAsStateWithLifecycle(
     initial: T,
     lifecycle: Lifecycle = LocalLifecycleOwner.current.lifecycle,
-    minActiveState: Lifecycle.State = Lifecycle.State.STARTED
-): State<T> {
-    return remember(this, lifecycle) {
+    minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
+): State<T> =
+    remember(this, lifecycle) {
         flowWithLifecycle(
             lifecycle = lifecycle,
-            minActiveState = minActiveState
+            minActiveState = minActiveState,
         )
     }.collectAsState(initial = initial)
-}
 
 @Composable
 fun <T> rememberMutableStateOf(
     initialValue: T,
-    policy: SnapshotMutationPolicy<T> = structuralEqualityPolicy()
+    policy: SnapshotMutationPolicy<T> = structuralEqualityPolicy(),
 ): MutableState<T> = remember { mutableStateOf(initialValue, policy) }

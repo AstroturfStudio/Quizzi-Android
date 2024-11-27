@@ -16,25 +16,26 @@ import androidx.compose.ui.unit.dp
 fun GameTopBar(
     timeRemaining: Int,
     cursorPosition: Float,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         TimeDisplay(
             timeRemaining = timeRemaining,
-            modifier = Modifier.size(56.dp)
+            modifier = Modifier.size(56.dp),
         )
 
         Spacer(modifier = Modifier.width(16.dp))
 
         GameBar(
             cursorPosition = cursorPosition,
-            modifier = Modifier
-                .weight(1f)
-                .height(8.dp)  // Fixed height for GameBar
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .height(8.dp), // Fixed height for GameBar
         )
     }
 }

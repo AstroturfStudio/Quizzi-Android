@@ -6,10 +6,11 @@ import studio.astroturf.quizzi.domain.model.Option
 @Serializable
 data class OptionDto(
     val id: Int,
-    val value: String
+    val value: String,
 ) {
-    fun toDomain() = Option(
-        id = id,
-        value = value
-    )
+    fun toDomain() =
+        Option(
+            id = id,
+            value = value,
+        )
 }

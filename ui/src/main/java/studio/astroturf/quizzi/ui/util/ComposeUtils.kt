@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 @Composable
 inline fun <reified T> Flow<T>.observeWithLifecycle(
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
-    noinline action: suspend (T) -> Unit
+    noinline action: suspend (T) -> Unit,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(key1 = Unit) {

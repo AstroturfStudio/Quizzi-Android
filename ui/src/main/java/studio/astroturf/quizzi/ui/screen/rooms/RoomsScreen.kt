@@ -37,7 +37,7 @@ import studio.astroturf.quizzi.ui.screen.rooms.RoomsViewModel
 @Composable
 fun RoomsScreen(
     viewModel: RoomsViewModel = hiltViewModel(),
-    onNavigateToRoom: (RoomIntent) -> Unit
+    onNavigateToRoom: (RoomIntent) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
@@ -56,12 +56,12 @@ fun RoomsScreen(
                         IconButton(onClick = { viewModel.refresh() }) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "Refresh rooms"
+                                contentDescription = "Refresh rooms",
                             )
                         }
-                    }
+                    },
                 )
-            }
+            },
         ) { innerPadding ->
             RoomsScreenContent(
                 modifier = Modifier.padding(innerPadding),
@@ -73,7 +73,7 @@ fun RoomsScreen(
                 },
                 onJoinRoom = { roomId ->
                     onNavigateToRoom(RoomIntent.JoinRoom(roomId))
-                }
+                },
             )
         }
     }
@@ -86,19 +86,20 @@ private fun RoomsScreenContent(
     isConnected: Boolean,
     error: String?,
     onCreateRoom: () -> Unit,
-    onJoinRoom: (String) -> Unit
+    onJoinRoom: (String) -> Unit,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (!isConnected) {
             Text(
                 text = "Connecting...",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.secondary,
             )
         }
 
@@ -106,80 +107,81 @@ private fun RoomsScreenContent(
             Text(
                 text = it,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
             )
         }
 
         Button(
             onClick = onCreateRoom,
             modifier = Modifier.fillMaxWidth(),
-            enabled = isConnected
+            enabled = isConnected,
         ) {
             Text(
                 text = "Create New Room",
-                style = MaterialTheme.typography.labelLarge
+                style = MaterialTheme.typography.labelLarge,
             )
         }
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) {
             items(rooms) { room ->
                 RoomItem(
                     room = room,
-                    onJoinRoom = { onJoinRoom(room.id) }
+                    onJoinRoom = { onJoinRoom(room.id) },
                 )
             }
         }
     }
 }
 
-
 @Composable
 private fun RoomItem(
     room: GameRoom,
-    onJoinRoom: () -> Unit
+    onJoinRoom: () -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 4.dp,
-            focusedElevation = 4.dp
-        )
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 4.dp,
+                focusedElevation = 4.dp,
+        ),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
-                modifier = Modifier.weight(0.7f)
+                modifier = Modifier.weight(0.7f),
             ) {
                 Text(
                     text = "Room #${room.id}",
                     style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1
+                    maxLines = 1,
                 )
                 Text(
                     text = "Created by: ${room.players.first()}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
+                    maxLines = 1,
                 )
                 Text(
                     text = "Status: ${room.roomState.name}",
                     style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1
+                    maxLines = 1,
                 )
             }
 
             Button(
                 onClick = onJoinRoom,
-                enabled = room.roomState == RoomState.WAITING && room.players.count() < 2
+                enabled = room.roomState == RoomState.WAITING && room.players.count() < 2,
             ) {
                 Text("Join")
             }
@@ -187,28 +189,28 @@ private fun RoomItem(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 private fun RoomsScreenContentPreview() {
     MaterialTheme {
         RoomsScreenContent(
-            rooms = listOf(
-                GameRoom(
-                    id = "Room1",
-                    roomState = RoomState.WAITING,
-                    players = listOf("Player1", "Player2")
+            rooms =
+                listOf(
+                    GameRoom(
+                        id = "Room1",
+                        roomState = RoomState.WAITING,
+                        players = listOf("Player1", "Player2"),
+                    ),
+                    GameRoom(
+                        id = "Room2",
+                        roomState = RoomState.PLAYING,
+                        players = listOf("Player3", "Player4", "Player5"),
                 ),
-                GameRoom(
-                    id = "Room2",
-                    roomState = RoomState.PLAYING,
-                    players = listOf("Player3", "Player4", "Player5")
-                )
             ),
             isConnected = true,
             error = null,
             onCreateRoom = {},
-            onJoinRoom = {}
+            onJoinRoom = {},
         )
     }
 }

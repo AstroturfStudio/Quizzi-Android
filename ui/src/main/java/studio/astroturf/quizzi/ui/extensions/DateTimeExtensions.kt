@@ -8,9 +8,7 @@ import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-fun Long.toFormattedDate(pattern: String = "dd/MM/yyyy"): String {
-    return SimpleDateFormat(pattern, Locale.getDefault()).format(Date(this))
-}
+fun Long.toFormattedDate(pattern: String = "dd/MM/yyyy"): String = SimpleDateFormat(pattern, Locale.getDefault()).format(Date(this))
 
 fun Long.toRelativeTimeString(): String {
     val now = System.currentTimeMillis()
@@ -40,26 +38,14 @@ fun Long.formatCountdown(): String {
     return "%02d:%02d".format(minutes, seconds)
 }
 
-fun LocalDateTime.toEpochMilli(): Long {
-    return this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-}
+fun LocalDateTime.toEpochMilli(): Long = this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-fun LocalDate.isToday(): Boolean {
-    return this == LocalDate.now()
-}
+fun LocalDate.isToday(): Boolean = this == LocalDate.now()
 
-fun LocalDate.isFuture(): Boolean {
-    return this.isAfter(LocalDate.now())
-}
+fun LocalDate.isFuture(): Boolean = this.isAfter(LocalDate.now())
 
-fun LocalDate.isPast(): Boolean {
-    return this.isBefore(LocalDate.now())
-}
+fun LocalDate.isPast(): Boolean = this.isBefore(LocalDate.now())
 
-fun LocalDateTime.formatForDisplay(pattern: String = "dd MMM yyyy, HH:mm"): String {
-    return this.format(DateTimeFormatter.ofPattern(pattern))
-}
+fun LocalDateTime.formatForDisplay(pattern: String = "dd MMM yyyy, HH:mm"): String = this.format(DateTimeFormatter.ofPattern(pattern))
 
-fun LocalDateTime.isSameDay(other: LocalDateTime): Boolean {
-    return this.toLocalDate() == other.toLocalDate()
-} 
+fun LocalDateTime.isSameDay(other: LocalDateTime): Boolean = this.toLocalDate() == other.toLocalDate()

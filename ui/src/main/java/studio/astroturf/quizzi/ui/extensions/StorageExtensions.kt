@@ -8,42 +8,60 @@ import kotlin.reflect.KProperty
 
 fun SharedPreferences.string(
     key: String,
-    defaultValue: String = ""
-): ReadWriteProperty<Any, String> = object : ReadWriteProperty<Any, String> {
-    override fun getValue(thisRef: Any, property: KProperty<*>): String {
-        return getString(key, defaultValue) ?: defaultValue
-    }
+    defaultValue: String = "",
+): ReadWriteProperty<Any, String> =
+    object : ReadWriteProperty<Any, String> {
+        override fun getValue(
+            thisRef: Any,
+            property: KProperty<*>,
+        ): String = getString(key, defaultValue) ?: defaultValue
 
-    override fun setValue(thisRef: Any, property: KProperty<*>, value: String) {
-        edit().putString(key, value).apply()
+        override fun setValue(
+            thisRef: Any,
+            property: KProperty<*>,
+            value: String,
+        ) {
+            edit().putString(key, value).apply()
+        }
     }
-}
 
 fun SharedPreferences.int(
     key: String,
-    defaultValue: Int = 0
-): ReadWriteProperty<Any, Int> = object : ReadWriteProperty<Any, Int> {
-    override fun getValue(thisRef: Any, property: KProperty<*>): Int {
-        return getInt(key, defaultValue)
-    }
+    defaultValue: Int = 0,
+): ReadWriteProperty<Any, Int> =
+    object : ReadWriteProperty<Any, Int> {
+        override fun getValue(
+            thisRef: Any,
+            property: KProperty<*>,
+        ): Int = getInt(key, defaultValue)
 
-    override fun setValue(thisRef: Any, property: KProperty<*>, value: Int) {
-        edit().putInt(key, value).apply()
+        override fun setValue(
+            thisRef: Any,
+            property: KProperty<*>,
+            value: Int,
+        ) {
+            edit().putInt(key, value).apply()
+        }
     }
-}
 
 fun SharedPreferences.boolean(
     key: String,
-    defaultValue: Boolean = false
-): ReadWriteProperty<Any, Boolean> = object : ReadWriteProperty<Any, Boolean> {
-    override fun getValue(thisRef: Any, property: KProperty<*>): Boolean {
-        return getBoolean(key, defaultValue)
-    }
+    defaultValue: Boolean = false,
+): ReadWriteProperty<Any, Boolean> =
+    object : ReadWriteProperty<Any, Boolean> {
+        override fun getValue(
+            thisRef: Any,
+            property: KProperty<*>,
+        ): Boolean = getBoolean(key, defaultValue)
 
-    override fun setValue(thisRef: Any, property: KProperty<*>, value: Boolean) {
-        edit().putBoolean(key, value).apply()
+        override fun setValue(
+            thisRef: Any,
+            property: KProperty<*>,
+            value: Boolean,
+        ) {
+            edit().putBoolean(key, value).apply()
+        }
     }
-}
 
 suspend fun Context.clearApplicationData() {
     withContext(Dispatchers.IO) {
@@ -64,11 +82,11 @@ suspend fun Context.clearApplicationData() {
     }
 }
 
-suspend fun Context.calculateDirectorySize(directory: File): Long {
-    return withContext(Dispatchers.IO) {
-        directory.walkTopDown()
+suspend fun Context.calculateDirectorySize(directory: File): Long =
+    withContext(Dispatchers.IO) {
+        directory
+            .walkTopDown()
             .filter { it.isFile }
             .map { it.length() }
             .sum()
     }
-} 

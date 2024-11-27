@@ -11,49 +11,50 @@ import studio.astroturf.quizzi.domain.repository.QuizRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class RoomsViewModel @Inject constructor(
-    private val repository: QuizRepository
-) : ViewModel() {
+class RoomsViewModel
+    @Inject
+    constructor(
+        private val repository: QuizRepository,
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(RoomsUiState())
+        val uiState = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(RoomsUiState())
-    val uiState = _uiState.asStateFlow()
+        private var _isRefreshing = MutableStateFlow(false)
+        val isRefreshing = _isRefreshing.asStateFlow()
 
-    private var _isRefreshing = MutableStateFlow(false)
-    val isRefreshing = _isRefreshing.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            getRooms()
-        }
-    }
-
-    private suspend fun getRooms() {
-        repository.getRooms()
-            .onSuccess { rooms ->
-                _uiState.update {
-                    it.copy(
-                        isConnected = true,
-                        rooms = rooms
-                    )
-                }
-            }
-            .onFailure { error ->
-                _uiState.update {
-                    it.copy(
-                        isConnected = false,
-                        error = error.message
-                    )
-                }
-            }
-    }
-
-    fun refresh() {
-        viewModelScope.launch {
-            try {
-                _isRefreshing.value = true
+        init {
+            viewModelScope.launch {
                 getRooms()
-            } finally {
-                _isRefreshing.value = false
+            }
+        }
+
+        private suspend fun getRooms() {
+            repository
+                .getRooms()
+                .onSuccess { rooms ->
+                    _uiState.update {
+                        it.copy(
+                            isConnected = true,
+                            rooms = rooms,
+                        )
+                    }
+                }.onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isConnected = false,
+                            error = error.message,
+                        )
+                    }
+                }
+        }
+
+        fun refresh() {
+            viewModelScope.launch {
+                try {
+                    _isRefreshing.value = true
+                    getRooms()
+                } finally {
+                    _isRefreshing.value = false
             }
         }
     }

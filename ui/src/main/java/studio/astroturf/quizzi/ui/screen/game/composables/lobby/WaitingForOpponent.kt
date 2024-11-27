@@ -20,26 +20,28 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun WaitingForOpponent() {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(16.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(24.dp),
-                strokeWidth = 2.dp
+                strokeWidth = 2.dp,
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Waiting for opponent...",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
     }

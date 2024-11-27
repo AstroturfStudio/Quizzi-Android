@@ -1,6 +1,5 @@
 package studio.astroturf.quizzi.ui.screen.game
 
-
 import NavDestination
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -22,138 +21,133 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class GameViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    private val repository: QuizRepository
-) : ViewModel() {
+class GameViewModel
+    @Inject
+    constructor(
+        private val savedStateHandle: SavedStateHandle,
+        private val repository: QuizRepository,
+    ) : ViewModel() {
+        private val roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
 
-    private val roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
+        private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
+        val uiState = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
-    val uiState = _uiState.asStateFlow()
+        private val _uiEventChannel = Channel<GameUiEvent>()
+        val uiEventFlow = _uiEventChannel.receiveAsFlow()
 
-    private val _uiEventChannel = Channel<GameUiEvent>()
-    val uiEventFlow = _uiEventChannel.receiveAsFlow()
+        private val gsm = GameStateMachine(viewModelScope)
 
-    private val gsm = GameStateMachine(viewModelScope)
+        init {
+            // Map domain state to UI state
+            viewModelScope.launch {
+                gsm.stateFlow
+                    .map { it.toUiState() }
+                    .catch { error ->
+                        Timber.e("GameViewModel", "State mapping error", error)
+                    }.collect { uiState ->
+                        _uiState.value = uiState
+                    }
+            }
 
-    init {
-        // Map domain state to UI state
-        viewModelScope.launch {
-            gsm.stateFlow
-                .map { it.toUiState() }
-                .catch { error ->
-                    Timber.e("GameViewModel", "State mapping error", error)
+            // Handle game effects
+            viewModelScope.launch {
+                gsm.effectFlow.collect { effect ->
+                    handleGameEffect(effect)
                 }
-                .collect { uiState ->
-                    _uiState.value = uiState
-                }
+            }
+
+            viewModelScope.launch {
+                repository
+                    .observeMessages()
+                    .collect { message ->
+                        gsm.processServerMessage(message)
+                    }
+            }
+
+            repository.connect()
+
+            roomId?.let {
+                joinRoom(it)
+            } ?: createRoom()
         }
 
-        // Handle game effects
-        viewModelScope.launch {
-            gsm.effectFlow.collect { effect ->
-                handleGameEffect(effect)
-            }
-        }
-
-        viewModelScope.launch {
-            repository
-                .observeMessages()
-                .collect { message ->
-                    gsm.processServerMessage(message)
+        private suspend fun handleGameEffect(effect: GameEffect) {
+            when (effect) {
+                is GameEffect.NavigateTo -> {
+                    _uiEventChannel.send(GameUiEvent.NavigateTo(effect.destination))
                 }
+
+                is GameEffect.PlayerDisconnected -> {
+                }
+
+                is GameEffect.PlayerReconnected -> {
+                }
+
+                is GameEffect.ReceiveAnswerResult -> {
+                    val currentState = _uiState.value
+                    if (currentState is GameUiState.RoundOn) {
+                        _uiState.value =
+                            currentState.copy(
+                                playerRoundResult =
+                                    PlayerRoundResult(
+                                        answerId = effect.answerResult.answer,
+                                        isCorrect = effect.answerResult.correct,
+                                    ),
+                            )
+                    }
+                }
+
+                is GameEffect.RoomCreated -> {
+                }
+
+                is GameEffect.RoomJoined -> {
+                }
+
+                is GameEffect.RoundUpdate -> {
+                }
+
+                is GameEffect.ShowError -> {
+                }
+
+                is GameEffect.ShowTimeRemaining -> {
+                    val currentState = _uiState.value
+                    _uiState.value =
+                        when (currentState) {
+                            is GameUiState.RoundOn -> {
+                                currentState.copy(
+                                    timeRemainingInSeconds = effect.timeRemaining.toInt(),
+                                )
+                            }
+
+                            else -> currentState
+                        }
+                }
+
+                is GameEffect.ShowToast -> {
+                }
+
+                is GameEffect.RoundTimeUp -> {
+                }
+            }
         }
 
-        repository.connect()
+        fun createRoom() {
+            repository.sendMessage(ClientMessage.CreateRoom)
+        }
 
-        roomId?.let {
-            joinRoom(it)
-        } ?: createRoom()
-    }
+        fun joinRoom(roomId: String) {
+            repository.sendMessage(ClientMessage.JoinRoom(roomId))
+        }
 
-
-    private suspend fun handleGameEffect(effect: GameEffect) {
-        when (effect) {
-            is GameEffect.NavigateTo -> {
-                _uiEventChannel.send(GameUiEvent.NavigateTo(effect.destination))
-            }
-
-            is GameEffect.PlayerDisconnected -> {
-
-            }
-
-            is GameEffect.PlayerReconnected -> {
-
-            }
-
-            is GameEffect.ReceiveAnswerResult -> {
+        fun submitAnswer(answerId: Int) {
+            viewModelScope.launch {
+                // Update UI state to show selected answer
                 val currentState = _uiState.value
                 if (currentState is GameUiState.RoundOn) {
-                    _uiState.value = currentState.copy(
-                        playerRoundResult = PlayerRoundResult(
-                            answerId = effect.answerResult.answer,
-                            isCorrect = effect.answerResult.correct
-                        )
+                _uiState.value =
+                    currentState.copy(
+                        selectedAnswerId = answerId,
                     )
-                }
-            }
-
-            is GameEffect.RoomCreated -> {
-
-            }
-
-            is GameEffect.RoomJoined -> {
-
-            }
-
-            is GameEffect.RoundUpdate -> {
-
-            }
-
-            is GameEffect.ShowError -> {
-
-            }
-
-            is GameEffect.ShowTimeRemaining -> {
-                val currentState = _uiState.value
-                _uiState.value = when (currentState) {
-                    is GameUiState.RoundOn -> {
-                        currentState.copy(
-                            timeRemainingInSeconds = effect.timeRemaining.toInt()
-                        )
-                    }
-
-                    else -> currentState
-                }
-            }
-
-            is GameEffect.ShowToast -> {
-
-            }
-
-            is GameEffect.RoundTimeUp -> {
-
-            }
-        }
-    }
-
-    fun createRoom() {
-        repository.sendMessage(ClientMessage.CreateRoom)
-    }
-
-    fun joinRoom(roomId: String) {
-        repository.sendMessage(ClientMessage.JoinRoom(roomId))
-    }
-
-    fun submitAnswer(answerId: Int) {
-        viewModelScope.launch {
-            // Update UI state to show selected answer
-            val currentState = _uiState.value
-            if (currentState is GameUiState.RoundOn) {
-                _uiState.value = currentState.copy(
-                    selectedAnswerId = answerId
-                )
             }
 
             // Send answer to server

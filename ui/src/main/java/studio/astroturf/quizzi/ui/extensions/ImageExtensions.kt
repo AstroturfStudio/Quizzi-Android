@@ -11,8 +11,11 @@ import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 
-fun Bitmap.saveToInternalStorage(context: Context, filename: String): Uri? {
-    return try {
+fun Bitmap.saveToInternalStorage(
+    context: Context,
+    filename: String,
+): Uri? =
+    try {
         val file = File(context.filesDir, filename)
         FileOutputStream(file).use { stream ->
             compress(Bitmap.CompressFormat.JPEG, 90, stream)
@@ -20,28 +23,28 @@ fun Bitmap.saveToInternalStorage(context: Context, filename: String): Uri? {
         FileProvider.getUriForFile(
             context,
             "${context.packageName}.provider",
-            file
+            file,
         )
     } catch (e: Exception) {
         e.printStackTrace()
         null
     }
-}
 
 fun Bitmap.addWatermark(
     watermark: String,
     textSize: Float = 50f,
     color: Int = Color.WHITE,
-    alpha: Int = 128
+    alpha: Int = 128,
 ): Bitmap {
     val result = copy(config, true)
     val canvas = Canvas(result)
-    val paint = Paint().apply {
-        this.textSize = textSize
-        this.color = color
-        this.alpha = alpha
-        isAntiAlias = true
-    }
+    val paint =
+        Paint().apply {
+            this.textSize = textSize
+            this.color = color
+            this.alpha = alpha
+            isAntiAlias = true
+        }
 
     val bounds = Rect()
     paint.getTextBounds(watermark, 0, watermark.length, bounds)
@@ -54,28 +57,31 @@ fun Bitmap.addWatermark(
 }
 
 fun Bitmap.cropToCircle(): Bitmap {
-    val output = Bitmap.createBitmap(
-        width,
-        height,
-        Bitmap.Config.ARGB_8888
-    )
+    val output =
+        Bitmap.createBitmap(
+            width,
+            height,
+            Bitmap.Config.ARGB_8888,
+        )
 
     val canvas = Canvas(output)
-    val paint = Paint().apply {
-        isAntiAlias = true
-        shader = BitmapShader(
-            this@cropToCircle,
-            Shader.TileMode.CLAMP,
-            Shader.TileMode.CLAMP
-        )
-    }
+    val paint =
+        Paint().apply {
+            isAntiAlias = true
+            shader =
+                BitmapShader(
+                    this@cropToCircle,
+                    Shader.TileMode.CLAMP,
+                    Shader.TileMode.CLAMP,
+                )
+        }
 
     val radius = width.coerceAtMost(height) / 2f
     canvas.drawCircle(
         width / 2f,
         height / 2f,
         radius,
-        paint
+        paint,
     )
 
     return output

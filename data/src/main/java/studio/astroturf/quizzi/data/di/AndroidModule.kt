@@ -14,7 +14,7 @@ import javax.inject.Singleton
 object AndroidModule {
     @Provides
     @Singleton
-    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("QuizziPrefs", Context.MODE_PRIVATE)
-    }
-} 
+    fun provideSharedPreferences(
+        @ApplicationContext context: Context,
+    ): SharedPreferences = context.getSharedPreferences("QuizziPrefs", Context.MODE_PRIVATE)
+}

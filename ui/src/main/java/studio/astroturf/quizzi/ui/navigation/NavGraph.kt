@@ -13,12 +13,12 @@ import studio.astroturf.quizzi.ui.screen.rooms.RoomIntent
 fun QuizziNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: String = NavDestination.Landing.route
+    startDestination: String = NavDestination.Landing.route,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
     ) {
         composable(NavDestination.Landing.route) {
             LandingScreen(
@@ -26,7 +26,7 @@ fun QuizziNavGraph(
                     navController.navigate(NavDestination.Rooms.route) {
                         popUpTo(NavDestination.Landing.route) { inclusive = true }
                     }
-                }
+                },
             )
         }
 
@@ -42,19 +42,19 @@ fun QuizziNavGraph(
                             navController.navigate(NavDestination.Game.createRoute(roomId = roomIntent.roomId))
                         }
                     }
-
-                }
+                },
             )
         }
 
         composable(
             route = NavDestination.Game.ROUTE_PATTERN,
-            arguments = listOf(
-                navArgument(NavDestination.Game.ARG_ROOM_ID) {
-                    type = NavType.StringType
-                    nullable = true
-                }
-            )
+            arguments =
+                listOf(
+                    navArgument(NavDestination.Game.ARG_ROOM_ID) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
         ) {
             GameScreen(
                 onNavigateToRooms = {
@@ -63,7 +63,7 @@ fun QuizziNavGraph(
                     }
                 },
                 onShowError = {},
-                onShowToast = { }
+                onShowToast = { },
             )
         }
     }

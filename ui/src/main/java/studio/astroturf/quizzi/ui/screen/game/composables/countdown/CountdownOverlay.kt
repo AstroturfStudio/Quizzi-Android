@@ -16,27 +16,29 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun CountdownOverlay(
     countdown: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.7f)),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.7f)),
+        contentAlignment = Alignment.Center,
     ) {
         val scale by animateFloatAsState(
             targetValue = if (countdown > 0) 1.2f else 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
-            )
+            animationSpec =
+                spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow,
+                ),
         )
 
         Text(
             text = if (countdown > 0) countdown.toString() else "BAŞLA!",
             style = MaterialTheme.typography.displayLarge,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.scale(scale)
+            modifier = Modifier.scale(scale),
         )
     }
 } 

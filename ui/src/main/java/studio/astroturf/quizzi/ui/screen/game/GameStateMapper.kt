@@ -2,8 +2,8 @@ package studio.astroturf.quizzi.ui.screen.game
 
 import studio.astroturf.quizzi.domain.model.statemachine.GameState
 
-fun GameState.toUiState(): GameUiState {
-    return when (this) {
+fun GameState.toUiState(): GameUiState =
+    when (this) {
         GameState.Idle -> {
             GameUiState.Idle
         }
@@ -13,7 +13,7 @@ fun GameState.toUiState(): GameUiState {
             GameUiState.Lobby(
                 roomName = "${creator.name} 's Room",
                 creator = creator,
-                challenger = players.getOrNull(1)
+                challenger = players.getOrNull(1),
             )
         }
 
@@ -22,21 +22,21 @@ fun GameState.toUiState(): GameUiState {
                 roundNo = 0, // TODO: Gelsinnn
                 roundWinner = winnerPlayer,
                 correctAnswerValue = correctAnswer.value,
-                newCursorPosition = cursorPosition
+                newCursorPosition = cursorPosition,
             )
         }
 
         is GameState.GameOver -> {
             GameUiState.GameOver(
                 totalRoundCount = statistics.roundCount,
-                winner = winner
+                winner = winner,
             )
         }
 
         is GameState.Paused -> {
             GameUiState.Paused(
                 reason = reason,
-                onlinePlayers = onlinePlayers
+                onlinePlayers = onlinePlayers,
             )
         }
 
@@ -52,8 +52,7 @@ fun GameState.toUiState(): GameUiState {
 
         is GameState.Starting -> {
             GameUiState.Starting(
-                timeRemainingInSeconds = timeRemaining
+                timeRemainingInSeconds = timeRemaining,
             )
         }
     }
-}

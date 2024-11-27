@@ -20,46 +20,49 @@ internal fun AnswerButton(
     optionId: Int,
     selectedAnswerId: Int?,
     playerRoundResult: PlayerRoundResult?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val isSelected = selectedAnswerId == optionId
 
-    val containerColor = when {
-        // Cevap sonucu geldiğinde ve bu buton seçilmişse
-        playerRoundResult != null && isSelected -> {
-            if (playerRoundResult.isCorrect) {
-                Color(0xFF4CAF50) // Yeşil
-            } else {
-                Color(0xFFF44336) // Kırmızı
+    val containerColor =
+        when {
+            // Cevap sonucu geldiğinde ve bu buton seçilmişse
+            playerRoundResult != null && isSelected -> {
+                if (playerRoundResult.isCorrect) {
+                    Color(0xFF4CAF50) // Yeşil
+                } else {
+                    Color(0xFFF44336) // Kırmızı
+                }
             }
+            // Sadece seçilmişse ve sonuç henüz gelmediyse
+            isSelected -> Color(0xFFFDD835) // Sarı
+            // Seçilmemiş normal durum
+            else -> MaterialTheme.colorScheme.primary
         }
-        // Sadece seçilmişse ve sonuç henüz gelmediyse
-        isSelected -> Color(0xFFFDD835) // Sarı
-        // Seçilmemiş normal durum
-        else -> MaterialTheme.colorScheme.primary
-    }
 
-    val textColor = when {
-        playerRoundResult != null && isSelected -> Color.White
-        isSelected -> Color.Black
-        else -> MaterialTheme.colorScheme.onPrimary
-    }
+    val textColor =
+        when {
+            playerRoundResult != null && isSelected -> Color.White
+            isSelected -> Color.Black
+            else -> MaterialTheme.colorScheme.onPrimary
+        }
 
     Button(
         onClick = onClick,
         enabled = selectedAnswerId == null, // Bir cevap seçildiyse disable et
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            disabledContainerColor = containerColor // Disable durumunda da aynı rengi koru
-        ),
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = containerColor,
+                disabledContainerColor = containerColor, // Disable durumunda da aynı rengi koru
+            ),
         modifier = modifier.height(56.dp),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
             color = textColor,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }

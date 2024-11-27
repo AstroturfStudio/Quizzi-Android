@@ -13,20 +13,20 @@ sealed class ServerSocketMessage {
     @Serializable
     @SerialName("RoomCreated")
     data class RoomCreated(
-        val roomId: String
+        val roomId: String,
     ) : ServerSocketMessage()
 
     @Serializable
     @SerialName("JoinedRoom")
     data class JoinedRoom(
         val roomId: String,
-        val success: Boolean
+        val success: Boolean,
     ) : ServerSocketMessage()
 
     @Serializable
     @SerialName("CountdownTimeUpdate")
     data class CountdownTimeUpdate(
-        val remaining: Long
+        val remaining: Long,
     ) : ServerSocketMessage()
 
     @Serializable
@@ -36,19 +36,19 @@ sealed class ServerSocketMessage {
         val state: RoomState,
         val cursorPosition: Float,
         val timeRemaining: Long? = null,
-        val currentQuestion: QuestionDto? = null
+        val currentQuestion: QuestionDto? = null,
     ) : ServerSocketMessage()
 
     @Serializable
     @SerialName("TimeUpdate")
     data class TimeUpdate(
-        val remaining: Long
+        val remaining: Long,
     ) : ServerSocketMessage()
 
     @Serializable
     @SerialName("TimeUp")
     data class TimeUp(
-        val correctAnswer: Int
+        val correctAnswer: Int,
     ) : ServerSocketMessage()
 
     @Serializable
@@ -56,7 +56,7 @@ sealed class ServerSocketMessage {
     data class AnswerResult(
         val playerId: String,
         val answer: Int,
-        val correct: Boolean
+        val correct: Boolean,
     ) : ServerSocketMessage()
 
     @Serializable
@@ -64,7 +64,7 @@ sealed class ServerSocketMessage {
     data class RoundUpdate(
         val roundNumber: Int,
         val timeRemaining: Long,
-        val currentQuestion: QuestionDto
+        val currentQuestion: QuestionDto,
     ) : ServerSocketMessage()
 
     @Serializable
@@ -72,37 +72,37 @@ sealed class ServerSocketMessage {
     data class RoundEnded(
         val cursorPosition: Float,
         val correctAnswer: Int,
-        val winnerPlayerId: String?
+        val winnerPlayerId: String?,
     ) : ServerSocketMessage()
 
     @Serializable
     @SerialName("GameOver")
     data class GameOver(
-        val winnerPlayerId: String
+        val winnerPlayerId: String,
     ) : ServerSocketMessage()
 
     @Serializable
     @SerialName("PlayerDisconnected")
     data class PlayerDisconnected(
         val playerId: String,
-        val playerName: String
+        val playerName: String,
     ) : ServerSocketMessage()
 
     @Serializable
     @SerialName("PlayerReconnected")
     data class PlayerReconnected(
-        val playerId: String
+        val playerId: String,
     ) : ServerSocketMessage()
 
     @Serializable
     @SerialName("RoomClosed")
     data class RoomClosed(
-        val reason: String
+        val reason: String,
     ) : ServerSocketMessage()
 
     @Serializable
     @SerialName("Error")
     data class Error(
-        val message: String
+        val message: String,
     ) : ServerSocketMessage()
 } 

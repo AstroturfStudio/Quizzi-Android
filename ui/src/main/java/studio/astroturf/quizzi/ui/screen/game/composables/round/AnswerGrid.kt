@@ -16,16 +16,16 @@ internal fun AnswerGrid(
     selectedAnswerId: Int?,
     playerRoundResult: PlayerRoundResult?,
     onAnswerSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         question.options.chunked(2).forEach { rowOptions ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 rowOptions.forEach { option ->
                     AnswerButton(
@@ -34,7 +34,7 @@ internal fun AnswerGrid(
                         selectedAnswerId = selectedAnswerId,
                         playerRoundResult = playerRoundResult,
                         onClick = { onAnswerSelected(option.id) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }

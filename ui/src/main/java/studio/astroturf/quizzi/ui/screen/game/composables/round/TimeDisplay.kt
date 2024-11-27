@@ -18,33 +18,35 @@ import androidx.compose.ui.draw.scale
 @Composable
 internal fun TimeDisplay(
     timeRemaining: Int?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val animatedScale by animateFloatAsState(
         targetValue = if (timeRemaining?.let { it <= 3 } == true) 1.2f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        )
+        animationSpec =
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow,
+            ),
     )
 
     Surface(
         shape = CircleShape,
-        color = when {
-            timeRemaining?.let { it <= 3 } == true -> MaterialTheme.colorScheme.error
-            timeRemaining?.let { it <= 5 } == true -> MaterialTheme.colorScheme.secondary
-            else -> MaterialTheme.colorScheme.primary
-        },
-        modifier = modifier.scale(animatedScale)
+        color =
+            when {
+                timeRemaining?.let { it <= 3 } == true -> MaterialTheme.colorScheme.error
+                timeRemaining?.let { it <= 5 } == true -> MaterialTheme.colorScheme.secondary
+                else -> MaterialTheme.colorScheme.primary
+            },
+        modifier = modifier.scale(animatedScale),
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             Text(
                 text = timeRemaining?.toString() ?: "",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
             )
         }
     }

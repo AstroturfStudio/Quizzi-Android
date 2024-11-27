@@ -35,7 +35,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://quizzi-production-16a0.up.railway.app\""
+                "\"https://quizzi-production-16a0.up.railway.app\"",
             )
         }
         create("dev") {
@@ -62,5 +62,4 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)
-
 }
