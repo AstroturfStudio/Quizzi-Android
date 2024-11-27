@@ -1,6 +1,5 @@
 package studio.astroturf.quizzi.ui.screen.landing
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.repository.QuizRepository
 import studio.astroturf.quizzi.domain.storage.PreferencesStorage
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,7 +38,7 @@ class LandingViewModel
                     preferencesStorage.savePlayerId(player.id)
                     _uiState.value = uiState.value.copy(playerId = player.id)
                 }.onFailure {
-                    Log.e("LandingViewModel", "createPlayer: ", it)
+                    Timber.tag("LandingViewModel").e(it, "createPlayer: ")
                 }
         }
 
