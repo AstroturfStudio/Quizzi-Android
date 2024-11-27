@@ -31,10 +31,10 @@ internal fun GameRoundContent(
 ) {
     Column(
         modifier =
-        Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .systemBarsPadding(),
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .systemBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // Time display at the top center

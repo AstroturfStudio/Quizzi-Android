@@ -66,31 +66,31 @@ fun GameBar(
         // Sağ taraf (Kırmızı)
         Box(
             modifier =
-            Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(1f - cursorPositionAnimated)
-                .align(Alignment.CenterEnd)
-                .background(Color(0xFFB71C1C)),
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(1f - cursorPositionAnimated)
+                    .align(Alignment.CenterEnd)
+                    .background(Color(0xFFB71C1C)),
         )
 
         // Cursor
         Box(
             modifier =
-            Modifier
-                .size(16.dp)
-                .offset {
-                    IntOffset(
-                        x =
-                        (cursorPositionAnimated * containerWidth).toInt() -
-                                8
-                                    .dp
-                                    .toPx()
-                                    .toInt(),
-                        y = 0,
-                    )
-                }.clip(CircleShape)
-                .background(Color.White)
-                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                Modifier
+                    .size(16.dp)
+                    .offset {
+                        IntOffset(
+                            x =
+                                (cursorPositionAnimated * containerWidth).toInt() -
+                                    8
+                                        .dp
+                                        .toPx()
+                                        .toInt(),
+                            y = 0,
+                        )
+                    }.clip(CircleShape)
+                    .background(Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
         )
     }
 }
@@ -100,17 +100,17 @@ fun GameBar(
 private fun GameBarPreview() {
     Box(
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .height(48.dp)
+            Modifier
+                .fillMaxWidth()
+                .height(48.dp)
                 .padding(8.dp),
     ) {
         GameBar(
             cursorPosition = 0.2f,
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(8.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .height(8.dp),
         )
     }
 }
@@ -129,17 +129,17 @@ private fun GameBarMovingPreview() {
 
     Box(
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .height(48.dp)
+            Modifier
+                .fillMaxWidth()
+                .height(48.dp)
                 .padding(8.dp),
     ) {
         GameBar(
             cursorPosition = position,
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(8.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .height(8.dp),
         )
     }
 }

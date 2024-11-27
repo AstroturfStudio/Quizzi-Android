@@ -21,9 +21,7 @@ sealed class ClientSocketMessage {
 
     @Serializable
     @SerialName("PlayerReady")
-    data class PlayerReady(
-        val playerId: String,
-    ) : ClientSocketMessage()
+    data object PlayerReady : ClientSocketMessage()
 
     @Serializable
     @SerialName("PlayerAnswer")

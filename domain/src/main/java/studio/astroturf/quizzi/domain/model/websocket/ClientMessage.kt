@@ -7,9 +7,7 @@ sealed class ClientMessage {
         val roomId: String,
     ) : ClientMessage()
 
-    data class PlayerReady(
-        val playerId: String,
-    ) : ClientMessage()
+    data object PlayerReady : ClientMessage()
 
     data class PlayerAnswer(
         val answer: Int,

@@ -61,7 +61,7 @@ fun ClientMessage.toDto(): ClientSocketMessage =
     when (this) {
         is ClientMessage.CreateRoom -> ClientSocketMessage.CreateRoom
         is ClientMessage.JoinRoom -> ClientSocketMessage.JoinRoom(roomId = roomId)
-        is ClientMessage.PlayerReady -> ClientSocketMessage.PlayerReady(playerId = playerId)
+        is ClientMessage.PlayerReady -> ClientSocketMessage.PlayerReady
         is ClientMessage.PlayerAnswer -> ClientSocketMessage.PlayerAnswer(answer = answer)
         is ClientMessage.PlayerReconnected -> ClientSocketMessage.PlayerReconnected(playerId = playerId)
     }
