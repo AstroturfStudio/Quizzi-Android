@@ -35,6 +35,7 @@ fun GameScreen(
     viewModel: GameViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
     GameScreenContent(
         state = uiState,
         onNavigateToRooms = onNavigateToRooms,

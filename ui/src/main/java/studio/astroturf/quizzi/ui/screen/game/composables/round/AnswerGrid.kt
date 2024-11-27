@@ -8,10 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.domain.model.Question
+import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 
 @Composable
 internal fun AnswerGrid(
     question: Question,
+    selectedAnswerId: Int?,
+    playerRoundResult: PlayerRoundResult?,
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -27,6 +30,9 @@ internal fun AnswerGrid(
                 rowOptions.forEach { option ->
                     AnswerButton(
                         text = option.value,
+                        optionId = option.id,
+                        selectedAnswerId = selectedAnswerId,
+                        playerRoundResult = playerRoundResult,
                         onClick = { onAnswerSelected(option.id) },
                         modifier = Modifier.weight(1f)
                     )

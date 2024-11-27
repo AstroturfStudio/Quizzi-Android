@@ -16,6 +16,7 @@ import studio.astroturf.quizzi.domain.model.Option
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.Question
 import studio.astroturf.quizzi.ui.screen.game.GameUiState
+import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
 
 @Composable
@@ -51,6 +52,8 @@ internal fun GameRoundContent(
         // Answer grid at the bottom with specific padding
         AnswerGrid(
             question = state.question,
+            selectedAnswerId = state.selectedAnswerId,
+            playerRoundResult = state.playerRoundResult,
             onAnswerSelected = onSubmitAnswer,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -64,11 +67,13 @@ private fun GameRoundContentPreview() {
         GameRoundContent(
             state = GameUiState.RoundOn(
                 player1 = Player(
-                    id = "1", name = "Player 1",
+                    id = "1",
+                    name = "Player 1",
                     avatarUrl = "TODO()"
                 ),
                 player2 = Player(
-                    id = "2", name = "Player 2",
+                    id = "2",
+                    name = "Player 2",
                     avatarUrl = "TODO()"
                 ),
                 gameBarPercentage = 0.7f,
@@ -82,7 +87,84 @@ private fun GameRoundContentPreview() {
                         Option(id = 4, value = "Madrid")
                     )
                 ),
-                timeRemainingInSeconds = 14
+                timeRemainingInSeconds = 14,
+                selectedAnswerId = null,
+                playerRoundResult = null
+            ),
+            onSubmitAnswer = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun GameRoundContentWithSelectedAnswerPreview() {
+    QuizziTheme {
+        GameRoundContent(
+            state = GameUiState.RoundOn(
+                player1 = Player(
+                    id = "1",
+                    name = "Player 1",
+                    avatarUrl = "TODO()"
+                ),
+                player2 = Player(
+                    id = "2",
+                    name = "Player 2",
+                    avatarUrl = "TODO()"
+                ),
+                gameBarPercentage = 0.7f,
+                question = Question(
+                    content = "What is the capital of France?",
+                    imageUrl = "https://example.com/paris.jpg",
+                    options = listOf(
+                        Option(id = 1, value = "Paris"),
+                        Option(id = 2, value = "London"),
+                        Option(id = 3, value = "Berlin"),
+                        Option(id = 4, value = "Madrid")
+                    )
+                ),
+                timeRemainingInSeconds = 14,
+                selectedAnswerId = 1, // Paris seçili
+                playerRoundResult = null   // Henüz sonuç gelmemiş
+            ),
+            onSubmitAnswer = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun GameRoundContentWithCorrectAnswerPreview() {
+    QuizziTheme {
+        GameRoundContent(
+            state = GameUiState.RoundOn(
+                player1 = Player(
+                    id = "1",
+                    name = "Player 1",
+                    avatarUrl = "TODO()"
+                ),
+                player2 = Player(
+                    id = "2",
+                    name = "Player 2",
+                    avatarUrl = "TODO()"
+                ),
+                gameBarPercentage = 0.7f,
+                question = Question(
+                    content = "What is the capital of France?",
+                    imageUrl = "https://example.com/paris.jpg",
+                    options = listOf(
+                        Option(id = 1, value = "Paris"),
+                        Option(id = 2, value = "London"),
+                        Option(id = 3, value = "Berlin"),
+                        Option(id = 4, value = "Madrid")
+                    )
+                ),
+                timeRemainingInSeconds = 14,
+                selectedAnswerId = 1, // Paris seçili
+                playerRoundResult = PlayerRoundResult(
+                    answerId = 1,
+                    isCorrect = true
+                )
             ),
             onSubmitAnswer = {}
         )

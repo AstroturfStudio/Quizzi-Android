@@ -21,8 +21,15 @@ sealed interface GameUiState {
         val player2: Player,
         val gameBarPercentage: Float,
         val question: Question,
-        val timeRemainingInSeconds: Int
-    ) : GameUiState
+        val timeRemainingInSeconds: Int,
+        val selectedAnswerId: Int? = null,
+        val playerRoundResult: PlayerRoundResult? = null
+    ) : GameUiState {
+        data class PlayerRoundResult(
+            val answerId: Int,
+            val isCorrect: Boolean
+        )
+    }
 
     data class Paused(
         val reason: String,
@@ -41,3 +48,4 @@ sealed interface GameUiState {
         val winner: Player
     ) : GameUiState
 }
+

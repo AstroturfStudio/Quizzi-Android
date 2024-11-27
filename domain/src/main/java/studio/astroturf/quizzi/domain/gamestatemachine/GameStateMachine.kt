@@ -8,11 +8,28 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.model.GameStatistics
 import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.RoomState
 import studio.astroturf.quizzi.domain.model.statemachine.Destination
 import studio.astroturf.quizzi.domain.model.statemachine.GameEffect
 import studio.astroturf.quizzi.domain.model.statemachine.GameIntent
 import studio.astroturf.quizzi.domain.model.statemachine.GameState
 import studio.astroturf.quizzi.domain.model.statemachine.StateMachine
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.AnswerResult
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.Countdown
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.Error
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.GameOver
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.PlayerDisconnected
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.PlayerReconnected
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomClosed
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomCreated
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomJoined
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomUpdate
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoundEnded
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoundUpdate
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.TimeUp
+import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.TimeUpdate
+import timber.log.Timber
 
 class GameStateMachine(
     val coroutineScope: CoroutineScope
@@ -218,6 +235,38 @@ class GameStateMachine(
             }
 
             else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is GameOver")
+        }
+    }
+
+    fun processServerMessage(message: ServerMessage) {
+        when (message) {
+            // effects
+            is TimeUpdate -> sideEffect(GameEffect.ShowTimeRemaining(message.remaining))
+            is AnswerResult -> sideEffect(GameEffect.ReceiveAnswerResult(message))
+            is PlayerDisconnected -> sideEffect(GameEffect.PlayerDisconnected(message))
+            is Error -> sideEffect(GameEffect.ShowError(message.message))
+            is PlayerReconnected -> sideEffect(GameEffect.PlayerReconnected(message))
+            is RoomCreated -> sideEffect(GameEffect.RoomCreated(message))
+            is RoomJoined -> sideEffect(GameEffect.RoomJoined(message))
+            is RoundUpdate -> sideEffect(GameEffect.RoundUpdate(message))
+            is TimeUp -> sideEffect(GameEffect.RoundTimeUp(message))
+
+
+            // intents
+            is Countdown -> reduce(GameIntent.Countdown(message))
+            is RoomUpdate -> {
+                if (message.state == RoomState.WAITING) {
+                    reduce(GameIntent.Lobby(message))
+                } else if (message.state == RoomState.PLAYING) {
+                    reduce(GameIntent.StartRound(message))
+                }
+
+                Timber.tag("GameStateMachine: ").d("RoomUpdate: $message")
+            }
+
+            is RoundEnded -> reduce(GameIntent.RoundEnd(message))
+            is GameOver -> reduce(GameIntent.GameOver(message))
+            is RoomClosed -> reduce(GameIntent.CloseRoom(message))
         }
     }
 }
