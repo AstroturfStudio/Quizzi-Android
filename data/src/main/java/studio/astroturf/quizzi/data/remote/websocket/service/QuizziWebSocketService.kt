@@ -80,7 +80,7 @@ class QuizziWebSocketService
                     delay(delayMs)
                     playerId?.let { existingId ->
                         connectWebSocket()
-                    send(createReconnectMessage(existingId))
+                        send(createReconnectMessage(existingId))
                     }
                 } catch (e: Exception) {
                     Timber.e(e)
@@ -153,8 +153,8 @@ class QuizziWebSocketService
                 }
 
                 override fun onClosing(
-                webSocket: WebSocket,
-                code: Int,
+                    webSocket: WebSocket,
+                    code: Int,
                     reason: String,
                 ) {
                     Timber.d("WebSocket Closing: $code - $reason")
@@ -172,19 +172,19 @@ class QuizziWebSocketService
                 }
 
                 override fun onFailure(
-                webSocket: WebSocket,
-                t: Throwable,
-                response: Response?,
-            ) {
-                Timber.e(t, "WebSocket Error")
+                    webSocket: WebSocket,
+                    t: Throwable,
+                    response: Response?,
+                ) {
+                    Timber.e(t, "WebSocket Error")
 //            handleReconnect()
+                }
             }
-        }
 
-    companion object {
-        private const val NORMAL_CLOSURE_STATUS = 1000
-        private const val MAX_RECONNECT_ATTEMPTS = 5
-        private const val INITIAL_BACKOFF_MS = 1000L
-        private const val MAX_BACKOFF_MS = 32000L
+        companion object {
+            private const val NORMAL_CLOSURE_STATUS = 1000
+            private const val MAX_RECONNECT_ATTEMPTS = 5
+            private const val INITIAL_BACKOFF_MS = 1000L
+            private const val MAX_BACKOFF_MS = 32000L
+        }
     }
-}

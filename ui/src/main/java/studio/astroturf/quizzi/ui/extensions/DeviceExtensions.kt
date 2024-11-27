@@ -40,7 +40,7 @@ fun Context.getDeviceInfo(): DeviceInfo =
                 packageManager.getPackageInfo(packageName, 0).versionName
             } catch (e: PackageManager.NameNotFoundException) {
                 "unknown"
-        },
+            },
     )
 
 data class DeviceInfo(

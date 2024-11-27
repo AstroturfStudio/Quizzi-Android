@@ -55,12 +55,12 @@ class RoomsViewModel
                     getRooms()
                 } finally {
                     _isRefreshing.value = false
+                }
             }
         }
-    }
 
-    override fun onCleared() {
-        super.onCleared()
-        repository.disconnect()
+        override fun onCleared() {
+            super.onCleared()
+            repository.disconnect()
+        }
     }
-}

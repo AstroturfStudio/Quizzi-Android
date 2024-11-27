@@ -41,4 +41,4 @@ fun CountdownOverlay(
             modifier = Modifier.scale(scale),
         )
     }
-} 
+}

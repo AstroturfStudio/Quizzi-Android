@@ -13,4 +13,4 @@ class ObserveQuizUseCase
         private val repository: QuizRepository,
     ) {
         operator fun invoke(): Flow<ServerMessage> = repository.observeMessages()
-}
+    }

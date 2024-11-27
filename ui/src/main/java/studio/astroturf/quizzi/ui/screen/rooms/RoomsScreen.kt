@@ -148,7 +148,7 @@ private fun RoomItem(
                 defaultElevation = 2.dp,
                 pressedElevation = 4.dp,
                 focusedElevation = 4.dp,
-        ),
+            ),
     ) {
         Row(
             modifier =
@@ -205,8 +205,8 @@ private fun RoomsScreenContentPreview() {
                         id = "Room2",
                         roomState = RoomState.PLAYING,
                         players = listOf("Player3", "Player4", "Player5"),
+                    ),
                 ),
-            ),
             isConnected = true,
             error = null,
             onCreateRoom = {},

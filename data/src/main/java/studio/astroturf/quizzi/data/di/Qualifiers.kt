@@ -8,4 +8,4 @@ annotation class RestClient
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class WebSocketClient 
+annotation class WebSocketClient

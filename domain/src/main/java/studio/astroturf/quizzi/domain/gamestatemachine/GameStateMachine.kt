@@ -210,7 +210,7 @@ class GameStateMachine(
                             roundCount = 10,
                             averageResponseTimeMillis = mapOf(),
                             totalGameLengthMillis = 10,
-                    ),
+                        ),
                 )
             }
 

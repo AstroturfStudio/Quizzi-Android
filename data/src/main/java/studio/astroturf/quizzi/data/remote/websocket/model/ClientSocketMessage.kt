@@ -36,4 +36,4 @@ sealed class ClientSocketMessage {
     data class PlayerReconnected(
         val playerId: String,
     ) : ClientSocketMessage()
-} 
+}

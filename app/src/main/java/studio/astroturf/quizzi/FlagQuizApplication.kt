@@ -10,4 +10,4 @@ class QuizziApplication : Application() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
     }
-} 
+}

@@ -52,8 +52,8 @@ class LandingViewModel
                     }.onFailure {
                         _uiState.value =
                             uiState.value.copy(
-                            error = "Failed to login. Please try again.",
-                        )
-                }
-        }
-}
+                                error = "Failed to login. Please try again.",
+                            )
+                    }
+            }
+    }

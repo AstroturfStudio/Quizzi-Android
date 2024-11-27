@@ -83,7 +83,7 @@ fun RoundResultOverlay(
 
 @Preview
 @Composable
-fun RoundResultOverlayPreview() {
+private fun RoundResultOverlayPreview() {
     RoundResultOverlay(
         correctAnswerText = "Doğru Cevap",
         winnerName = "Alice",

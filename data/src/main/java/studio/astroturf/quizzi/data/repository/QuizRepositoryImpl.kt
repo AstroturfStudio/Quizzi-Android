@@ -50,9 +50,9 @@ class QuizRepositoryImpl
 
         override fun sendMessage(message: ClientMessage) {
             quizziWebSocketService.send(message.toDto())
-    }
+        }
 
-    override fun disconnect() {
-        quizziWebSocketService.disconnect()
+        override fun disconnect() {
+            quizziWebSocketService.disconnect()
+        }
     }
-} 

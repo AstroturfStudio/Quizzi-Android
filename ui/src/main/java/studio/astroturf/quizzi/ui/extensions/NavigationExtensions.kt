@@ -38,4 +38,4 @@ fun NavController.navigateWithAnimation(
         }
         builder()
     }
-} 
+}

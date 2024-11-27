@@ -57,39 +57,39 @@ fun GameBar(
         // Sol taraf (Mavi)
         Box(
             modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(cursorPositionAnimated)
-                    .background(Color(0xFF1A3A6E)),
+            Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(cursorPositionAnimated)
+                .background(Color(0xFF1A3A6E)),
         )
 
         // Sağ taraf (Kırmızı)
         Box(
             modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(1f - cursorPositionAnimated)
-                    .align(Alignment.CenterEnd)
+            Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(1f - cursorPositionAnimated)
+                .align(Alignment.CenterEnd)
                 .background(Color(0xFFB71C1C)),
         )
 
         // Cursor
         Box(
             modifier =
-                Modifier
-                    .size(16.dp)
-                    .offset {
-                        IntOffset(
-                            x =
-                                (cursorPositionAnimated * containerWidth).toInt() -
-                                    8
-                                        .dp
-                                        .toPx()
-                                        .toInt(),
-                            y = 0,
-                        )
-                    }.clip(CircleShape)
-                    .background(Color.White)
+            Modifier
+                .size(16.dp)
+                .offset {
+                    IntOffset(
+                        x =
+                        (cursorPositionAnimated * containerWidth).toInt() -
+                                8
+                                    .dp
+                                    .toPx()
+                                    .toInt(),
+                        y = 0,
+                    )
+                }.clip(CircleShape)
+                .background(Color.White)
                 .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
         )
     }
@@ -97,7 +97,7 @@ fun GameBar(
 
 @Preview(showBackground = true)
 @Composable
-fun GameBarPreview() {
+private fun GameBarPreview() {
     Box(
         modifier =
         Modifier
@@ -117,7 +117,7 @@ fun GameBarPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun GameBarMovingPreview() {
+private fun GameBarMovingPreview() {
     var position by remember { mutableStateOf(0.5f) }
 
     LaunchedEffect(Unit) {

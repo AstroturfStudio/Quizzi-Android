@@ -107,4 +107,4 @@ fun <T> Flow<T>.toSharedFlow(
     replay: Int = 0,
     scope: CoroutineScope,
     started: SharingStarted = SharingStarted.WhileSubscribed(5000),
-): SharedFlow<T> = shareIn(scope, started, replay) 
+): SharedFlow<T> = shareIn(scope, started, replay)

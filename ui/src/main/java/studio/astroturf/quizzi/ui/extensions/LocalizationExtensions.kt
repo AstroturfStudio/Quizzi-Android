@@ -51,4 +51,4 @@ fun Context.getLocalizedString(
     return createConfigurationContext(configuration)
         .resources
         .getString(resourceId)
-} 
+}

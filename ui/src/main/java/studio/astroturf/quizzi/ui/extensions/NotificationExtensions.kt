@@ -192,4 +192,4 @@ fun Context.cancelNotification(notificationId: Int) {
 
 fun Context.cancelAllNotifications() {
     NotificationManagerCompat.from(this).cancelAll()
-} 
+}

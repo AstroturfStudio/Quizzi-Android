@@ -110,4 +110,4 @@ fun Int.toTimeString(): String {
         if (minutes > 0) append("${minutes}m ")
         if (seconds > 0 || (hours == 0 && minutes == 0)) append("${seconds}s")
     }.trim()
-} 
+}

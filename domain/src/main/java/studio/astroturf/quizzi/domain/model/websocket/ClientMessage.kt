@@ -18,4 +18,4 @@ sealed class ClientMessage {
     data class PlayerReconnected(
         val playerId: String,
     ) : ClientMessage()
-} 
+}

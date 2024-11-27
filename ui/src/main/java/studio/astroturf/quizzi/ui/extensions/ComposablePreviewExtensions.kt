@@ -50,8 +50,8 @@ class FontScalePreviewParameterProvider : PreviewParameterProvider<Float> {
     group = "Accessibility",
 )
 @Composable
-fun FontScalePreview(
+private fun FontScalePreview(
     @PreviewParameter(FontScalePreviewParameterProvider::class) fontScale: Float,
 ) {
     // Your composable here
-} 
+}

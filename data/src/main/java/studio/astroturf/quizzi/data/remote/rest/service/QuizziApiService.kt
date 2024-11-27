@@ -51,7 +51,7 @@ class QuizziApiService
             }.onFailure { e ->
                 when (e) {
                     is HttpException -> Timber.e(e, "Failed to get rooms")
-                else -> Timber.e(e, "Unexpected error while fetching rooms")
+                    else -> Timber.e(e, "Unexpected error while fetching rooms")
+                }
             }
-        }
-}
+    }

@@ -105,4 +105,4 @@ sealed class ServerSocketMessage {
     data class Error(
         val message: String,
     ) : ServerSocketMessage()
-} 
+}

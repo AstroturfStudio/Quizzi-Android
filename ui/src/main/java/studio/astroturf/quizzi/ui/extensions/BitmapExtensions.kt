@@ -76,4 +76,4 @@ fun Bitmap.applyColorFilter(color: Int): Bitmap {
         }
     Canvas(result).drawBitmap(this, 0f, 0f, paint)
     return result
-} 
+}

@@ -92,11 +92,11 @@ private fun GameRoundContentPreview() {
                                     Option(id = 3, value = "Berlin"),
                                     Option(id = 4, value = "Madrid"),
                                 ),
+                        ),
+                    timeRemainingInSeconds = 14,
+                    selectedAnswerId = null,
+                    playerRoundResult = null,
                 ),
-                timeRemainingInSeconds = 14,
-                selectedAnswerId = null,
-                playerRoundResult = null,
-            ),
             onSubmitAnswer = {},
         )
     }
@@ -130,11 +130,11 @@ private fun GameRoundContentWithSelectedAnswerPreview() {
                                 listOf(
                                     Option(id = 1, value = "Paris"),
                                     Option(id = 2, value = "London"),
-                        Option(id = 3, value = "Berlin"),
-                        Option(id = 4, value = "Madrid"),
-                    ),
-                ),
-                timeRemainingInSeconds = 14,
+                                    Option(id = 3, value = "Berlin"),
+                                    Option(id = 4, value = "Madrid"),
+                                ),
+                        ),
+                    timeRemainingInSeconds = 14,
                     selectedAnswerId = 1, // Paris seçili
                     playerRoundResult = null, // Henüz sonuç gelmemiş
                 ),
@@ -170,19 +170,19 @@ private fun GameRoundContentWithCorrectAnswerPreview() {
                             options =
                                 listOf(
                                     Option(id = 1, value = "Paris"),
-                        Option(id = 2, value = "London"),
-                        Option(id = 3, value = "Berlin"),
-                        Option(id = 4, value = "Madrid"),
-                    ),
+                                    Option(id = 2, value = "London"),
+                                    Option(id = 3, value = "Berlin"),
+                                    Option(id = 4, value = "Madrid"),
+                                ),
+                        ),
+                    timeRemainingInSeconds = 14,
+                    selectedAnswerId = 1, // Paris seçili
+                    playerRoundResult =
+                        PlayerRoundResult(
+                            answerId = 1,
+                            isCorrect = true,
+                        ),
                 ),
-                timeRemainingInSeconds = 14,
-                selectedAnswerId = 1, // Paris seçili
-                playerRoundResult =
-                PlayerRoundResult(
-                    answerId = 1,
-                    isCorrect = true,
-                ),
-            ),
             onSubmitAnswer = {},
         )
     }

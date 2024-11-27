@@ -41,4 +41,4 @@ fun <T> Flow<T>.collectWhenResumed(
             collect { collector(it) }
         }
     }
-} 
+}

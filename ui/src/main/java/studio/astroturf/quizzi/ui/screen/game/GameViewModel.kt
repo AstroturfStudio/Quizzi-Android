@@ -144,19 +144,19 @@ class GameViewModel
                 // Update UI state to show selected answer
                 val currentState = _uiState.value
                 if (currentState is GameUiState.RoundOn) {
-                _uiState.value =
-                    currentState.copy(
-                        selectedAnswerId = answerId,
-                    )
-            }
+                    _uiState.value =
+                        currentState.copy(
+                            selectedAnswerId = answerId,
+                        )
+                }
 
-            // Send answer to server
-            repository.sendMessage(ClientMessage.PlayerAnswer(answerId))
+                // Send answer to server
+                repository.sendMessage(ClientMessage.PlayerAnswer(answerId))
+            }
+        }
+
+        override fun onCleared() {
+            super.onCleared()
+            repository.disconnect()
         }
     }
-
-    override fun onCleared() {
-        super.onCleared()
-        repository.disconnect()
-    }
-}

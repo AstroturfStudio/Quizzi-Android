@@ -47,4 +47,4 @@ fun <T> List<T>.forEachIndexedReversed(action: (Int, T) -> Unit) {
     for (i in lastIndex downTo 0) {
         action(i, get(i))
     }
-} 
+}

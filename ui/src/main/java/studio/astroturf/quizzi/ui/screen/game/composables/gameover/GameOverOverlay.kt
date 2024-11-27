@@ -99,4 +99,4 @@ private fun GameOverOverlayPreview() {
         onNavigateBack = {},
         modifier = Modifier.fillMaxSize(),
     )
-} 
+}

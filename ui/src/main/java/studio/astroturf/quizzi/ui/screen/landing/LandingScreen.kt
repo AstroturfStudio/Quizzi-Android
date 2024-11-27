@@ -124,7 +124,7 @@ fun LandingScreenContent(
 
 @Preview(showBackground = true)
 @Composable
-fun LandingScreenPreview_NewUser() {
+private fun LandingScreenPreview_NewUser() {
     MaterialTheme {
         LandingScreenContent()
     }
@@ -132,7 +132,7 @@ fun LandingScreenPreview_NewUser() {
 
 @Preview(showBackground = true)
 @Composable
-fun LandingScreenPreview_ExistingUser() {
+private fun LandingScreenPreview_ExistingUser() {
     MaterialTheme {
         LandingScreenContent(
             modifier = Modifier.fillMaxSize(),

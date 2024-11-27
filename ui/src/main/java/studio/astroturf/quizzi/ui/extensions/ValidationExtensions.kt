@@ -48,4 +48,4 @@ fun String.isValidEmail(): ValidationResult =
 fun String.containsSpecialCharacters(): Boolean = matches(Regex(".*[@#\$%^&+=].*"))
 
 fun String.isValidIpAddress(): Boolean =
-    matches(Regex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")) 
+    matches(Regex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"))

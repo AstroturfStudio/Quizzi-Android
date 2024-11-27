@@ -77,4 +77,4 @@ fun Context.getNetworkType(): String {
         capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true -> "VPN"
         else -> "Unknown"
     }
-} 
+}

@@ -72,4 +72,4 @@ sealed class ServerMessage {
     data class RoomClosed(
         val reason: String,
     ) : ServerMessage()
-} 
+}

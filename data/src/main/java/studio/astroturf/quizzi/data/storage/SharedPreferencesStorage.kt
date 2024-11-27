@@ -21,5 +21,5 @@ class SharedPreferencesStorage
 
         override fun clearPlayerId() {
             sharedPreferences.edit().remove(KEY_PLAYER_ID).apply()
+        }
     }
-} 
