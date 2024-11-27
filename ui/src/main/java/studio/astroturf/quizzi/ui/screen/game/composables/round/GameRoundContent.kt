@@ -1,12 +1,17 @@
 package studio.astroturf.quizzi.ui.screen.game.composables.round
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,17 +31,53 @@ internal fun GameRoundContent(
 ) {
     Column(
         modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .systemBarsPadding(),
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .systemBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // GameTopBar needs specific height constraints
-        Box(modifier = Modifier.height(56.dp)) {
-            GameTopBar(
+        // Time display at the top center
+        Box(
+            modifier =
+                Modifier
+                    .padding(bottom = 16.dp)
+                    .size(72.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            TimeDisplay(
                 timeRemaining = state.timeRemainingInSeconds,
-                cursorPosition = 1 - state.gameBarPercentage, // fixme
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        // Players VS section with GameBar
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            PlayerDisplay(
+                player = state.player1,
+                isLeft = true,
+                modifier = Modifier.weight(1f),
+            )
+
+            GameBar(
+                cursorPosition = 1 - state.gameBarPercentage,
+                modifier =
+                    Modifier
+                        .width(160.dp)
+                        .height(12.dp),
+            )
+
+            PlayerDisplay(
+                player = state.player2,
+                isLeft = false,
+                modifier = Modifier.weight(1f),
             )
         }
 
@@ -50,7 +91,7 @@ internal fun GameRoundContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Answer grid at the bottom with specific padding
+        // Answer grid at the bottom
         AnswerGrid(
             question = state.question,
             selectedAnswerId = state.selectedAnswerId,
@@ -135,8 +176,8 @@ private fun GameRoundContentWithSelectedAnswerPreview() {
                                 ),
                         ),
                     timeRemainingInSeconds = 14,
-                    selectedAnswerId = 1, // Paris seçili
-                    playerRoundResult = null, // Henüz sonuç gelmemiş
+                    selectedAnswerId = 1,
+                    playerRoundResult = null,
                 ),
             onSubmitAnswer = {},
         )
@@ -176,7 +217,7 @@ private fun GameRoundContentWithCorrectAnswerPreview() {
                                 ),
                         ),
                     timeRemainingInSeconds = 14,
-                    selectedAnswerId = 1, // Paris seçili
+                    selectedAnswerId = 1,
                     playerRoundResult =
                         PlayerRoundResult(
                             answerId = 1,
@@ -185,5 +226,44 @@ private fun GameRoundContentWithCorrectAnswerPreview() {
                 ),
             onSubmitAnswer = {},
         )
+    }
+}
+
+// Additional preview for PlayerDisplay
+@Preview(showBackground = true)
+@Composable
+private fun PlayerDisplayPreview() {
+    QuizziTheme {
+        Row(modifier = Modifier.width(200.dp)) {
+            PlayerDisplay(
+                player =
+                    Player(
+                        id = "1",
+                        name = "John Doe",
+                        avatarUrl = "TODO()",
+                    ),
+                isLeft = true,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PlayerDisplayRightPreview() {
+    QuizziTheme {
+        Row(modifier = Modifier.width(200.dp)) {
+            PlayerDisplay(
+                player =
+                    Player(
+                        id = "2",
+                        name = "Jane Doe",
+                        avatarUrl = "TODO()",
+                    ),
+                isLeft = false,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }

@@ -57,10 +57,10 @@ fun GameBar(
         // Sol taraf (Mavi)
         Box(
             modifier =
-            Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(cursorPositionAnimated)
-                .background(Color(0xFF1A3A6E)),
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(cursorPositionAnimated)
+                    .background(Color(0xFF1A3A6E)),
         )
 
         // Sağ taraf (Kırmızı)
