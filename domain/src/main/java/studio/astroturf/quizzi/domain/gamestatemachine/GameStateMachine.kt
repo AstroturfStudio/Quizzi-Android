@@ -4,8 +4,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import studio.astroturf.quizzi.domain.model.GameStatistics
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.RoomState
@@ -15,73 +18,93 @@ import studio.astroturf.quizzi.domain.model.statemachine.GameIntent
 import studio.astroturf.quizzi.domain.model.statemachine.GameState
 import studio.astroturf.quizzi.domain.model.statemachine.StateMachine
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.AnswerResult
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.Countdown
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.Error
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.GameOver
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.PlayerDisconnected
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.PlayerReconnected
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomClosed
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomCreated
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomJoined
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoomUpdate
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoundEnded
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.RoundUpdate
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.TimeUp
-import studio.astroturf.quizzi.domain.model.websocket.ServerMessage.TimeUpdate
 import timber.log.Timber
 
+private const val TAG = "GameStateMachine"
+private const val DEFAULT_ROUND_COUNT = 10
+private const val CHANNEL_BUFFER_SIZE = Channel.BUFFERED
+
 class GameStateMachine(
-    val coroutineScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope,
 ) : StateMachine<GameState, GameIntent, GameEffect> {
-    private val _currentStateFlow = MutableStateFlow<GameState>(GameState.Idle)
-    val stateFlow = _currentStateFlow.asStateFlow()
+    private val _stateFlow = MutableStateFlow<GameState>(GameState.Idle)
+    val stateFlow = _stateFlow.asStateFlow()
 
-    private val _effectChannel = Channel<GameEffect>()
-    val effectFlow = _effectChannel.receiveAsFlow()
+    private val _effects = Channel<GameEffect>()
+    val effects = _effects.receiveAsFlow()
 
-    override fun getCurrentState(): GameState = _currentStateFlow.value
+    private val stateMutex = Mutex()
+    private val messageChannel = Channel<ServerMessage>(CHANNEL_BUFFER_SIZE)
+
+    init {
+        initializeServerMessageProcessing()
+    }
+
+    private fun initializeServerMessageProcessing() {
+        coroutineScope.launch {
+            messageChannel.consumeAsFlow().collect { message ->
+                processMessageSafely(message)
+            }
+        }
+    }
+
+    override fun getCurrentState(): GameState = _stateFlow.value
 
     override fun sideEffect(effect: GameEffect) {
         coroutineScope.launch {
-            _effectChannel.send(effect)
+            _effects.send(effect)
         }
     }
 
     override fun reduce(intent: GameIntent) {
-        val currentState = getCurrentState()
-
-        val newState =
-            when (currentState) {
-                GameState.Idle -> reduceIdleState(currentState, intent)
-                is GameState.Lobby -> reduceLobbyState(currentState, intent)
-                is GameState.Starting -> reduceStartingState(currentState, intent)
-                is GameState.RoundOn -> reduceRoundOnState(currentState, intent)
-                is GameState.Paused -> reducePausedState(currentState, intent)
-                is GameState.EndOfRound -> reduceEndOfRoundState(currentState, intent)
-                is GameState.GameOver -> reduceGameOverState(currentState, intent)
-            }
-
-        _currentStateFlow.value = newState
+        coroutineScope.launch {
+            reduceWithLock(intent)
+        }
     }
 
-    private fun reduceIdleState(
+    private suspend fun reduceWithLock(intent: GameIntent) {
+        stateMutex.withLock {
+            val currentState = getCurrentState()
+            logStateTransition(currentState, intent)
+
+            val newState =
+                try {
+                    reduceState(currentState, intent)
+                } catch (e: IllegalStateException) {
+                    handleStateTransitionError(e, currentState)
+                    currentState
+                }
+
+            if (newState != currentState) {
+                logStateChange(currentState, newState)
+            }
+            _stateFlow.value = newState
+        }
+    }
+
+    private fun reduceState(
         currentState: GameState,
         intent: GameIntent,
     ): GameState =
-        when (intent) {
-            is GameIntent.CloseRoom -> TODO()
-            GameIntent.ExitGame -> TODO()
+        when (currentState) {
+            GameState.Idle -> reduceIdleState(intent)
+            is GameState.Lobby -> reduceLobbyState(currentState, intent)
+            is GameState.Starting -> reduceStartingState(intent)
+            is GameState.RoundOn -> reduceRoundOnState(currentState, intent)
+            is GameState.Paused -> reducePausedState(intent)
+            is GameState.EndOfRound -> reduceEndOfRoundState(intent)
+            is GameState.GameOver -> reduceGameOverState(intent)
+        }
 
-            is GameIntent.Lobby -> {
-                // TODO: Idle'da WAITING gelirse roomId lazım mı
+    private fun reduceIdleState(intent: GameIntent): GameState =
+        when (intent) {
+            is GameIntent.Lobby ->
                 GameState.Lobby(
                     roomId = intent.message.toString(),
                     players = intent.message.players,
                 )
-            }
-
-            else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is Idle")
+            is GameIntent.CloseRoom, GameIntent.ExitGame -> throw NotImplementedError()
+            else -> throw IllegalStateException(getInvalidTransitionMessage("Idle", intent))
         }
 
     private fun reduceLobbyState(
@@ -89,28 +112,39 @@ class GameStateMachine(
         intent: GameIntent,
     ): GameState =
         when (intent) {
-            is GameIntent.CloseRoom -> TODO()
-            GameIntent.ExitGame -> TODO()
-
-            is GameIntent.Countdown -> {
-                GameState.Starting(intent.message.remaining.toInt())
-            }
-
-            is GameIntent.Lobby -> {
-                getCurrentState()
-            }
-
-            else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is Lobby")
+            is GameIntent.Countdown -> GameState.Starting(intent.message.remaining.toInt())
+            is GameIntent.Lobby -> getCurrentState()
+            is GameIntent.CloseRoom, GameIntent.ExitGame -> throw NotImplementedError()
+            else -> throw IllegalStateException(getInvalidTransitionMessage("Lobby", intent))
         }
 
-    private fun reduceStartingState(
-        currentState: GameState.Starting,
+    private fun reduceStartingState(intent: GameIntent): GameState =
+        when (intent) {
+            is GameIntent.StartRound ->
+                with(intent.message) {
+                    GameState.RoundOn(
+                        players = players,
+                        currentQuestion = currentQuestion!!,
+                        timeRemaining = timeRemaining!!,
+                        cursorPosition = cursorPosition,
+                    )
+                }
+            is GameIntent.Countdown -> GameState.Starting(intent.message.remaining.toInt())
+            is GameIntent.CloseRoom, GameIntent.ExitGame -> throw NotImplementedError()
+            else -> throw IllegalStateException(getInvalidTransitionMessage("Starting", intent))
+        }
+
+    private fun reduceRoundOnState(
+        currentState: GameState.RoundOn,
         intent: GameIntent,
     ): GameState =
         when (intent) {
-            is GameIntent.CloseRoom -> TODO()
-            GameIntent.ExitGame -> TODO()
-
+            GameIntent.ExitGame -> {
+                handleExitGame()
+            }
+            is GameIntent.GameOver -> {
+                createGameOverState(intent, currentState.players)
+            }
             is GameIntent.StartRound -> {
                 with(intent.message) {
                     GameState.RoundOn(
@@ -121,157 +155,194 @@ class GameStateMachine(
                     )
                 }
             }
-
-            is GameIntent.Countdown -> {
-                GameState.Starting(intent.message.remaining.toInt())
+            else -> {
+                throw IllegalStateException(getInvalidTransitionMessage("RoundOn", intent))
             }
-
-            else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is Starting")
         }
 
-    private fun reduceRoundOnState(
-        currentState: GameState.RoundOn,
-        intent: GameIntent,
-    ): GameState =
+    private fun reducePausedState(intent: GameIntent): GameState =
         when (intent) {
-            GameIntent.ExitGame -> {
-                sideEffect(GameEffect.NavigateTo(Destination.Rooms))
-                getCurrentState()
-            }
-
-            is GameIntent.GameOver -> {
-                GameState.GameOver(
-                    winner = currentState.players.first { it.id == intent.message.winnerPlayerId },
-                    statistics =
-                        GameStatistics(
-                            roundCount = 10,
-                            averageResponseTimeMillis = mapOf(),
-                            totalGameLengthMillis = 10,
-                        ),
-                )
-            }
-
-            is GameIntent.RoundEnd -> {
-                val winner: Player? =
-                    currentState.players.find { it.id == intent.message.winnerPlayerId }
-                val correctAnswer =
-                    currentState.currentQuestion.options[intent.message.correctAnswer]
-
-                GameState.EndOfRound(
-                    cursorPosition = intent.message.cursorPosition,
-                    correctAnswer = correctAnswer,
-                    winnerPlayer = winner,
-                )
-            }
-
-            else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is RoundOn")
+            is GameIntent.StartRound ->
+                with(intent.message) {
+                    GameState.RoundOn(
+                        players = players,
+                        currentQuestion = currentQuestion!!,
+                        timeRemaining = timeRemaining!!,
+                        cursorPosition = cursorPosition,
+                    )
+                }
+            is GameIntent.CloseRoom, GameIntent.ExitGame -> throw NotImplementedError()
+            else -> throw IllegalStateException(getInvalidTransitionMessage("Paused", intent))
         }
 
-    private fun reducePausedState(
-        currentState: GameState.Paused,
-        intent: GameIntent,
-    ): GameState =
+    private fun reduceEndOfRoundState(intent: GameIntent): GameState =
         when (intent) {
-            is GameIntent.CloseRoom -> TODO()
-            GameIntent.ExitGame -> TODO()
-
-            is GameIntent.StartRound -> {
-                GameState.RoundOn(
-                    players = intent.message.players,
-                    currentQuestion = intent.message.currentQuestion!!,
-                    timeRemaining = intent.message.timeRemaining!!,
-                    cursorPosition = intent.message.cursorPosition,
-                )
-            }
-
-            else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is Paused")
+            is GameIntent.GameOver -> createGameOverState(intent)
+            is GameIntent.StartRound ->
+                with(intent.message) {
+                    GameState.RoundOn(
+                        players = players,
+                        currentQuestion = currentQuestion!!,
+                        timeRemaining = timeRemaining!!,
+                        cursorPosition = cursorPosition,
+                    )
+                }
+            is GameIntent.CloseRoom, GameIntent.ExitGame -> throw NotImplementedError()
+            else -> throw IllegalStateException(getInvalidTransitionMessage("EndOfRound", intent))
         }
 
-    private fun reduceEndOfRoundState(
-        currentState: GameState.EndOfRound,
-        intent: GameIntent,
-    ): GameState =
+    private fun reduceGameOverState(intent: GameIntent): GameState =
         when (intent) {
-            is GameIntent.CloseRoom -> TODO()
-            GameIntent.ExitGame -> TODO()
-
-            is GameIntent.GameOver -> {
-                val winnerPlayerId = intent.message.winnerPlayerId
-                GameState.GameOver(
-                    winner =
-                        Player(
-                            // FIXME: currentState.players.first { it.id == intent.message.winnerPlayerId } olmasi lazim
-                            id = winnerPlayerId,
-                            name = intent.message.winnerPlayerId,
-                            avatarUrl = "",
-                        ),
-                    statistics =
-                        GameStatistics(
-                            roundCount = 10,
-                            averageResponseTimeMillis = mapOf(),
-                            totalGameLengthMillis = 10,
-                        ),
-                )
-            }
-
-            is GameIntent.StartRound -> {
-                GameState.RoundOn(
-                    players = intent.message.players,
-                    currentQuestion = intent.message.currentQuestion!!,
-                    timeRemaining = intent.message.timeRemaining!!,
-                    cursorPosition = intent.message.cursorPosition,
-                )
-            }
-
-            else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is EndOfRound")
-        }
-
-    private fun reduceGameOverState(
-        currentState: GameState.GameOver,
-        intent: GameIntent,
-    ): GameState =
-        when (intent) {
-            GameIntent.ExitGame -> {
-                sideEffect(GameEffect.NavigateTo(Destination.Rooms))
-                GameState.Idle
-            }
-
-            is GameIntent.CloseRoom -> {
-                sideEffect(GameEffect.ShowError(intent.message.reason))
-                GameState.Idle
-            }
-
-            else -> throw IllegalStateException("${intent::class.simpleName} couldn't be reduced when current state is GameOver")
+            GameIntent.ExitGame -> handleExitGame()
+            is GameIntent.CloseRoom -> handleCloseRoom(intent)
+            else -> throw IllegalStateException(getInvalidTransitionMessage("GameOver", intent))
         }
 
     fun processServerMessage(message: ServerMessage) {
-        when (message) {
-            // effects
-            is TimeUpdate -> sideEffect(GameEffect.ShowTimeRemaining(message.remaining))
-            is AnswerResult -> sideEffect(GameEffect.ReceiveAnswerResult(message))
-            is PlayerDisconnected -> sideEffect(GameEffect.PlayerDisconnected(message))
-            is Error -> sideEffect(GameEffect.ShowError(message.message))
-            is PlayerReconnected -> sideEffect(GameEffect.PlayerReconnected(message))
-            is RoomCreated -> sideEffect(GameEffect.RoomCreated(message))
-            is RoomJoined -> sideEffect(GameEffect.RoomJoined(message))
-            is RoundUpdate -> sideEffect(GameEffect.RoundUpdate(message))
-            is TimeUp -> sideEffect(GameEffect.RoundTimeUp(message))
-
-            // intents
-            is Countdown -> reduce(GameIntent.Countdown(message))
-            is RoomUpdate -> {
-                if (message.state == RoomState.WAITING) {
-                    reduce(GameIntent.Lobby(message))
-                } else if (message.state == RoomState.PLAYING) {
-                    reduce(GameIntent.StartRound(message))
-                }
-
-                Timber.tag("GameStateMachine: ").d("RoomUpdate: $message")
-            }
-
-            is RoundEnded -> reduce(GameIntent.RoundEnd(message))
-            is GameOver -> reduce(GameIntent.GameOver(message))
-            is RoomClosed -> reduce(GameIntent.CloseRoom(message))
+        coroutineScope.launch {
+            messageChannel.send(message)
         }
     }
+
+    private suspend fun processMessageSafely(message: ServerMessage) {
+        Timber.tag(TAG).d("Processing server message: ${message::class.simpleName}")
+
+        try {
+            stateMutex.withLock {
+                processMessage(message)
+            }
+        } catch (e: Exception) {
+            handleMessageProcessingError(e, message)
+        }
+    }
+
+    private fun processMessage(message: ServerMessage) {
+        when (message) {
+            // Effects
+            is ServerMessage.TimeUpdate -> sideEffect(GameEffect.ShowTimeRemaining(message.remaining))
+            is ServerMessage.AnswerResult -> sideEffect(GameEffect.ReceiveAnswerResult(message))
+            is ServerMessage.PlayerDisconnected -> sideEffect(GameEffect.PlayerDisconnected(message))
+            is ServerMessage.Error -> sideEffect(GameEffect.ShowError(message.message))
+            is ServerMessage.PlayerReconnected -> sideEffect(GameEffect.PlayerReconnected(message))
+            is ServerMessage.RoomCreated -> sideEffect(GameEffect.RoomCreated(message))
+            is ServerMessage.RoomJoined -> sideEffect(GameEffect.RoomJoined(message))
+            is ServerMessage.RoundUpdate -> sideEffect(GameEffect.RoundUpdate(message))
+            is ServerMessage.TimeUp -> sideEffect(GameEffect.RoundTimeUp(message))
+            is ServerMessage.RoundEnded -> sideEffect(GameEffect.RoundEnd(message))
+
+            // State transitions
+            is ServerMessage.Countdown -> handleCountdown(message)
+            is ServerMessage.RoomUpdate -> handleRoomUpdate(message)
+            is ServerMessage.GameOver -> reduce(GameIntent.GameOver(message))
+            is ServerMessage.RoomClosed -> reduce(GameIntent.CloseRoom(message))
+        }
+    }
+
+    private fun handleCountdown(message: ServerMessage.Countdown) {
+        Timber.tag(TAG).d("Processing Countdown message with remaining: ${message.remaining}")
+        reduce(GameIntent.Countdown(message))
+    }
+
+    private fun handleRoomUpdate(message: ServerMessage.RoomUpdate) {
+        Timber.tag(TAG).d("Processing RoomUpdate message with state: ${message.state}")
+        when (message.state) {
+            RoomState.WAITING -> reduce(GameIntent.Lobby(message))
+            RoomState.PLAYING -> handlePlayingState(message)
+            else -> {
+                Timber.tag(TAG).w("Unhandled room state: ${message.state}")
+                // Current state remains unchanged
+            }
+        }
+    }
+
+    private fun handlePlayingState(message: ServerMessage.RoomUpdate) {
+        val currentState = getCurrentState()
+        if (currentState !is GameState.EndOfRound) {
+            Timber.tag(TAG).w(
+                "Received StartRound while in ${currentState::class.simpleName}. " +
+                    "Expected EndOfRound state.",
+            )
+        }
+        reduce(GameIntent.StartRound(message))
+    }
+
+    private fun createGameOverState(
+        intent: GameIntent.GameOver,
+        players: List<Player>,
+    ): GameState.GameOver {
+        val winner = players.first { it.id == intent.message.winnerPlayerId }
+        return GameState.GameOver(
+            winner = winner,
+            statistics = createDefaultGameStatistics(),
+        )
+    }
+
+    private fun createGameOverState(intent: GameIntent.GameOver): GameState.GameOver {
+        val winner =
+            Player(
+                id = intent.message.winnerPlayerId,
+                name = intent.message.winnerPlayerId,
+                avatarUrl = "",
+            )
+        return GameState.GameOver(
+            winner = winner,
+            statistics = createDefaultGameStatistics(),
+        )
+    }
+
+    private fun handleExitGame(): GameState {
+        sideEffect(GameEffect.NavigateTo(Destination.Rooms))
+        return GameState.Idle
+    }
+
+    private fun handleCloseRoom(intent: GameIntent.CloseRoom): GameState {
+        sideEffect(GameEffect.ShowError(intent.message.reason))
+        return GameState.Idle
+    }
+
+    private fun createDefaultGameStatistics() =
+        GameStatistics(
+            roundCount = DEFAULT_ROUND_COUNT,
+            averageResponseTimeMillis = mapOf(),
+            totalGameLengthMillis = DEFAULT_ROUND_COUNT.toLong(),
+        )
+
+    private fun handleStateTransitionError(
+        e: IllegalStateException,
+        currentState: GameState,
+    ) {
+        Timber.tag(TAG).e(e, "State transition error")
+        sideEffect(GameEffect.ShowError("Invalid game state transition"))
+    }
+
+    private fun handleMessageProcessingError(
+        e: Exception,
+        message: ServerMessage,
+    ) {
+        Timber.tag(TAG).e(e, "Error processing message: $message")
+        sideEffect(GameEffect.ShowError("Error processing game state: ${e.message}"))
+    }
+
+    private fun logStateTransition(
+        currentState: GameState,
+        intent: GameIntent,
+    ) {
+        Timber.tag(TAG).d(
+            "Reducing intent ${intent::class.simpleName} in state ${currentState::class.simpleName}",
+        )
+    }
+
+    private fun logStateChange(
+        currentState: GameState,
+        newState: GameState,
+    ) {
+        Timber.tag(TAG).d(
+            "State transition: ${currentState::class.simpleName} -> ${newState::class.simpleName}",
+        )
+    }
+
+    private fun getInvalidTransitionMessage(
+        stateName: String,
+        intent: GameIntent,
+    ): String = "${intent::class.simpleName} couldn't be reduced when current state is $stateName"
 }

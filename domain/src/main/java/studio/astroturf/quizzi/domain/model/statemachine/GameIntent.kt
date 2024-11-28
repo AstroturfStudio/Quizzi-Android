@@ -19,10 +19,6 @@ sealed interface GameIntent {
         val message: ServerMessage.GameOver,
     ) : GameIntent
 
-    data class RoundEnd(
-        val message: ServerMessage.RoundEnded,
-    ) : GameIntent
-
     data class CloseRoom(
         val message: ServerMessage.RoomClosed,
     ) : GameIntent

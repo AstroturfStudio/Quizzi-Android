@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.gamestatemachine.GameStateMachine
+import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.statemachine.GameEffect
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.repository.QuizRepository
@@ -32,9 +33,8 @@ class GameViewModel
         private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
         val uiState = _uiState.asStateFlow()
 
-        private val _uiEventChannel = Channel<GameUiEvent>()
-        val uiEventFlow = _uiEventChannel.receiveAsFlow()
-
+        private val _uiEvents = Channel<GameUiEvent>()
+        val uiEvents = _uiEvents.receiveAsFlow()
         private val gsm = GameStateMachine(viewModelScope)
 
         init {
@@ -51,7 +51,7 @@ class GameViewModel
 
             // Handle game effects
             viewModelScope.launch {
-                gsm.effectFlow.collect { effect ->
+                gsm.effects.collect { effect ->
                     handleGameEffect(effect)
                 }
             }
@@ -74,7 +74,7 @@ class GameViewModel
         private suspend fun handleGameEffect(effect: GameEffect) {
             when (effect) {
                 is GameEffect.NavigateTo -> {
-                    _uiEventChannel.send(GameUiEvent.NavigateTo(effect.destination))
+                    _uiEvents.send(GameUiEvent.NavigateTo(effect.destination))
                 }
 
                 is GameEffect.PlayerDisconnected -> {
@@ -98,9 +98,11 @@ class GameViewModel
                 }
 
                 is GameEffect.RoomCreated -> {
+                    sendPlayerReady()
                 }
 
                 is GameEffect.RoomJoined -> {
+                    sendPlayerReady()
                 }
 
                 is GameEffect.RoundUpdate -> {
@@ -128,6 +130,30 @@ class GameViewModel
 
                 is GameEffect.RoundTimeUp -> {
                 }
+
+                is GameEffect.RoundEnd -> {
+                    val currentState = _uiState.value
+                    if (currentState is GameUiState.RoundOn) {
+                        val winner: Player? =
+                            listOf(currentState.player1, currentState.player2)
+                                .find {
+                                    it.id == effect.message.winnerPlayerId
+                                }
+
+                        val correctAnswerValue =
+                            currentState.question.options
+                                .first { it.id == effect.message.correctAnswer }
+                                .value
+
+                        _uiState.value =
+                            GameUiState.RoundEnd(
+                                roundNo = 0, // TODO: Gelecekkk
+                                roundWinner = winner,
+                                correctAnswerValue = correctAnswerValue,
+                                newCursorPosition = effect.message.cursorPosition,
+                            )
+                    }
+                }
             }
         }
 
@@ -137,6 +163,10 @@ class GameViewModel
 
         fun joinRoom(roomId: String) {
             repository.sendMessage(ClientMessage.JoinRoom(roomId))
+        }
+
+        fun sendPlayerReady() {
+            repository.sendMessage(ClientMessage.PlayerReady)
         }
 
         fun submitAnswer(answerId: Int) {

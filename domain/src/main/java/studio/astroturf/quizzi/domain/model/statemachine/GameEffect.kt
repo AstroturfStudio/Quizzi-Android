@@ -46,6 +46,10 @@ sealed interface GameEffect {
     data class RoomJoined(
         val message: ServerMessage.RoomJoined,
     ) : GameEffect
+
+    data class RoundEnd(
+        val message: ServerMessage.RoundEnded,
+    ) : GameEffect
 }
 
 sealed interface Destination {
