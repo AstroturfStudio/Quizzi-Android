@@ -34,9 +34,6 @@ sealed class ServerSocketMessage {
     data class RoomUpdate(
         val players: List<PlayerDto>,
         val state: RoomState,
-        val cursorPosition: Float,
-        val timeRemaining: Long? = null,
-        val currentQuestion: QuestionDto? = null,
     ) : ServerSocketMessage()
 
     @Serializable
@@ -61,7 +58,7 @@ sealed class ServerSocketMessage {
 
     @Serializable
     @SerialName("RoundStarted")
-    data class RoundUpdate(
+    data class RoundStarted(
         val roundNumber: Int,
         val timeRemaining: Long,
         val currentQuestion: QuestionDto,

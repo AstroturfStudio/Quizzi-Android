@@ -92,13 +92,15 @@ internal fun GameRoundContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Answer grid at the bottom
-        AnswerGrid(
-            question = state.question,
-            selectedAnswerId = state.selectedAnswerId,
-            playerRoundResult = state.playerRoundResult,
-            onAnswerSelected = onSubmitAnswer,
-            modifier = Modifier.padding(bottom = 16.dp),
-        )
+        state.question?.let {
+            AnswerGrid(
+                question = state.question,
+                selectedAnswerId = state.selectedAnswerId,
+                playerRoundResult = state.playerRoundResult,
+                onAnswerSelected = onSubmitAnswer,
+                modifier = Modifier.padding(bottom = 16.dp),
+            )
+        }
     }
 }
 

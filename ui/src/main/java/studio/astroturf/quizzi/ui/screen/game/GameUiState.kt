@@ -20,7 +20,7 @@ sealed interface GameUiState {
         val player1: Player,
         val player2: Player,
         val gameBarPercentage: Float,
-        val question: Question,
+        val question: Question? = null,
         val timeRemainingInSeconds: Int,
         val selectedAnswerId: Int? = null,
         val playerRoundResult: PlayerRoundResult? = null,
@@ -44,7 +44,7 @@ sealed interface GameUiState {
     ) : GameUiState
 
     data class GameOver(
-        val totalRoundCount: Int,
-        val winner: Player,
+        val totalRoundCount: Int?,
+        val winner: Player?,
     ) : GameUiState
 }
