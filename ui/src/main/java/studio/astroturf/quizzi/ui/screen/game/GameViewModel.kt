@@ -9,16 +9,19 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
-import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.repository.QuizRepository
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
+import timber.log.Timber
 import javax.inject.Inject
+
+private const val TAG = "GameViewModel"
 
 @HiltViewModel
 class GameViewModel
@@ -31,211 +34,208 @@ class GameViewModel
 
         private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
         val uiState = _uiState.asStateFlow()
-        val currentUiState: GameUiState
-            get() = _uiState.value
 
-        private val _uiEvents = Channel<GameUiEvent>()
+        private val _uiEvents = Channel<GameUiEvent>(Channel.BUFFERED)
         val uiEvents = _uiEvents.receiveAsFlow()
 
-        private val gsm = GameRoomStateMachine(viewModelScope, repository)
+        private val gameStateMachine = GameRoomStateMachine(viewModelScope, repository)
+        private val stateMutex = Mutex()
+
         val currentGameRoomState: GameRoomState
-            get() = gsm.getCurrentState()
+            get() = gameStateMachine.getCurrentState()
 
         init {
-            viewModelScope.launch {
-                gsm.state
-                    .collect { gameRoomState ->
-                        onGameRoomUpdate(gameRoomState)
-                    }
-            }
+            observeGameState()
+            observeGameEffects()
+            initializeGameRoom()
+        }
 
+        private fun initializeGameRoom() {
+            repository.connect()
+            roomId?.let { joinRoom(it) } ?: createRoom()
+        }
+
+        private fun observeGameState() {
             viewModelScope.launch {
-                gsm.effects.collect { effect ->
+                gameStateMachine.state.collect { gameRoomState ->
+                    updateUiStateSafely(gameRoomState)
+                }
+            }
+        }
+
+        private fun observeGameEffects() {
+            viewModelScope.launch {
+                gameStateMachine.effects.collect { effect ->
+                    handleGameEffectSafely(effect)
+                }
+            }
+        }
+
+        private suspend fun updateUiStateSafely(gameRoomState: GameRoomState) {
+            try {
+                stateMutex.withLock {
+                    updateUiState(gameRoomState)
+                }
+            } catch (e: Exception) {
+                Timber.tag(TAG).e(e, "Error updating UI state")
+            }
+        }
+
+        private fun updateUiState(gameRoomState: GameRoomState) {
+            _uiState.value =
+                when (gameRoomState) {
+                    GameRoomState.Idle -> GameUiState.Idle
+                    GameRoomState.Countdown -> _uiState.value // Preserve current state during countdown
+                    GameRoomState.Paused -> _uiState.value // Preserve current state while paused
+                    is GameRoomState.Playing -> createPlayingState(gameRoomState)
+                    is GameRoomState.Waiting -> createLobbyState(gameRoomState)
+                    is GameRoomState.Closed -> createGameOverState()
+                }
+        }
+
+        private suspend fun handleGameEffectSafely(effect: GameRoomStateUpdater) {
+            try {
+                stateMutex.withLock {
                     handleGameEffect(effect)
                 }
-            }
-
-            repository.connect()
-
-            roomId?.let {
-                joinRoom(it)
-            } ?: createRoom()
-        }
-
-        private fun onGameRoomUpdate(gameRoomState: GameRoomState) {
-            when (gameRoomState) {
-                GameRoomState.Idle -> {
-                    _uiState.value = GameUiState.Idle
-                }
-                GameRoomState.Countdown -> {
-                    // TODO
-                }
-                GameRoomState.Paused -> {
-                    // TODO
-                }
-                is GameRoomState.Playing -> {
-                    _uiState.value =
-                        GameUiState.RoundOn(
-                            player1 = gameRoomState.players.get(0),
-                            player2 = gameRoomState.players.get(1),
-                            gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE_FLOAT,
-                            question = null,
-                            timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
-                            selectedAnswerId = null,
-                            playerRoundResult = null,
-                        )
-                }
-                is GameRoomState.Waiting -> {
-                    val creator = gameRoomState.players.first()
-                    val challenger = gameRoomState.players.getOrNull(1)
-
-                    _uiState.update {
-                        GameUiState.Lobby(
-                            roomName = "${creator.name}'s Room",
-                            creator = creator,
-                            challenger = challenger,
-                        )
-                    }
-                }
-                is GameRoomState.Closed -> {
-                    _uiState.update {
-                        GameUiState.GameOver(
-                            totalRoundCount = 0,
-                            winner = null,
-                        )
-                    }
-                }
+            } catch (e: Exception) {
+                Timber.tag(TAG).e(e, "Error handling game effect")
             }
         }
+
+        private fun createPlayingState(gameRoomState: GameRoomState.Playing): GameUiState.RoundOn =
+            GameUiState.RoundOn(
+                player1 = gameRoomState.players[0],
+                player2 = gameRoomState.players[1],
+                gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
+                question = null,
+                timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
+                selectedAnswerId = null,
+                playerRoundResult = null,
+            )
+
+        private fun createLobbyState(gameRoomState: GameRoomState.Waiting): GameUiState.Lobby {
+            val creator = gameRoomState.players.first()
+            return GameUiState.Lobby(
+                roomName = "${creator.name}'s Room",
+                creator = creator,
+                challenger = gameRoomState.players.getOrNull(1),
+            )
+        }
+
+        private fun createGameOverState(): GameUiState.GameOver = GameUiState.GameOver(totalRoundCount = 0, winner = null)
 
         private fun handleGameEffect(effect: GameRoomStateUpdater) {
             when (effect) {
-                is GameRoomStateUpdater.PlayerDisconnected -> {
-                    // TODO
-                }
+                is GameRoomStateUpdater.RoomCreated,
+                is GameRoomStateUpdater.RoomJoined,
+                -> sendPlayerReady()
 
-                is GameRoomStateUpdater.PlayerReconnected -> {
-                    // TODO
-                }
+                is GameRoomStateUpdater.ReceiveAnswerResult -> handleAnswerResult(effect)
+                is GameRoomStateUpdater.RoundStarted -> handleRoundStart(effect)
+                is GameRoomStateUpdater.RoundEnd -> handleRoundEnd(effect)
+                is GameRoomStateUpdater.Countdown -> handleCountdown(effect)
+                is GameRoomStateUpdater.GameRoomOver -> handleGameOver(effect)
+                is GameRoomStateUpdater.RoundTimeUpdate -> handleTimeUpdate(effect)
 
-                is GameRoomStateUpdater.ReceiveAnswerResult -> {
-                    val currentState = _uiState.value
-                    if (currentState is GameUiState.RoundOn) {
-                        _uiState.value =
-                            currentState.copy(
-                                playerRoundResult =
-                                    PlayerRoundResult(
-                                        answerId = effect.answerResult.answer,
-                                        isCorrect = effect.answerResult.correct,
-                                    ),
-                            )
-                    }
-                }
-
-                is GameRoomStateUpdater.RoomCreated -> {
-                    sendPlayerReady()
-                }
-
-                is GameRoomStateUpdater.RoomJoined -> {
-                    sendPlayerReady()
-                }
-
-                is GameRoomStateUpdater.RoundStarted -> {
-                    with(effect.message) {
-                        val currentState = _uiState.value
-
-                        _uiState.value =
-                            when (currentState) {
-                                is GameUiState.RoundOn -> {
-                                    currentState.copy(
-                                        question = currentQuestion,
-                                        timeRemainingInSeconds = timeRemaining.toInt(),
-                                        selectedAnswerId = null,
-                                        playerRoundResult = null,
-                                    )
-                                }
-
-                                is GameUiState.RoundEnd -> {
-                                    val currentGameRoomState = currentGameRoomState as GameRoomState.Playing
-                                    GameUiState.RoundOn(
-                                        player1 = currentGameRoomState.players.get(0),
-                                        player2 = currentGameRoomState.players.get(1),
-                                        gameBarPercentage = currentState.newCursorPosition,
-                                        question = currentQuestion,
-                                        timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
-                                        selectedAnswerId = null,
-                                        playerRoundResult = null,
-                                    )
-                                }
-
-                                else -> currentState
-                            }
-                    }
-                }
-
-                is GameRoomStateUpdater.RoundTimeUp -> {
-                    // TODO
-                }
-
-                is GameRoomStateUpdater.RoundEnd -> {
-                    val currentState = _uiState.value
-                    if (currentState is GameUiState.RoundOn) {
-                        val winner: Player? =
-                            listOf(currentState.player1, currentState.player2)
-                                .find {
-                                    it.id == effect.message.winnerPlayerId
-                                }
-
-                        val correctAnswerValue =
-                            currentState.question!!
-                                .options
-                                .first { it.id == effect.message.correctAnswer }
-                                .value
-
-                        _uiState.value =
-                            GameUiState.RoundEnd(
-                                roundNo = 0, // TODO: Gelecekkk
-                                roundWinner = winner,
-                                correctAnswerValue = correctAnswerValue,
-                                newCursorPosition = effect.message.cursorPosition,
-                            )
-                    }
-                }
-
-                is GameRoomStateUpdater.CloseRoom -> {
-                    // TODO
-                }
-                is GameRoomStateUpdater.Countdown -> {
-                    _uiState.update {
-                        GameUiState.Starting(effect.message.remaining.toInt())
-                    }
-                }
-                GameRoomStateUpdater.ExitGameRoom -> {
-                    // TODO
-                }
-                is GameRoomStateUpdater.GameRoomOver -> {
-                    val currentState = _uiState.value
-                    if (currentState is GameUiState.GameOver) {
-                        val winner = (currentGameRoomState as GameRoomState.Closed).players.first { it.id == effect.message.winnerPlayerId }
-                        _uiState.update {
-                            currentState.copy(totalRoundCount = 0, winner = winner)
-                        }
-                    }
-                }
-                is GameRoomStateUpdater.RoundTimeUpdate -> {
-                    val currentState = _uiState.value
-                    if (currentState is GameUiState.RoundOn) {
-                        _uiState.value =
-                            currentState.copy(
-                                timeRemainingInSeconds = effect.message.remaining.toInt(),
-                            )
-                    }
-                }
-
-                is GameRoomStateUpdater.Error -> {
-                    // TODO
-                }
+                // TODO: Implement remaining effect handlers
+                is GameRoomStateUpdater.PlayerDisconnected,
+                is GameRoomStateUpdater.PlayerReconnected,
+                is GameRoomStateUpdater.RoundTimeUp,
+                is GameRoomStateUpdater.CloseRoom,
+                GameRoomStateUpdater.ExitGameRoom,
+                is GameRoomStateUpdater.Error,
+                -> Unit
             }
+        }
+
+        private fun handleAnswerResult(effect: GameRoomStateUpdater.ReceiveAnswerResult) {
+            val currentState = _uiState.value as? GameUiState.RoundOn ?: return
+            _uiState.value =
+                currentState.copy(
+                    playerRoundResult =
+                        PlayerRoundResult(
+                            answerId = effect.answerResult.answer,
+                            isCorrect = effect.answerResult.correct,
+                        ),
+                )
+        }
+
+        private fun handleRoundStart(effect: GameRoomStateUpdater.RoundStarted) {
+            when (val currentState = _uiState.value) {
+                is GameUiState.RoundOn -> updateExistingRound(currentState, effect)
+                is GameUiState.RoundEnd -> createNewRound(currentState, effect)
+                else -> Unit
+            }
+        }
+
+        private fun updateExistingRound(
+            currentState: GameUiState.RoundOn,
+            effect: GameRoomStateUpdater.RoundStarted,
+        ) {
+            _uiState.value =
+                currentState.copy(
+                    question = effect.message.currentQuestion,
+                    timeRemainingInSeconds = effect.message.timeRemaining.toInt(),
+                    selectedAnswerId = null,
+                    playerRoundResult = null,
+                )
+        }
+
+        private fun createNewRound(
+            currentState: GameUiState.RoundEnd,
+            effect: GameRoomStateUpdater.RoundStarted,
+        ) {
+            val gameState = currentGameRoomState as? GameRoomState.Playing ?: return
+            _uiState.value =
+                GameUiState.RoundOn(
+                    player1 = gameState.players[0],
+                    player2 = gameState.players[1],
+                    gameBarPercentage = currentState.newCursorPosition,
+                    question = effect.message.currentQuestion,
+                    timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
+                    selectedAnswerId = null,
+                    playerRoundResult = null,
+                )
+        }
+
+        private fun handleRoundEnd(effect: GameRoomStateUpdater.RoundEnd) {
+            val currentState = _uiState.value as? GameUiState.RoundOn ?: return
+            val winner =
+                listOf(currentState.player1, currentState.player2)
+                    .find { it.id == effect.message.winnerPlayerId }
+
+            val correctAnswerValue =
+                currentState.question
+                    ?.options
+                    ?.find { it.id == effect.message.correctAnswer }
+                    ?.value ?: return
+
+            _uiState.value =
+                GameUiState.RoundEnd(
+                    roundNo = 0, // TODO: Implement round counting
+                    roundWinner = winner,
+                    correctAnswerValue = correctAnswerValue,
+                    newCursorPosition = effect.message.cursorPosition,
+                )
+        }
+
+        private fun handleCountdown(effect: GameRoomStateUpdater.Countdown) {
+            _uiState.value = GameUiState.Starting(effect.message.remaining.toInt())
+        }
+
+        private fun handleGameOver(effect: GameRoomStateUpdater.GameRoomOver) {
+            val gameState = currentGameRoomState as? GameRoomState.Closed ?: return
+            val winner = gameState.players.find { it.id == effect.message.winnerPlayerId }
+            _uiState.value = GameUiState.GameOver(totalRoundCount = 0, winner = winner)
+        }
+
+        private fun handleTimeUpdate(effect: GameRoomStateUpdater.RoundTimeUpdate) {
+            val currentState = _uiState.value as? GameUiState.RoundOn ?: return
+            _uiState.value =
+                currentState.copy(
+                    timeRemainingInSeconds = effect.message.remaining.toInt(),
+                )
         }
 
         fun createRoom() {
@@ -252,17 +252,12 @@ class GameViewModel
 
         fun submitAnswer(answerId: Int) {
             viewModelScope.launch {
-                // Update UI state to show selected answer
-                val currentState = _uiState.value
-                if (currentState is GameUiState.RoundOn) {
-                    _uiState.value =
-                        currentState.copy(
-                            selectedAnswerId = answerId,
-                        )
+                stateMutex.withLock {
+                    (_uiState.value as? GameUiState.RoundOn)?.let { currentState ->
+                        _uiState.value = currentState.copy(selectedAnswerId = answerId)
+                        repository.sendMessage(ClientMessage.PlayerAnswer(answerId))
+                    }
                 }
-
-                // Send answer to server
-                repository.sendMessage(ClientMessage.PlayerAnswer(answerId))
             }
         }
 
@@ -273,6 +268,6 @@ class GameViewModel
 
         companion object {
             const val INITIAL_ROUND_COUNTDOWN_SEC = 20
-            const val INITIAL_GAMEBAR_PERCENTAGE_FLOAT = 0.5f
+            const val INITIAL_GAMEBAR_PERCENTAGE = 0.5f
         }
     }
