@@ -9,7 +9,7 @@ sealed class ServerMessage {
         val roomId: String,
     ) : ServerMessage()
 
-    data class RoomJoined(
+    data class JoinedRoom(
         val roomId: String,
         val success: Boolean,
     ) : ServerMessage()
@@ -17,16 +17,13 @@ sealed class ServerMessage {
     data class RoomUpdate(
         val players: List<Player>,
         val state: RoomState,
-        val cursorPosition: Float,
-        val timeRemaining: Long?,
-        val currentQuestion: Question?,
     ) : ServerMessage()
 
-    data class Countdown(
+    data class CountdownTimeUpdate(
         val remaining: Long,
     ) : ServerMessage()
 
-    data class RoundUpdate(
+    data class RoundStarted(
         val roundNumber: Int,
         val timeRemaining: Long,
         val currentQuestion: Question,

@@ -5,6 +5,5 @@ enum class RoomState {
     COUNTDOWN,
     PLAYING,
     PAUSED,
-    ROUND_END,
-    FINISHED,
+    CLOSED,
 }

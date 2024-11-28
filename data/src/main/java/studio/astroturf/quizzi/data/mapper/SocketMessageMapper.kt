@@ -7,19 +7,16 @@ fun ServerSocketMessage.toDomain(): ServerMessage =
     when (this) {
         is ServerSocketMessage.RoomCreated -> ServerMessage.RoomCreated(roomId = roomId)
         is ServerSocketMessage.JoinedRoom ->
-            ServerMessage.RoomJoined(
+            ServerMessage.JoinedRoom(
                 roomId = roomId,
                 success = success,
             )
 
-        is ServerSocketMessage.CountdownTimeUpdate -> ServerMessage.Countdown(remaining = remaining)
+        is ServerSocketMessage.CountdownTimeUpdate -> ServerMessage.CountdownTimeUpdate(remaining = remaining)
         is ServerSocketMessage.RoomUpdate ->
             ServerMessage.RoomUpdate(
                 players = players.map { it.toDomain() },
                 state = state,
-                timeRemaining = timeRemaining,
-                cursorPosition = cursorPosition,
-                currentQuestion = currentQuestion?.toDomain(),
             )
 
         is ServerSocketMessage.AnswerResult ->
@@ -46,8 +43,8 @@ fun ServerSocketMessage.toDomain(): ServerMessage =
                 winnerPlayerId = winnerPlayerId,
             )
 
-        is ServerSocketMessage.RoundUpdate ->
-            ServerMessage.RoundUpdate(
+        is ServerSocketMessage.RoundStarted ->
+            ServerMessage.RoundStarted(
                 roundNumber = roundNumber,
                 timeRemaining = timeRemaining,
                 currentQuestion = currentQuestion.toDomain(),

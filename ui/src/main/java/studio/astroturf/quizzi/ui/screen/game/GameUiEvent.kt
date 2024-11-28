@@ -1,9 +1,19 @@
 package studio.astroturf.quizzi.ui.screen.game
 
-import studio.astroturf.quizzi.domain.model.statemachine.Destination
-
 sealed interface GameUiEvent {
+    data class ShowToast(
+        val message: String,
+    ) : GameUiEvent
+
     data class NavigateTo(
         val destination: Destination,
+    ) : GameUiEvent {
+        sealed interface Destination {
+            object Rooms : Destination
+        }
+    }
+
+    data class ShowError(
+        val message: String,
     ) : GameUiEvent
 }

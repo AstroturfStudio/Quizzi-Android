@@ -99,11 +99,13 @@ private fun GameStateContent(
         }
 
         stateKey == GameStateAnimationKey.GAME_OVER && currentState is GameUiState.GameOver -> {
-            GameOverContent(
-                winner = currentState.winner,
-                totalRounds = currentState.totalRoundCount,
-                onNavigateBack = onNavigateToRooms,
-            )
+            if (currentState.winner != null && currentState.totalRoundCount != null) {
+                GameOverContent(
+                    winner = currentState.winner,
+                    totalRounds = currentState.totalRoundCount,
+                    onNavigateBack = onNavigateToRooms,
+                )
+            }
         }
 
         stateKey == GameStateAnimationKey.PAUSED && currentState is GameUiState.Paused -> {
