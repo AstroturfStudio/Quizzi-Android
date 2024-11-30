@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import studio.astroturf.quizzi.ui.screen.game.LoadingIndicator
 
 @Composable
 fun LandingScreen(
@@ -36,26 +37,24 @@ fun LandingScreen(
         }
     }
 
-    LandingScreenContent(
-        modifier = modifier,
-        savedPlayerId = uiState.savedPlayerId,
-        error = uiState.error,
-        onCreatePlayer = { name, avatarUrl ->
-            viewModel.createPlayer(name, avatarUrl)
-        },
-        onLogin = { playerId ->
-            viewModel.login(playerId)
-        },
-    )
+    if (uiState.playerId == null) {
+        LandingScreenContent(
+            modifier = modifier,
+            error = uiState.error,
+            onCreatePlayer = { name, avatarUrl ->
+                viewModel.createPlayer(name, avatarUrl)
+            },
+        )
+    } else {
+        LoadingIndicator()
+    }
 }
 
 @Composable
 fun LandingScreenContent(
     modifier: Modifier = Modifier,
-    savedPlayerId: String? = null,
     error: String? = null,
     onCreatePlayer: (String, String) -> Unit = { _, _ -> },
-    onLogin: (String) -> Unit = { _ -> },
 ) {
     Column(
         modifier =
@@ -65,51 +64,37 @@ fun LandingScreenContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        if (savedPlayerId != null) {
-            Text(
-                text = "Welcome Back!",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp),
-            )
-            Button(
-                onClick = { onLogin(savedPlayerId) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Continue Play")
-            }
-        } else {
-            var name by remember { mutableStateOf("") }
-            val avatarUrl by remember { mutableStateOf("https://api.dicebear.com/7.x/avataaars/svg") }
+        var name by remember { mutableStateOf("") }
+        val avatarUrl by remember { mutableStateOf("https://api.dicebear.com/7.x/avataaars/svg") }
 
-            Text(
-                text = "Welcome to Quizzi!",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp),
-            )
+        Text(
+            text = "Welcome to Quizzi!",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp),
+        )
 
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Enter your name") },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-            )
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Enter your name") },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+        )
 
-            Button(
-                onClick = {
-                    onCreatePlayer(name, avatarUrl)
-                    // Store player ID will be handled in ViewModel after successful creation
-                },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                enabled = name.isNotBlank(),
-            ) {
-                Text("Start Play")
-            }
+        Button(
+            onClick = {
+                onCreatePlayer(name, avatarUrl)
+                // Store player ID will be handled in ViewModel after successful creation
+            },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+            enabled = name.isNotBlank(),
+        ) {
+            Text("Start Play")
         }
 
         if (error != null) {
@@ -124,18 +109,8 @@ fun LandingScreenContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun LandingScreenPreview_NewUser() {
+private fun LandingScreenPreview() {
     MaterialTheme {
         LandingScreenContent()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LandingScreenPreview_ExistingUser() {
-    MaterialTheme {
-        LandingScreenContent(
-            modifier = Modifier.fillMaxSize(),
-        )
     }
 }
