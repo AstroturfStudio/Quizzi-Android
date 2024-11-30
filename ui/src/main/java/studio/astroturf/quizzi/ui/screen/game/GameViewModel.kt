@@ -5,13 +5,22 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import studio.astroturf.quizzi.domain.di.DefaultDispatcher
+import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
@@ -29,25 +38,71 @@ class GameViewModel
     constructor(
         private val savedStateHandle: SavedStateHandle,
         private val repository: QuizRepository,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+        @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
 
         private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
-        val uiState = _uiState.asStateFlow()
+        val uiState =
+            _uiState
+                .buffer(Channel.UNLIMITED)
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(5000),
+                    initialValue = GameUiState.Idle,
+                )
 
-        private val _uiEvents = Channel<GameUiEvent>(Channel.BUFFERED)
-        val uiEvents = _uiEvents.receiveAsFlow()
+        private val _uiEvents =
+            MutableSharedFlow<GameUiEvent>(
+                extraBufferCapacity = 64,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST,
+            )
+        val uiEvents = _uiEvents.asSharedFlow()
 
-        private val gameStateMachine = GameRoomStateMachine(viewModelScope, repository)
+        private val gameStateMachine = GameRoomStateMachine(viewModelScope, repository, defaultDispatcher)
         private val stateMutex = Mutex()
 
         val currentGameRoomState: GameRoomState
             get() = gameStateMachine.getCurrentState()
 
+        private sealed class StateUpdate {
+            data class FromGameState(
+                val gameState: GameRoomState,
+            ) : StateUpdate()
+
+            data class FromEffect(
+                val effect: GameRoomStateUpdater,
+            ) : StateUpdate()
+        }
+
+        private val stateUpdateChannel = Channel<StateUpdate>(Channel.UNLIMITED)
+
         init {
             observeGameState()
             observeGameEffects()
+            processStateUpdatesSequentially()
             initializeGameRoom()
+        }
+
+        private fun processStateUpdatesSequentially() {
+            viewModelScope.launch {
+                for (update in stateUpdateChannel) {
+                    stateMutex.withLock {
+                        when (update) {
+                            is StateUpdate.FromGameState -> {
+                                val newUiState = processGameState(update.gameState)
+                                withContext(Dispatchers.Main) {
+                                    _uiState.value = newUiState
+                                }
+                            }
+                            is StateUpdate.FromEffect -> {
+                                handleGameEffect(update.effect)
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private fun initializeGameRoom() {
@@ -58,7 +113,7 @@ class GameViewModel
         private fun observeGameState() {
             viewModelScope.launch {
                 gameStateMachine.state.collect { gameRoomState ->
-                    updateUiStateSafely(gameRoomState)
+                    stateUpdateChannel.send(StateUpdate.FromGameState(gameRoomState))
                 }
             }
         }
@@ -66,42 +121,20 @@ class GameViewModel
         private fun observeGameEffects() {
             viewModelScope.launch {
                 gameStateMachine.effects.collect { effect ->
-                    handleGameEffectSafely(effect)
+                    stateUpdateChannel.send(StateUpdate.FromEffect(effect))
                 }
             }
         }
 
-        private suspend fun updateUiStateSafely(gameRoomState: GameRoomState) {
-            try {
-                stateMutex.withLock {
-                    updateUiState(gameRoomState)
-                }
-            } catch (e: Exception) {
-                Timber.tag(TAG).e(e, "Error updating UI state")
+        private suspend fun processGameState(gameRoomState: GameRoomState): GameUiState =
+            when (gameRoomState) {
+                GameRoomState.Idle -> GameUiState.Idle
+                GameRoomState.Countdown -> _uiState.value // Preserve current state
+                GameRoomState.Paused -> _uiState.value // Preserve current state
+                is GameRoomState.Playing -> createPlayingState(gameRoomState)
+                is GameRoomState.Waiting -> createLobbyState(gameRoomState)
+                is GameRoomState.Closed -> createGameOverState()
             }
-        }
-
-        private fun updateUiState(gameRoomState: GameRoomState) {
-            _uiState.value =
-                when (gameRoomState) {
-                    GameRoomState.Idle -> GameUiState.Idle
-                    GameRoomState.Countdown -> _uiState.value // Preserve current state during countdown
-                    GameRoomState.Paused -> _uiState.value // Preserve current state while paused
-                    is GameRoomState.Playing -> createPlayingState(gameRoomState)
-                    is GameRoomState.Waiting -> createLobbyState(gameRoomState)
-                    is GameRoomState.Closed -> createGameOverState()
-                }
-        }
-
-        private suspend fun handleGameEffectSafely(effect: GameRoomStateUpdater) {
-            try {
-                stateMutex.withLock {
-                    handleGameEffect(effect)
-                }
-            } catch (e: Exception) {
-                Timber.tag(TAG).e(e, "Error handling game effect")
-            }
-        }
 
         private fun createPlayingState(gameRoomState: GameRoomState.Playing): GameUiState.RoundOn =
             GameUiState.RoundOn(
@@ -165,7 +198,21 @@ class GameViewModel
             when (val currentState = _uiState.value) {
                 is GameUiState.RoundOn -> updateExistingRound(currentState, effect)
                 is GameUiState.RoundEnd -> createNewRound(currentState, effect)
-                else -> Unit
+                else -> {
+                    // Force create new round even if in unexpected state
+                    val gameState = currentGameRoomState as? GameRoomState.Playing ?: return
+                    _uiState.value =
+                        GameUiState.RoundOn(
+                            player1 = gameState.players[0],
+                            player2 = gameState.players[1],
+                            gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
+                            question = effect.message.currentQuestion,
+                            timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
+                            selectedAnswerId = null,
+                            playerRoundResult = null,
+                        )
+                    Timber.tag(TAG).w("Forced round start from unexpected state: ${currentState::class.simpleName}")
+                }
             }
         }
 
@@ -251,7 +298,7 @@ class GameViewModel
         }
 
         fun submitAnswer(answerId: Int) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 stateMutex.withLock {
                     (_uiState.value as? GameUiState.RoundOn)?.let { currentState ->
                         _uiState.value = currentState.copy(selectedAnswerId = answerId)

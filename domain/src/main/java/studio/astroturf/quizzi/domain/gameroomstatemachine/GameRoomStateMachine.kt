@@ -1,5 +1,6 @@
 package studio.astroturf.quizzi.domain.gameroomstatemachine
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.model.RoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateChanger
@@ -23,20 +25,25 @@ private const val TAG = "GameRoomStateMachine"
 class GameRoomStateMachine(
     private val coroutineScope: CoroutineScope,
     private val repository: QuizRepository,
+    @DefaultDispatcher val defaultDispatcher: CoroutineDispatcher,
 ) : StateMachine<GameRoomState, GameRoomStateChanger, GameRoomStateUpdater> {
     private val _state = MutableStateFlow<GameRoomState>(GameRoomState.Idle)
     val state = _state.asStateFlow()
 
-    private val _effects = Channel<GameRoomStateUpdater>()
-    val effects = _effects.receiveAsFlow()
+    // Channel with unlimited buffer to ensure we never drop effects
+    private val _effects = Channel<GameRoomStateUpdater>(Channel.UNLIMITED)
+    val effects =
+        _effects
+            .receiveAsFlow()
+            .buffer(Channel.UNLIMITED)
 
     private val stateMutex = Mutex()
 
     init {
-        coroutineScope.launch {
+        // Start message processing in a single coroutine to maintain order
+        coroutineScope.launch(defaultDispatcher) {
             repository
                 .observeMessages()
-                .buffer()
                 .collect { message ->
                     processMessageSafely(message)
                 }
@@ -46,7 +53,7 @@ class GameRoomStateMachine(
     override fun getCurrentState(): GameRoomState = _state.value
 
     override fun sideEffect(effect: GameRoomStateUpdater) {
-        coroutineScope.launch {
+        coroutineScope.launch(defaultDispatcher) {
             _effects.send(effect)
         }
     }
@@ -56,18 +63,35 @@ class GameRoomStateMachine(
 
         try {
             stateMutex.withLock {
-                processMessage(message)
+                // Process all messages sequentially under the same lock
+                when (message) {
+                    is ServerMessage.RoomUpdate -> {
+                        // Handle state updates
+                        processStateUpdate(message)
+                    }
+                    else -> {
+                        // Convert other messages to effects
+                        processGameRoomStateUpdater(message)
+                    }
+                }
             }
         } catch (e: Exception) {
-            Timber.tag(TAG).e(e, "Error processing message: $message")
+            Timber.tag(TAG).e(e, "Error processing message: ${message::class.simpleName}")
         }
     }
 
-    private fun processMessage(message: ServerMessage) {
-        when (message) {
-            is ServerMessage.RoomUpdate -> reduce(GameRoomStateChanger.RoomUpdate(message))
+    private suspend fun processStateUpdate(update: ServerMessage.RoomUpdate) {
+        val currentState = getCurrentState()
+        val newState =
+            try {
+                reduceState(currentState, GameRoomStateChanger.RoomUpdate(update))
+            } catch (e: IllegalStateException) {
+                Timber.tag(TAG).e(e, "Invalid state transition from ${currentState::class.simpleName}")
+                currentState
+            }
 
-            else -> processGameRoomStateUpdater(message)
+        if (newState != currentState) {
+            _state.value = newState
         }
     }
 
@@ -146,6 +170,7 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
+            RoomState.WAITING -> GameRoomState.Waiting(players = updateMessage.players) // 2nd player joins
             RoomState.COUNTDOWN -> GameRoomState.Countdown
             else -> throw IllegalStateException(getInvalidTransitionMessage("Waiting", updateMessage))
         }
@@ -206,5 +231,5 @@ class GameRoomStateMachine(
     private fun getInvalidTransitionMessage(
         stateName: String,
         intent: ServerMessage.RoomUpdate,
-    ): String = "${intent.state::class.simpleName} couldn't be reduced when current state is $stateName"
+    ): String = "${intent.state} couldn't be reduced when current state is $stateName"
 }
