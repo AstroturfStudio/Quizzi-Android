@@ -24,8 +24,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun RoundResultOverlay(
     correctAnswerText: String,
-    winnerName: String?,
-    isWinner: Boolean,
+    roundWinner: RoundWinner,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
@@ -63,18 +62,21 @@ fun RoundResultOverlay(
                         textAlign = TextAlign.Center,
                     )
 
-                    if (winnerName != null) {
-                        Text(
-                            text =
-                                if (isWinner) {
-                                    "Tebrikler! Bu eli kazandınız!"
-                                } else {
-                                    "$winnerName bu eli kazandı!"
-                                },
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (isWinner) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
+                    Text(
+                        text =
+                            when (roundWinner) {
+                                is RoundWinner.Me -> "Tebrikler! Bu eli kazandınız!"
+                                RoundWinner.None -> "Cevabi bilen olmadi. Berabere!"
+                                is RoundWinner.Opponent -> "${roundWinner.name} bu eli kazandı!"
+                            },
+                        style = MaterialTheme.typography.titleMedium,
+                        color =
+                            when (roundWinner) {
+                                is RoundWinner.Me -> Color(0xFF4CAF50)
+                                RoundWinner.None -> MaterialTheme.colorScheme.onSurface
+                                is RoundWinner.Opponent -> Color(0xFFAF4C4C)
+                            },
+                    )
                 }
             }
         }
@@ -86,7 +88,6 @@ fun RoundResultOverlay(
 private fun RoundResultOverlayPreview() {
     RoundResultOverlay(
         correctAnswerText = "Doğru Cevap",
-        winnerName = "Alice",
-        isWinner = true,
+        roundWinner = RoundWinner.Me("", "Alican"),
     )
 }

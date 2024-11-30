@@ -27,6 +27,7 @@ import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.repository.QuizRepository
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
+import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -184,14 +185,17 @@ class GameViewModel
 
         private fun handleAnswerResult(effect: GameRoomStateUpdater.ReceiveAnswerResult) {
             val currentState = _uiState.value as? GameUiState.RoundOn ?: return
-            _uiState.value =
-                currentState.copy(
-                    playerRoundResult =
-                        PlayerRoundResult(
-                            answerId = effect.answerResult.answer,
-                            isCorrect = effect.answerResult.correct,
-                        ),
-                )
+            val isCurrentPlayerResult: Boolean = effect.answerResult.playerId == repository.getCurrentPlayerId()
+            if (isCurrentPlayerResult) {
+                _uiState.value =
+                    currentState.copy(
+                        playerRoundResult =
+                            PlayerRoundResult(
+                                answerId = effect.answerResult.answer,
+                                isCorrect = effect.answerResult.correct,
+                            ),
+                    )
+            }
         }
 
         private fun handleRoundStart(effect: GameRoomStateUpdater.RoundStarted) {
@@ -252,6 +256,13 @@ class GameViewModel
                 listOf(currentState.player1, currentState.player2)
                     .find { it.id == effect.message.winnerPlayerId }
 
+            val roundWinner: RoundWinner =
+                when (winner?.id) {
+                    null -> RoundWinner.None
+                    repository.getCurrentPlayerId() -> RoundWinner.Me(winner.id, winner.name)
+                    else -> RoundWinner.Opponent(winner.id, winner.name)
+                }
+
             val correctAnswerValue =
                 currentState.question
                     ?.options
@@ -261,7 +272,7 @@ class GameViewModel
             _uiState.value =
                 GameUiState.RoundEnd(
                     roundNo = 0, // TODO: Implement round counting
-                    roundWinner = winner,
+                    roundWinner = roundWinner,
                     correctAnswerValue = correctAnswerValue,
                     newCursorPosition = effect.message.cursorPosition,
                 )

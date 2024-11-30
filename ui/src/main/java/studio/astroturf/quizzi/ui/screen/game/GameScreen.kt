@@ -14,6 +14,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,7 +24,9 @@ import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyContent
 import studio.astroturf.quizzi.ui.screen.game.composables.paused.PausedContent
 import studio.astroturf.quizzi.ui.screen.game.composables.round.GameRoundContent
 import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundResultOverlay
-import kotlin.random.Random
+import timber.log.Timber
+
+private const val TAG = "GameScreen"
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -35,6 +38,33 @@ fun GameScreen(
     viewModel: GameViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    // Log state changes using a side effect
+    LaunchedEffect(uiState) {
+        Timber.tag(TAG).d("State changed to: ${uiState::class.simpleName}")
+        when (uiState) {
+            is GameUiState.RoundEnd -> {
+                val roundEnd = uiState as GameUiState.RoundEnd
+                Timber.tag(TAG).d(
+                    "%snull",
+                    "RoundEnd details - Winner: ${roundEnd.roundWinner.winnerName}, " +
+                        "Correct Answer: ${roundEnd.correctAnswerValue}, ",
+                )
+            }
+            is GameUiState.RoundOn -> {
+                val roundOn = uiState as GameUiState.RoundOn
+                Timber.tag(TAG).d(
+                    "%snull",
+                    "RoundOn details - Question: ${roundOn.question?.content}, " +
+                        "Time: ${roundOn.timeRemainingInSeconds}, ",
+                )
+            }
+            else -> {
+                // Log additional details for other states if needed
+                Timber.tag(TAG).d("State details: $uiState")
+            }
+        }
+    }
 
     GameScreenContent(
         state = uiState,
@@ -52,11 +82,27 @@ private fun GameScreenContent(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
+        // Log animation state changes
+        val currentAnimationKey = state.toAnimationKey()
+        LaunchedEffect(currentAnimationKey) {
+            Timber.tag(TAG).d("Animation state changed to: $currentAnimationKey")
+        }
+
         AnimatedContent(
-            targetState = state.toAnimationKey(),
-            transitionSpec = { getTransitionSpec(targetState, initialState) },
+            targetState = currentAnimationKey,
+            transitionSpec = {
+                val spec = getTransitionSpec(targetState, initialState)
+                // Log transition information
+                Timber.tag(TAG).d("Transition from $initialState to $targetState")
+                spec
+            },
             modifier = Modifier.fillMaxSize(),
         ) { stateKey ->
+            // Log content state changes
+            LaunchedEffect(stateKey) {
+                Timber.tag(TAG).d("Rendering content for state: $stateKey")
+            }
+
             GameStateContent(
                 currentState = state,
                 stateKey = stateKey,
@@ -119,8 +165,7 @@ private fun GameStateContent(
         stateKey == GameStateAnimationKey.ROUND_END && currentState is GameUiState.RoundEnd -> {
             RoundResultOverlay(
                 correctAnswerText = currentState.correctAnswerValue,
-                winnerName = currentState.roundWinner?.name ?: "kimse",
-                isWinner = Random.nextBoolean(), // fixme
+                roundWinner = currentState.roundWinner,
             )
         }
 

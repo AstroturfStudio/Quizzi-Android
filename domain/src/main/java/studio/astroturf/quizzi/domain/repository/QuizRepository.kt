@@ -14,6 +14,8 @@ interface QuizRepository {
         avatarUrl: String,
     ): Result<Player>
 
+    fun getCurrentPlayerId(): String?
+
     suspend fun getRooms(): Result<List<GameRoom>>
 
     fun connect()

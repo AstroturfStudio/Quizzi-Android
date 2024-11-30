@@ -39,6 +39,8 @@ class QuizRepositoryImpl
                     currentPlayerDto = it
                 }.map { it.toDomain() }
 
+        override fun getCurrentPlayerId(): String? = currentPlayerDto?.id
+
         override suspend fun getRooms(): Result<List<GameRoom>> =
             quizziApiService.getRooms().map { it.rooms.map { roomDto -> roomDto.toDomain() } }
 

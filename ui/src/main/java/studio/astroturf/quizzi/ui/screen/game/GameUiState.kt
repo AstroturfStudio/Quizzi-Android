@@ -2,6 +2,7 @@ package studio.astroturf.quizzi.ui.screen.game
 
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.Question
+import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
 
 sealed interface GameUiState {
     object Idle : GameUiState
@@ -38,7 +39,7 @@ sealed interface GameUiState {
 
     data class RoundEnd(
         val roundNo: Int,
-        val roundWinner: Player?,
+        val roundWinner: RoundWinner,
         val correctAnswerValue: String,
         val newCursorPosition: Float,
     ) : GameUiState
