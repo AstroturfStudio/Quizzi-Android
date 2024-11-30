@@ -6,13 +6,56 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.VERSION_UPDATE_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Calculate New Version Code
+        id: version
+        run: |
+          # Python script modified for .kts syntax
+          echo "$(python3 -c '
+          import re
+          
+          def get_next_version():
+              gradle_file = "app/build.gradle.kts"
+              with open(gradle_file, "r") as f:
+                  content = f.read()
+          
+              # Updated regex for Kotlin DSL syntax
+              version_code_match = re.search(r"versionCode\s*=\s*(\d+)", content)
+              if not version_code_match:
+                  raise Exception("Version code not found")
+          
+              current_version = int(version_code_match.group(1))
+              new_version = current_version + 1
+          
+              # Create a temporary gradle file with updated version
+              new_content = re.sub(
+                  r"versionCode\s*=\s*\d+",
+                  f"versionCode = {new_version}",
+                  content
+              )
+          
+              with open(gradle_file, "w") as f:
+                  f.write(new_content)
+          
+              print(f"::set-output name=new_version_code::{new_version}")
+              return new_version
+          
+          get_next_version()
+          ')"
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -32,7 +75,7 @@ jobs:
       - name: Build & Test
         run: |
           ./gradlew test
-          ./gradlew bundleProdRelease  # prod flavor için
+          ./gradlew bundleProdRelease
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -41,24 +84,35 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-bundle
-          path: app/build/outputs/bundle/prodRelease/app-prod-release.aab  # prod path'i
+          path: app/build/outputs/bundle/prodRelease/app-prod-release.aab
 
       - name: Upload Mapping File
         uses: actions/upload-artifact@v4
         with:
           name: proguard-mapping
-          path: app/build/outputs/mapping/prodRelease/mapping.txt  # prod mapping path'i
+          path: app/build/outputs/mapping/prodRelease/mapping.txt
 
       - name: Prepare Store Credentials
         run: |
           echo '${{ secrets.PLAY_STORE_CREDENTIALS }}' > play-store-credentials.json
 
       - name: Deploy to Play Store Internal
+        id: play_store_deploy
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: play-store-credentials.json
-          packageName: "studio.astroturf.quizzi"  # prod package name
+          packageName: "studio.astroturf.quizzi"
           releaseFiles: app/build/outputs/bundle/prodRelease/app-prod-release.aab
           track: internal
           mappingFile: app/build/outputs/mapping/prodRelease/mapping.txt
           status: draft
+
+      # Only commit the version change if deployment succeeded
+      - name: Commit Version Update
+        if: success()
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add app/build.gradle.kts
+          git commit -m "chore: Bump version code to ${{ steps.version.outputs.new_version_code }} after successful deploy"
+          git push
