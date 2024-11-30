@@ -13,7 +13,7 @@ sealed interface GameUiEvent {
         }
     }
 
-    data class ShowError(
+    data class Error(
         val message: String,
     ) : GameUiEvent
 }

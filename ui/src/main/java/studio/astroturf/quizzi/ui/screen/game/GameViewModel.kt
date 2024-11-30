@@ -8,11 +8,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -45,7 +46,7 @@ class GameViewModel
         private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
         val uiState =
             _uiState
-                .asStateFlow()
+                .buffer(Channel.UNLIMITED)
                 .stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(5000),
@@ -65,10 +66,43 @@ class GameViewModel
         val currentGameRoomState: GameRoomState
             get() = gameStateMachine.getCurrentState()
 
+        private sealed class StateUpdate {
+            data class FromGameState(
+                val gameState: GameRoomState,
+            ) : StateUpdate()
+
+            data class FromEffect(
+                val effect: GameRoomStateUpdater,
+            ) : StateUpdate()
+        }
+
+        private val stateUpdateChannel = Channel<StateUpdate>(Channel.UNLIMITED)
+
         init {
             observeGameState()
             observeGameEffects()
+            processStateUpdatesSequentially()
             initializeGameRoom()
+        }
+
+        private fun processStateUpdatesSequentially() {
+            viewModelScope.launch {
+                for (update in stateUpdateChannel) {
+                    stateMutex.withLock {
+                        when (update) {
+                            is StateUpdate.FromGameState -> {
+                                val newUiState = processGameState(update.gameState)
+                                withContext(Dispatchers.Main) {
+                                    _uiState.value = newUiState
+                                }
+                            }
+                            is StateUpdate.FromEffect -> {
+                                handleGameEffect(update.effect)
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private fun initializeGameRoom() {
@@ -78,23 +112,8 @@ class GameViewModel
 
         private fun observeGameState() {
             viewModelScope.launch {
-                try {
-                    gameStateMachine.state
-                        .collect { gameRoomState ->
-                            // Process state update in background, but maintain mutex protection
-                            withContext(defaultDispatcher) {
-                                stateMutex.withLock {
-                                    val newUiState = processGameState(gameRoomState)
-
-                                    // Switch to main thread while still holding the lock
-                                    withContext(Dispatchers.Main) {
-                                        _uiState.value = newUiState
-                                    }
-                                }
-                            }
-                        }
-                } catch (e: Exception) {
-                    Timber.tag(TAG).e(e, "Error in game state processing")
+                gameStateMachine.state.collect { gameRoomState ->
+                    stateUpdateChannel.send(StateUpdate.FromGameState(gameRoomState))
                 }
             }
         }
@@ -102,7 +121,7 @@ class GameViewModel
         private fun observeGameEffects() {
             viewModelScope.launch {
                 gameStateMachine.effects.collect { effect ->
-                    handleGameEffectSafely(effect)
+                    stateUpdateChannel.send(StateUpdate.FromEffect(effect))
                 }
             }
         }
@@ -116,16 +135,6 @@ class GameViewModel
                 is GameRoomState.Waiting -> createLobbyState(gameRoomState)
                 is GameRoomState.Closed -> createGameOverState()
             }
-
-        private suspend fun handleGameEffectSafely(effect: GameRoomStateUpdater) {
-            try {
-                stateMutex.withLock {
-                    handleGameEffect(effect)
-                }
-            } catch (e: Exception) {
-                Timber.tag(TAG).e(e, "Error handling game effect")
-            }
-        }
 
         private fun createPlayingState(gameRoomState: GameRoomState.Playing): GameUiState.RoundOn =
             GameUiState.RoundOn(

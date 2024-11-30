@@ -170,6 +170,7 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
+            RoomState.WAITING -> GameRoomState.Waiting(players = updateMessage.players) // 2nd player joins
             RoomState.COUNTDOWN -> GameRoomState.Countdown
             else -> throw IllegalStateException(getInvalidTransitionMessage("Waiting", updateMessage))
         }
