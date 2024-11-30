@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.repository.QuizRepository
 import studio.astroturf.quizzi.domain.storage.PreferencesStorage
@@ -22,10 +23,9 @@ class LandingViewModel
         val uiState = _uiState.asStateFlow()
 
         init {
-            _uiState.value =
-                _uiState.value.copy(
-                    savedPlayerId = preferencesStorage.getPlayerId(),
-                )
+            preferencesStorage.getPlayerId()?.let {
+                login(it)
+            }
         }
 
         fun createPlayer(
@@ -37,8 +37,11 @@ class LandingViewModel
                 .onSuccess { player ->
                     preferencesStorage.savePlayerId(player.id)
                     _uiState.value = uiState.value.copy(playerId = player.id)
-                }.onFailure {
-                    Timber.tag("LandingViewModel").e(it, "createPlayer: ")
+                }.onFailure { err ->
+                    Timber.tag("LandingViewModel").e(err, "createPlayer: ")
+                    _uiState.update {
+                        it.copy(error = err.message)
+                    }
                 }
         }
 
@@ -49,11 +52,12 @@ class LandingViewModel
                     .onSuccess { player ->
                         preferencesStorage.savePlayerId(player.id)
                         _uiState.value = uiState.value.copy(playerId = player.id)
-                    }.onFailure {
-                        _uiState.value =
-                            uiState.value.copy(
-                                error = "Failed to login. Please try again.",
-                            )
+                    }.onFailure { err ->
+                        Timber.tag("LandingViewModel").e(err, "Failed to login with playerId = $playerId")
+                        preferencesStorage.clearPlayerId()
+                        _uiState.update {
+                            it.copy(playerId = null, error = err.message)
+                        }
                     }
             }
     }
