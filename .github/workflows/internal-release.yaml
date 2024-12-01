@@ -105,10 +105,7 @@ jobs:
           releaseFiles: app/build/outputs/bundle/prodRelease/app-prod-release.aab
           track: internal
           mappingFile: app/build/outputs/mapping/prodRelease/mapping.txt
-          status: completed
-          # Added to ensure immediate release
-          releaseName: "Internal Release ${{ steps.version.outputs.new_version_code }}"
-          releaseNotes: "Automated internal release for version ${{ steps.version.outputs.new_version_code }}"
+          status: draft
 
       # Only commit the version change if deployment succeeded
       - name: Commit Version Update
