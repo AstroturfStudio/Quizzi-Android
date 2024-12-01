@@ -325,7 +325,7 @@ class GameViewModel
         }
 
         companion object {
-            const val INITIAL_ROUND_COUNTDOWN_SEC = 20
+            const val INITIAL_ROUND_COUNTDOWN_SEC = 10
             const val INITIAL_GAMEBAR_PERCENTAGE = 0.5f
         }
     }

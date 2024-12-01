@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +43,7 @@ internal fun GameRoundContent(
             modifier =
                 Modifier
                     .padding(bottom = 16.dp)
-                    .size(72.dp),
+                    .size(48.dp),
             contentAlignment = Alignment.Center,
         ) {
             TimeDisplay(
@@ -81,7 +82,7 @@ internal fun GameRoundContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Question takes remaining available space
         QuestionContent(
@@ -98,7 +99,7 @@ internal fun GameRoundContent(
                 selectedAnswerId = state.selectedAnswerId,
                 playerRoundResult = state.playerRoundResult,
                 onAnswerSelected = onSubmitAnswer,
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier.wrapContentHeight().padding(bottom = 16.dp),
             )
         }
     }

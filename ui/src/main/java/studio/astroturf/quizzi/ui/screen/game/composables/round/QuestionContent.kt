@@ -2,9 +2,8 @@ package studio.astroturf.quizzi.ui.screen.game.composables.round
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -13,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -32,25 +30,23 @@ internal fun QuestionContent(
         Column(
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
+                    .fillMaxSize()
+                    .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Text(
                 text = question?.content ?: "",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
+                modifier = Modifier.padding(8.dp),
             )
 
+            // Add a visible container for the image
             AsyncImage(
                 model = question?.imageUrl,
                 contentDescription = "Question Image",
-                contentScale = ContentScale.Fit,
-                modifier =
-                    Modifier
-                        .size(280.dp)
-                        .padding(16.dp),
+                modifier = Modifier.weight(1f),
             )
         }
     }

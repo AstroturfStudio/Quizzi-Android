@@ -2,8 +2,8 @@ package studio.astroturf.quizzi.ui.screen.game.composables.round
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,24 +20,20 @@ internal fun AnswerGrid(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        question.options.chunked(2).forEach { rowOptions ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                rowOptions.forEach { option ->
-                    AnswerButton(
-                        text = option.value,
-                        optionId = option.id,
-                        selectedAnswerId = selectedAnswerId,
-                        playerRoundResult = playerRoundResult,
-                        onClick = { onAnswerSelected(option.id) },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
+        question.options.forEach { option ->
+            AnswerButton(
+                text = option.value,
+                optionId = option.id,
+                selectedAnswerId = selectedAnswerId,
+                playerRoundResult = playerRoundResult,
+                onClick = { onAnswerSelected(option.id) },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+            )
         }
     }
 }
