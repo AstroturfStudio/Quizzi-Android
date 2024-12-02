@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
+import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
@@ -63,6 +64,8 @@ class GameViewModel
 
         private val gameStateMachine = GameRoomStateMachine(viewModelScope, repository, defaultDispatcher)
         private val stateMutex = Mutex()
+
+        private lateinit var players: List<Player>
 
         val currentGameRoomState: GameRoomState
             get() = gameStateMachine.getCurrentState()
@@ -132,21 +135,17 @@ class GameViewModel
                 GameRoomState.Idle -> GameUiState.Idle
                 GameRoomState.Countdown -> _uiState.value // Preserve current state
                 GameRoomState.Paused -> _uiState.value // Preserve current state
-                is GameRoomState.Playing -> createPlayingState(gameRoomState)
+                is GameRoomState.Playing -> {
+                    savePlayers(gameRoomState.players)
+                    _uiState.value
+                }
                 is GameRoomState.Waiting -> createLobbyState(gameRoomState)
                 is GameRoomState.Closed -> createGameOverState()
             }
 
-        private fun createPlayingState(gameRoomState: GameRoomState.Playing): GameUiState.RoundOn =
-            GameUiState.RoundOn(
-                player1 = gameRoomState.players[0],
-                player2 = gameRoomState.players[1],
-                gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
-                question = null,
-                timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
-                selectedAnswerId = null,
-                playerRoundResult = null,
-            )
+        private fun savePlayers(players: List<Player>) {
+            this.players = players
+        }
 
         private fun createLobbyState(gameRoomState: GameRoomState.Waiting): GameUiState.Lobby {
             val creator = gameRoomState.players.first()
@@ -201,6 +200,7 @@ class GameViewModel
 
         private fun handleRoundStart(effect: GameRoomStateUpdater.RoundStarted) {
             when (val currentState = _uiState.value) {
+                is GameUiState.Lobby -> createInitialRound(currentState, effect)
                 is GameUiState.RoundOn -> updateExistingRound(currentState, effect)
                 is GameUiState.RoundEnd -> createNewRound(currentState, effect)
                 else -> {
@@ -229,6 +229,23 @@ class GameViewModel
                 currentState.copy(
                     question = effect.message.currentQuestion,
                     timeRemainingInSeconds = effect.message.timeRemaining.toInt(),
+                    selectedAnswerId = null,
+                    playerRoundResult = null,
+                )
+        }
+
+        private fun createInitialRound(
+            currentState: GameUiState.Lobby,
+            effect: GameRoomStateUpdater.RoundStarted,
+        ) {
+            val gameState = currentGameRoomState as? GameRoomState.Playing ?: return
+            _uiState.value =
+                GameUiState.RoundOn(
+                    player1 = gameState.players[0],
+                    player2 = gameState.players[1],
+                    gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
+                    question = effect.message.currentQuestion,
+                    timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
                     selectedAnswerId = null,
                     playerRoundResult = null,
                 )
@@ -266,8 +283,8 @@ class GameViewModel
 
             val correctAnswerValue =
                 currentState.question
-                    ?.options
-                    ?.find { it.id == effect.message.correctAnswer }
+                    .options
+                    .find { it.id == effect.message.correctAnswer }
                     ?.value ?: return
 
             _uiState.value =

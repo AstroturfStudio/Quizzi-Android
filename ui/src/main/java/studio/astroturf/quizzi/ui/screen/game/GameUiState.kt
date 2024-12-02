@@ -22,7 +22,7 @@ sealed interface GameUiState {
         val player1: Player,
         val player2: Player,
         val gameBarPercentage: Float,
-        val question: Question? = null,
+        val question: Question,
         val timeRemainingInSeconds: Int,
         val selectedAnswerId: Int? = null,
         val playerRoundResult: PlayerRoundResult? = null,
