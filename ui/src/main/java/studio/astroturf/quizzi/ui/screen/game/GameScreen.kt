@@ -1,13 +1,10 @@
 package studio.astroturf.quizzi.ui.screen.game
 
-import CountdownOverlay
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -91,7 +88,7 @@ private fun GameScreenContent(
         AnimatedContent(
             targetState = currentAnimationKey,
             transitionSpec = {
-                val spec = getTransitionSpec(targetState, initialState)
+                val spec = getTransitionSpec(targetState)
                 // Log transition information
                 Timber.tag(TAG).d("Transition from $initialState to $targetState")
                 spec
@@ -128,12 +125,7 @@ private fun GameStateContent(
                 roomName = currentState.roomName,
                 creator = currentState.creator,
                 challenger = currentState.challenger,
-            )
-        }
-
-        stateKey == GameStateAnimationKey.STARTING && currentState is GameUiState.Starting -> {
-            CountdownOverlay(
-                countdown = currentState.timeRemainingInSeconds,
+                countdown = currentState.countdown?.timeRemainingInSeconds,
             )
         }
 
@@ -176,7 +168,6 @@ private fun GameStateContent(
 private enum class GameStateAnimationKey {
     IDLE,
     LOBBY,
-    STARTING,
     ROUND,
     GAME_OVER,
     PAUSED,
@@ -187,30 +178,17 @@ private fun GameUiState.toAnimationKey(): GameStateAnimationKey =
     when (this) {
         is GameUiState.Idle -> GameStateAnimationKey.IDLE
         is GameUiState.Lobby -> GameStateAnimationKey.LOBBY
-        is GameUiState.Starting -> GameStateAnimationKey.STARTING
         is GameUiState.RoundOn -> GameStateAnimationKey.ROUND
         is GameUiState.GameOver -> GameStateAnimationKey.GAME_OVER
         is GameUiState.Paused -> GameStateAnimationKey.PAUSED
         is GameUiState.RoundEnd -> GameStateAnimationKey.ROUND_END
     }
 
-private fun getTransitionSpec(
-    targetState: GameStateAnimationKey,
-    initialState: GameStateAnimationKey,
-): ContentTransform =
+private fun getTransitionSpec(targetState: GameStateAnimationKey): ContentTransform =
     when (targetState) {
         GameStateAnimationKey.GAME_OVER ->
             (slideInVertically { height -> height } + fadeIn())
                 .togetherWith(slideOutVertically { height -> -height } + fadeOut())
-
-        GameStateAnimationKey.ROUND ->
-            when (initialState) {
-                GameStateAnimationKey.STARTING ->
-                    (expandVertically() + fadeIn())
-                        .togetherWith(shrinkVertically() + fadeOut())
-
-                else -> fadeIn() togetherWith fadeOut()
-            }
 
         else -> fadeIn() togetherWith fadeOut()
     }

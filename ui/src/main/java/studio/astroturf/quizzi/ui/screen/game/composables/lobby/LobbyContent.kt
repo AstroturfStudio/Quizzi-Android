@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.domain.model.Player
 
@@ -19,6 +20,7 @@ internal fun LobbyContent(
     roomName: String,
     creator: Player,
     challenger: Player?,
+    countdown: Int?,
 ) {
     Column(
         modifier =
@@ -32,13 +34,27 @@ internal fun LobbyContent(
             text = roomName,
             style = MaterialTheme.typography.headlineMedium,
         )
+
         Spacer(modifier = Modifier.height(32.dp))
+
         PlayerCard(player = creator, isCreator = true)
+
         Spacer(modifier = Modifier.height(16.dp))
+
         if (challenger != null) {
             PlayerCard(player = challenger, isCreator = false)
         } else {
             WaitingForOpponent()
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        countdown?.let {
+            Text(
+                text = "Starting in $countdown...",
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
     }
 }

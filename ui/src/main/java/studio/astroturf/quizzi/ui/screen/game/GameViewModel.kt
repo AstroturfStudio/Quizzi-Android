@@ -154,6 +154,7 @@ class GameViewModel
                 roomName = "${creator.name}'s Room",
                 creator = creator,
                 challenger = gameRoomState.players.getOrNull(1),
+                countdown = null,
             )
         }
 
@@ -279,7 +280,11 @@ class GameViewModel
         }
 
         private fun handleCountdown(effect: GameRoomStateUpdater.Countdown) {
-            _uiState.value = GameUiState.Starting(effect.message.remaining.toInt())
+            val currentUiState = uiState.value as? GameUiState.Lobby ?: return
+            _uiState.value =
+                currentUiState.copy(
+                    countdown = GameUiState.Lobby.CountdownTimer(effect.message.remaining.toInt()),
+                )
         }
 
         private fun handleGameOver(effect: GameRoomStateUpdater.GameRoomOver) {

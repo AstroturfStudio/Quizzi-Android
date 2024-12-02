@@ -11,11 +11,12 @@ sealed interface GameUiState {
         val roomName: String,
         val creator: Player,
         val challenger: Player?,
-    ) : GameUiState
-
-    data class Starting(
-        val timeRemainingInSeconds: Int,
-    ) : GameUiState
+        val countdown: CountdownTimer?,
+    ) : GameUiState {
+        data class CountdownTimer(
+            val timeRemainingInSeconds: Int,
+        )
+    }
 
     data class RoundOn(
         val player1: Player,
