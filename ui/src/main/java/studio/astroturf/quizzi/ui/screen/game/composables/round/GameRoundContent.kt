@@ -1,10 +1,8 @@
 package studio.astroturf.quizzi.ui.screen.game.composables.round
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,23 +32,22 @@ internal fun GameRoundContent(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
                 .systemBarsPadding(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        // Question takes remaining available space
+        QuestionContent(
+            modifier = Modifier.weight(1f),
+            question = state.question,
+        )
+
         // Time display at the top center
-        Box(
-            modifier =
-                Modifier
-                    .padding(bottom = 16.dp)
-                    .size(48.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            TimeDisplay(
-                timeRemaining = state.timeRemainingInSeconds,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
+        TimeDisplay(
+            modifier = Modifier.size(42.dp),
+            timeRemaining = state.timeRemainingInSeconds,
+        )
 
         // Players VS section with GameBar
         Row(
@@ -62,44 +59,34 @@ internal fun GameRoundContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             PlayerDisplay(
+                modifier = Modifier.weight(1f),
                 player = state.player1,
                 isLeft = true,
-                modifier = Modifier.weight(1f),
             )
 
             GameBar(
-                cursorPosition = 1 - state.gameBarPercentage,
                 modifier =
                     Modifier
                         .width(160.dp)
                         .height(12.dp),
+                cursorPosition = 1 - state.gameBarPercentage,
             )
 
             PlayerDisplay(
+                modifier = Modifier.weight(1f),
                 player = state.player2,
                 isLeft = false,
-                modifier = Modifier.weight(1f),
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Question takes remaining available space
-        QuestionContent(
-            question = state.question,
-            modifier = Modifier.weight(1f),
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         // Answer grid at the bottom
         state.question?.let {
             AnswerGrid(
+                modifier = Modifier.wrapContentHeight(),
                 question = state.question,
                 selectedAnswerId = state.selectedAnswerId,
                 playerRoundResult = state.playerRoundResult,
                 onAnswerSelected = onSubmitAnswer,
-                modifier = Modifier.wrapContentHeight().padding(bottom = 16.dp),
             )
         }
     }
@@ -225,6 +212,51 @@ private fun GameRoundContentWithCorrectAnswerPreview() {
                         PlayerRoundResult(
                             answerId = 1,
                             isCorrect = true,
+                        ),
+                ),
+            onSubmitAnswer = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun GameRoundContentWithWrongAnswerPreview() {
+    QuizziTheme {
+        GameRoundContent(
+            state =
+                GameUiState.RoundOn(
+                    player1 =
+                        Player(
+                            id = "1",
+                            name = "Player 1",
+                            avatarUrl = "TODO()",
+                        ),
+                    player2 =
+                        Player(
+                            id = "2",
+                            name = "Player 2",
+                            avatarUrl = "TODO()",
+                        ),
+                    gameBarPercentage = 0.7f,
+                    question =
+                        Question(
+                            content = "What is the capital of France?",
+                            imageUrl = "https://example.com/paris.jpg",
+                            options =
+                                listOf(
+                                    Option(id = 1, value = "Paris"),
+                                    Option(id = 2, value = "London"),
+                                    Option(id = 3, value = "Berlin"),
+                                    Option(id = 4, value = "Madrid"),
+                                ),
+                        ),
+                    timeRemainingInSeconds = 14,
+                    selectedAnswerId = 1,
+                    playerRoundResult =
+                        PlayerRoundResult(
+                            answerId = 1,
+                            isCorrect = false,
                         ),
                 ),
             onSubmitAnswer = {},

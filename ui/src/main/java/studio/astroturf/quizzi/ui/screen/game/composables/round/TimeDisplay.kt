@@ -4,7 +4,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,8 +17,8 @@ import androidx.compose.ui.draw.scale
 
 @Composable
 internal fun TimeDisplay(
+    modifier: Modifier,
     timeRemaining: Int?,
-    modifier: Modifier = Modifier,
 ) {
     val animatedScale by animateFloatAsState(
         targetValue = if (timeRemaining?.let { it <= 3 } == true) 1.2f else 1f,
@@ -41,11 +41,11 @@ internal fun TimeDisplay(
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.wrapContentSize(),
         ) {
             Text(
                 text = timeRemaining?.toString() ?: "",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onPrimary,
             )
         }

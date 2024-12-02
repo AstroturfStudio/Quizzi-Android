@@ -1,5 +1,6 @@
 package studio.astroturf.quizzi.ui.screen.game.composables.round
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -37,14 +38,14 @@ internal fun AnswerButton(
             // Sadece seçilmişse ve sonuç henüz gelmediyse
             isSelected -> Color(0xFFFDD835) // Sarı
             // Seçilmemiş normal durum
-            else -> MaterialTheme.colorScheme.primary
+            else -> Color.White
         }
 
     val textColor =
         when {
             playerRoundResult != null && isSelected -> Color.White
             isSelected -> Color.Black
-            else -> MaterialTheme.colorScheme.onPrimary
+            else -> Color.Black
         }
 
     Button(
@@ -55,7 +56,10 @@ internal fun AnswerButton(
                 containerColor = containerColor,
                 disabledContainerColor = containerColor, // Disable durumunda da aynı rengi koru
             ),
-        modifier = modifier.height(56.dp),
+        modifier =
+            modifier
+                .height(56.dp)
+                .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
     ) {
         Text(
