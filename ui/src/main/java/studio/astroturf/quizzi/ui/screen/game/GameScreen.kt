@@ -19,7 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameOverContent
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyContent
 import studio.astroturf.quizzi.ui.screen.game.composables.paused.PausedContent
-import studio.astroturf.quizzi.ui.screen.game.composables.round.GameRoundContent
+import studio.astroturf.quizzi.ui.screen.game.composables.round.GameRoundContent2
 import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundResultOverlay
 import timber.log.Timber
 
@@ -52,7 +52,7 @@ fun GameScreen(
                 val roundOn = uiState as GameUiState.RoundOn
                 Timber.tag(TAG).d(
                     "%snull",
-                    "RoundOn details - Question: ${roundOn.question?.content}, " +
+                    "RoundOn details - Question: ${roundOn.question.content}, " +
                         "Time: ${roundOn.timeRemainingInSeconds}, ",
                 )
             }
@@ -130,7 +130,7 @@ private fun GameStateContent(
         }
 
         stateKey == GameStateAnimationKey.ROUND && currentState is GameUiState.RoundOn -> {
-            GameRoundContent(
+            GameRoundContent2(
                 state = currentState,
                 onSubmitAnswer = onSubmitAnswer,
             )
