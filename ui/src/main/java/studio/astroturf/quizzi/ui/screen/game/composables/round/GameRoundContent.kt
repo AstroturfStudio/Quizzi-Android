@@ -3,6 +3,7 @@ package studio.astroturf.quizzi.ui.screen.game.composables.round
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -11,11 +12,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import studio.astroturf.quizzi.domain.model.Option
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.Question
@@ -24,7 +28,7 @@ import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundRes
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
 
 @Composable
-internal fun GameRoundContent(
+fun GameRoundContent(
     state: GameUiState.RoundOn,
     onSubmitAnswer: (Int) -> Unit,
 ) {
@@ -34,55 +38,66 @@ internal fun GameRoundContent(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
                 .systemBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Question takes remaining available space
-        QuestionContent(
-            modifier = Modifier.weight(1f),
-            question = state.question,
-        )
-
-        // Time display at the top center
-        TimeDisplay(
-            modifier = Modifier.size(42.dp),
-            timeRemaining = state.timeRemainingInSeconds,
-        )
-
-        // Players VS section with GameBar
-        Row(
+        Column(
             modifier =
                 Modifier
+                    .weight(1f) // This makes it fill remaining space
                     .fillMaxWidth()
-                    .height(60.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+                    .wrapContentHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            PlayerDisplay(
-                modifier = Modifier.weight(1f),
-                player = state.player1,
-                isLeft = true,
-            )
-
-            GameBar(
-                modifier =
-                    Modifier
-                        .width(160.dp)
-                        .height(12.dp),
-                cursorPosition = 1 - state.gameBarPercentage,
-            )
-
-            PlayerDisplay(
-                modifier = Modifier.weight(1f),
-                player = state.player2,
-                isLeft = false,
+            Text(text = state.question.content)
+            Spacer(modifier = Modifier.height(16.dp))
+            AsyncImage(
+                model = state.question.imageUrl,
+                contentDescription = "Question Image",
+                modifier = Modifier.height(120.dp).wrapContentWidth(),
             )
         }
 
-        // Answer grid at the bottom
-        state.question?.let {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            TimeDisplay(
+                modifier = Modifier.size(42.dp),
+                timeRemaining = state.timeRemainingInSeconds,
+            )
+
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                PlayerDisplay(
+                    modifier = Modifier.weight(1f),
+                    player = state.player1,
+                    isLeft = true,
+                )
+
+                GameBar(
+                    modifier =
+                        Modifier
+                            .width(160.dp)
+                            .height(12.dp),
+                    cursorPosition = 1 - state.gameBarPercentage,
+                )
+
+                PlayerDisplay(
+                    modifier = Modifier.weight(1f),
+                    player = state.player2,
+                    isLeft = false,
+                )
+            }
+
+            // Answer grid at the bottom
             AnswerGrid(
-                modifier = Modifier.wrapContentHeight(),
+                modifier =
+                    Modifier
+                        .wrapContentHeight(),
                 question = state.question,
                 selectedAnswerId = state.selectedAnswerId,
                 playerRoundResult = state.playerRoundResult,
@@ -261,44 +276,5 @@ private fun GameRoundContentWithWrongAnswerPreview() {
                 ),
             onSubmitAnswer = {},
         )
-    }
-}
-
-// Additional preview for PlayerDisplay
-@Preview(showBackground = true)
-@Composable
-private fun PlayerDisplayPreview() {
-    QuizziTheme {
-        Row(modifier = Modifier.width(200.dp)) {
-            PlayerDisplay(
-                player =
-                    Player(
-                        id = "1",
-                        name = "John Doe",
-                        avatarUrl = "TODO()",
-                    ),
-                isLeft = true,
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PlayerDisplayRightPreview() {
-    QuizziTheme {
-        Row(modifier = Modifier.width(200.dp)) {
-            PlayerDisplay(
-                player =
-                    Player(
-                        id = "2",
-                        name = "Jane Doe",
-                        avatarUrl = "TODO()",
-                    ),
-                isLeft = false,
-                modifier = Modifier.weight(1f),
-            )
-        }
     }
 }
