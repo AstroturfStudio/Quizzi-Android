@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "413863778401",
+    "project_id": "astroturfstudio-quizzi",
+    "storage_bucket": "astroturfstudio-quizzi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413863778401:android:fe79e0a784d3634ce53220",
+        "android_client_info": {
+          "package_name": "studio.astroturf.quizzi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjuk4MdN-vVpj22euTjHCwCFYbWVx6I7k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 fun BugReportDialog(
     gameId: String,
     onDismiss: () -> Unit,
-    onReportBug: (String, String) -> Unit,
 ) {
     val context = LocalContext.current
 

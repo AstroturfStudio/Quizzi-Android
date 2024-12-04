@@ -22,13 +22,14 @@ import kotlinx.coroutines.withContext
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
+import studio.astroturf.quizzi.domain.model.GameFeedback
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
+import studio.astroturf.quizzi.domain.repository.FeedbackRepository
 import studio.astroturf.quizzi.domain.repository.QuizRepository
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
-import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameFeedback
 import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
 import timber.log.Timber
 import javax.inject.Inject
@@ -41,6 +42,7 @@ class GameViewModel
     constructor(
         private val savedStateHandle: SavedStateHandle,
         private val repository: QuizRepository,
+        private val feedbackRepository: FeedbackRepository,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
         @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
@@ -353,30 +355,13 @@ class GameViewModel
         }
 
         fun submitFeedback(feedback: GameFeedback) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 try {
-                    // For now, just log the feedback
-                    Timber.d("Feedback submitted: $feedback")
+                    feedbackRepository.submitFeedback(feedback)
                     _uiEvents.emit(GameUiEvent.ShowToast("Thank you for your feedback!"))
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to submit feedback")
                     _uiEvents.emit(GameUiEvent.Error("Failed to submit feedback"))
-                }
-            }
-        }
-
-        fun reportBug(
-            description: String,
-            contactMethod: String,
-        ) {
-            viewModelScope.launch {
-                try {
-                    // For now, just log the bug report
-                    Timber.d("Bug reported: $description via $contactMethod")
-                    _uiEvents.emit(GameUiEvent.ShowToast("Thank you for reporting the bug!"))
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to report bug")
-                    _uiEvents.emit(GameUiEvent.Error("Failed to report bug"))
                 }
             }
         }

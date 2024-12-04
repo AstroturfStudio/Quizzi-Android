@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import studio.astroturf.quizzi.domain.model.GameFeedback
 
 @Composable
 internal fun FeedbackSection(

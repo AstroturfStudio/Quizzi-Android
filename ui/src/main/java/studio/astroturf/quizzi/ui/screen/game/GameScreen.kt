@@ -16,7 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameFeedback
+import studio.astroturf.quizzi.domain.model.GameFeedback
 import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameOverContent
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyContent
 import studio.astroturf.quizzi.ui.screen.game.composables.paused.PausedContent
@@ -69,7 +69,6 @@ fun GameScreen(
         onNavigateToRooms = onNavigateToRooms,
         onSubmitAnswer = viewModel::submitAnswer,
         onSubmitFeedback = viewModel::submitFeedback,
-        onReportBug = viewModel::reportBug,
         modifier = modifier,
     )
 }
@@ -80,7 +79,6 @@ private fun GameScreenContent(
     onNavigateToRooms: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
     onSubmitFeedback: (GameFeedback) -> Unit,
-    onReportBug: (String, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -111,7 +109,6 @@ private fun GameScreenContent(
                 onNavigateToRooms = onNavigateToRooms,
                 onSubmitAnswer = onSubmitAnswer,
                 onSubmitFeedback = onSubmitFeedback,
-                onReportBug = onReportBug,
             )
         }
     }
@@ -124,7 +121,6 @@ private fun GameStateContent(
     onNavigateToRooms: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
     onSubmitFeedback: (GameFeedback) -> Unit,
-    onReportBug: (String, String) -> Unit,
 ) {
     when {
         stateKey == GameStateAnimationKey.IDLE -> LoadingIndicator()
@@ -153,7 +149,6 @@ private fun GameStateContent(
                     gameId = currentState.gameId,
                     onNavigateBack = onNavigateToRooms,
                     onSubmitFeedback = onSubmitFeedback,
-                    onReportBug = onReportBug,
                 )
             }
         }

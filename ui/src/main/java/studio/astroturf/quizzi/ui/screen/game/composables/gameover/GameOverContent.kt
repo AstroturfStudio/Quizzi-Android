@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import studio.astroturf.quizzi.domain.model.GameFeedback
 import studio.astroturf.quizzi.domain.model.Player
 
 @Composable
@@ -29,7 +30,6 @@ internal fun GameOverContent(
     gameId: String,
     onNavigateBack: () -> Unit,
     onSubmitFeedback: (GameFeedback) -> Unit,
-    onReportBug: (String, String) -> Unit,
 ) {
     var showBugReportDialog by remember { mutableStateOf(false) }
 
@@ -81,7 +81,6 @@ internal fun GameOverContent(
         BugReportDialog(
             gameId = gameId,
             onDismiss = { showBugReportDialog = false },
-            onReportBug = onReportBug,
         )
     }
 }

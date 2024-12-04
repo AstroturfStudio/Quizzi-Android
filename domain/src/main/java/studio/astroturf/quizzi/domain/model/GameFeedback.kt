@@ -1,4 +1,4 @@
-package studio.astroturf.quizzi.ui.screen.game.composables.gameover
+package studio.astroturf.quizzi.domain.model
 
 data class GameFeedback(
     val enjoymentRating: Int,
