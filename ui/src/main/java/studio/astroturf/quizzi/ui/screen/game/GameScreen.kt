@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import studio.astroturf.quizzi.domain.model.GameFeedback
 import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameOverContent
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyContent
 import studio.astroturf.quizzi.ui.screen.game.composables.paused.PausedContent
@@ -67,6 +68,7 @@ fun GameScreen(
         state = uiState,
         onNavigateToRooms = onNavigateToRooms,
         onSubmitAnswer = viewModel::submitAnswer,
+        onSubmitFeedback = viewModel::submitFeedback,
         modifier = modifier,
     )
 }
@@ -76,6 +78,7 @@ private fun GameScreenContent(
     state: GameUiState,
     onNavigateToRooms: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
+    onSubmitFeedback: (GameFeedback) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -105,6 +108,7 @@ private fun GameScreenContent(
                 stateKey = stateKey,
                 onNavigateToRooms = onNavigateToRooms,
                 onSubmitAnswer = onSubmitAnswer,
+                onSubmitFeedback = onSubmitFeedback,
             )
         }
     }
@@ -116,6 +120,7 @@ private fun GameStateContent(
     stateKey: GameStateAnimationKey,
     onNavigateToRooms: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
+    onSubmitFeedback: (GameFeedback) -> Unit,
 ) {
     when {
         stateKey == GameStateAnimationKey.IDLE -> LoadingIndicator()
@@ -141,7 +146,9 @@ private fun GameStateContent(
                 GameOverContent(
                     winner = currentState.winner,
                     totalRounds = currentState.totalRoundCount,
+                    gameId = currentState.gameId,
                     onNavigateBack = onNavigateToRooms,
+                    onSubmitFeedback = onSubmitFeedback,
                 )
             }
         }

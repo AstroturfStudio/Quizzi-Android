@@ -22,10 +22,12 @@ import kotlinx.coroutines.withContext
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
+import studio.astroturf.quizzi.domain.model.GameFeedback
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
+import studio.astroturf.quizzi.domain.repository.FeedbackRepository
 import studio.astroturf.quizzi.domain.repository.QuizRepository
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
@@ -40,6 +42,7 @@ class GameViewModel
     constructor(
         private val savedStateHandle: SavedStateHandle,
         private val repository: QuizRepository,
+        private val feedbackRepository: FeedbackRepository,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
         @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
@@ -157,7 +160,12 @@ class GameViewModel
             )
         }
 
-        private fun createGameOverState(): GameUiState.GameOver = GameUiState.GameOver(totalRoundCount = 0, winner = null)
+        private fun createGameOverState(): GameUiState.GameOver =
+            GameUiState.GameOver(
+                totalRoundCount = 0,
+                winner = null,
+                gameId = roomId ?: "",
+            )
 
         private fun handleGameEffect(effect: GameRoomStateUpdater) {
             when (effect) {
@@ -307,7 +315,12 @@ class GameViewModel
         private fun handleGameOver(effect: GameRoomStateUpdater.GameRoomOver) {
             val gameState = currentGameRoomState as? GameRoomState.Closed ?: return
             val winner = gameState.players.find { it.id == effect.message.winnerPlayerId }
-            _uiState.value = GameUiState.GameOver(totalRoundCount = 0, winner = winner)
+            _uiState.value =
+                GameUiState.GameOver(
+                    totalRoundCount = 0,
+                    winner = winner,
+                    gameId = roomId ?: "",
+                )
         }
 
         private fun handleTimeUpdate(effect: GameRoomStateUpdater.RoundTimeUpdate) {
@@ -337,6 +350,18 @@ class GameViewModel
                         _uiState.value = currentState.copy(selectedAnswerId = answerId)
                         repository.sendMessage(ClientMessage.PlayerAnswer(answerId))
                     }
+                }
+            }
+        }
+
+        fun submitFeedback(feedback: GameFeedback) {
+            viewModelScope.launch(ioDispatcher) {
+                try {
+                    feedbackRepository.submitFeedback(feedback)
+                    _uiEvents.emit(GameUiEvent.ShowToast("Thank you for your feedback!"))
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to submit feedback")
+                    _uiEvents.emit(GameUiEvent.Error("Failed to submit feedback"))
                 }
             }
         }

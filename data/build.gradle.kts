@@ -62,4 +62,6 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.database.ktx)
 }
