@@ -28,6 +28,7 @@ import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.repository.QuizRepository
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
+import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameFeedback
 import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
 import timber.log.Timber
 import javax.inject.Inject
@@ -157,7 +158,12 @@ class GameViewModel
             )
         }
 
-        private fun createGameOverState(): GameUiState.GameOver = GameUiState.GameOver(totalRoundCount = 0, winner = null)
+        private fun createGameOverState(): GameUiState.GameOver =
+            GameUiState.GameOver(
+                totalRoundCount = 0,
+                winner = null,
+                gameId = roomId ?: "",
+            )
 
         private fun handleGameEffect(effect: GameRoomStateUpdater) {
             when (effect) {
@@ -307,7 +313,12 @@ class GameViewModel
         private fun handleGameOver(effect: GameRoomStateUpdater.GameRoomOver) {
             val gameState = currentGameRoomState as? GameRoomState.Closed ?: return
             val winner = gameState.players.find { it.id == effect.message.winnerPlayerId }
-            _uiState.value = GameUiState.GameOver(totalRoundCount = 0, winner = winner)
+            _uiState.value =
+                GameUiState.GameOver(
+                    totalRoundCount = 0,
+                    winner = winner,
+                    gameId = roomId ?: "",
+                )
         }
 
         private fun handleTimeUpdate(effect: GameRoomStateUpdater.RoundTimeUpdate) {
@@ -337,6 +348,35 @@ class GameViewModel
                         _uiState.value = currentState.copy(selectedAnswerId = answerId)
                         repository.sendMessage(ClientMessage.PlayerAnswer(answerId))
                     }
+                }
+            }
+        }
+
+        fun submitFeedback(feedback: GameFeedback) {
+            viewModelScope.launch {
+                try {
+                    // For now, just log the feedback
+                    Timber.d("Feedback submitted: $feedback")
+                    _uiEvents.emit(GameUiEvent.ShowToast("Thank you for your feedback!"))
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to submit feedback")
+                    _uiEvents.emit(GameUiEvent.Error("Failed to submit feedback"))
+                }
+            }
+        }
+
+        fun reportBug(
+            description: String,
+            contactMethod: String,
+        ) {
+            viewModelScope.launch {
+                try {
+                    // For now, just log the bug report
+                    Timber.d("Bug reported: $description via $contactMethod")
+                    _uiEvents.emit(GameUiEvent.ShowToast("Thank you for reporting the bug!"))
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to report bug")
+                    _uiEvents.emit(GameUiEvent.Error("Failed to report bug"))
                 }
             }
         }
