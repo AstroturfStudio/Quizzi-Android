@@ -11,7 +11,7 @@ import javax.inject.Inject
 class FirebaseFeedbackRepository
     @Inject
     constructor() : FeedbackRepository {
-        private val database = Firebase.database.reference
+        private val database = Firebase.database("https://astroturfstudio-quizzi-default-rtdb.$REGION.firebasedatabase.app").reference
 
         override suspend fun submitFeedback(feedback: GameFeedback) {
             val feedbackId = UUID.randomUUID().toString()
@@ -20,5 +20,9 @@ class FirebaseFeedbackRepository
                 .child(feedbackId)
                 .setValue(feedback)
                 .await()
+        }
+
+        companion object {
+            const val REGION = "europe-west1"
         }
     }

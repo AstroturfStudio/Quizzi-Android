@@ -9,18 +9,9 @@ import timber.log.Timber
 class QuizziApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        // Initialize Firebase first
-        try {
-            FirebaseApp.initializeApp(this)?.let {
-                Timber.d("Firebase initialized successfully")
-            } ?: run {
-                Timber.e("Firebase initialization returned null")
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to initialize Firebase")
-        }
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
+        FirebaseApp.initializeApp(applicationContext)
     }
 }

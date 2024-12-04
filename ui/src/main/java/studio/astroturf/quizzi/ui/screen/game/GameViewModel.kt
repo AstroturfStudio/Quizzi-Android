@@ -358,10 +358,8 @@ class GameViewModel
             viewModelScope.launch(ioDispatcher) {
                 try {
                     feedbackRepository.submitFeedback(feedback)
-                    _uiEvents.emit(GameUiEvent.ShowToast("Thank you for your feedback!"))
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to submit feedback")
-                    _uiEvents.emit(GameUiEvent.Error("Failed to submit feedback"))
                 }
             }
         }
