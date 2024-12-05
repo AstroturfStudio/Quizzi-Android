@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.ImageLoader
 import studio.astroturf.quizzi.domain.model.GameFeedback
 import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameOverContent
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyContent
@@ -69,6 +70,7 @@ fun GameScreen(
         onNavigateToRooms = onNavigateToRooms,
         onSubmitAnswer = viewModel::submitAnswer,
         onSubmitFeedback = viewModel::submitFeedback,
+        imageLoader = viewModel.imageLoader,
         modifier = modifier,
     )
 }
@@ -79,6 +81,7 @@ private fun GameScreenContent(
     onNavigateToRooms: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
     onSubmitFeedback: (GameFeedback) -> Unit,
+    imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -109,6 +112,7 @@ private fun GameScreenContent(
                 onNavigateToRooms = onNavigateToRooms,
                 onSubmitAnswer = onSubmitAnswer,
                 onSubmitFeedback = onSubmitFeedback,
+                imageLoader = imageLoader,
             )
         }
     }
@@ -121,6 +125,7 @@ private fun GameStateContent(
     onNavigateToRooms: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
     onSubmitFeedback: (GameFeedback) -> Unit,
+    imageLoader: ImageLoader,
 ) {
     when {
         stateKey == GameStateAnimationKey.IDLE -> LoadingIndicator()
@@ -138,6 +143,7 @@ private fun GameStateContent(
             GameRoundContent(
                 state = currentState,
                 onSubmitAnswer = onSubmitAnswer,
+                imageLoader = imageLoader,
             )
         }
 

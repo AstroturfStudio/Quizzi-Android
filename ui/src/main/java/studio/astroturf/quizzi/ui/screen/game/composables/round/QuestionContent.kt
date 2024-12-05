@@ -14,12 +14,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.ImageLoader
 import studio.astroturf.quizzi.domain.model.Question
+import studio.astroturf.quizzi.ui.screen.game.composables.CachedQuestionImage
 
 @Composable
 internal fun QuestionContent(
     question: Question?,
+    imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -42,10 +44,9 @@ internal fun QuestionContent(
                 modifier = Modifier.padding(8.dp),
             )
 
-            // Add a visible container for the image
-            AsyncImage(
-                model = question?.imageUrl,
-                contentDescription = "Question Image",
+            CachedQuestionImage(
+                imageUrl = question?.imageUrl,
+                imageLoader = imageLoader,
                 modifier = Modifier.weight(1f),
             )
         }

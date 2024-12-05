@@ -4,6 +4,7 @@ import NavDestination
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil.ImageLoader
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +46,7 @@ class GameViewModel
         private val feedbackRepository: FeedbackRepository,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
         @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+        val imageLoader: ImageLoader,
     ) : ViewModel() {
         private val roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
 

@@ -1,5 +1,6 @@
 package studio.astroturf.quizzi.ui.screen.game.composables.round
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,9 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.ImageLoader
 import studio.astroturf.quizzi.domain.model.Option
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.Question
@@ -30,10 +32,12 @@ import studio.astroturf.quizzi.ui.theme.QuizziTheme
 fun GameRoundContent(
     state: GameUiState.RoundOn,
     onSubmitAnswer: (Int) -> Unit,
+    imageLoader: ImageLoader,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
                 .systemBarsPadding(),
@@ -41,17 +45,20 @@ fun GameRoundContent(
         Column(
             modifier =
                 Modifier
-                    .weight(1f) // This makes it fill remaining space
+                    .weight(1f)
                     .fillMaxWidth()
                     .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(text = state.question.content)
             Spacer(modifier = Modifier.height(16.dp))
-            AsyncImage(
-                model = state.question.imageUrl,
-                contentDescription = "Question Image",
-                modifier = Modifier.width(320.dp).wrapContentHeight(),
+            QuestionContent(
+                question = state.question,
+                imageLoader = imageLoader,
+                modifier =
+                    Modifier
+                        .width(320.dp)
+                        .wrapContentHeight(),
             )
         }
 
@@ -109,40 +116,12 @@ fun GameRoundContent(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun GameRoundContentPreview() {
+    val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
-            state =
-                GameUiState.RoundOn(
-                    player1 =
-                        Player(
-                            id = "1",
-                            name = "Player 1",
-                            avatarUrl = "TODO()",
-                        ),
-                    player2 =
-                        Player(
-                            id = "2",
-                            name = "Player 2",
-                            avatarUrl = "TODO()",
-                        ),
-                    gameBarPercentage = 0.7f,
-                    question =
-                        Question(
-                            content = "What is the capital of France?",
-                            imageUrl = "https://example.com/paris.jpg",
-                            options =
-                                listOf(
-                                    Option(id = 1, value = "Paris"),
-                                    Option(id = 2, value = "London"),
-                                    Option(id = 3, value = "Berlin"),
-                                    Option(id = 4, value = "Madrid"),
-                                ),
-                        ),
-                    timeRemainingInSeconds = 14,
-                    selectedAnswerId = null,
-                    playerRoundResult = null,
-                ),
+            state = previewGameState(),
             onSubmitAnswer = {},
+            imageLoader = previewImageLoader(context),
         )
     }
 }
@@ -150,40 +129,12 @@ private fun GameRoundContentPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun GameRoundContentWithSelectedAnswerPreview() {
+    val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
-            state =
-                GameUiState.RoundOn(
-                    player1 =
-                        Player(
-                            id = "1",
-                            name = "Player 1",
-                            avatarUrl = "TODO()",
-                        ),
-                    player2 =
-                        Player(
-                            id = "2",
-                            name = "Player 2",
-                            avatarUrl = "TODO()",
-                        ),
-                    gameBarPercentage = 0.7f,
-                    question =
-                        Question(
-                            content = "What is the capital of France?",
-                            imageUrl = "https://example.com/paris.jpg",
-                            options =
-                                listOf(
-                                    Option(id = 1, value = "Paris"),
-                                    Option(id = 2, value = "London"),
-                                    Option(id = 3, value = "Berlin"),
-                                    Option(id = 4, value = "Madrid"),
-                                ),
-                        ),
-                    timeRemainingInSeconds = 14,
-                    selectedAnswerId = 1,
-                    playerRoundResult = null,
-                ),
+            state = previewGameState(selectedAnswerId = 1),
             onSubmitAnswer = {},
+            imageLoader = previewImageLoader(context),
         )
     }
 }
@@ -191,44 +142,16 @@ private fun GameRoundContentWithSelectedAnswerPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun GameRoundContentWithCorrectAnswerPreview() {
+    val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
             state =
-                GameUiState.RoundOn(
-                    player1 =
-                        Player(
-                            id = "1",
-                            name = "Player 1",
-                            avatarUrl = "TODO()",
-                        ),
-                    player2 =
-                        Player(
-                            id = "2",
-                            name = "Player 2",
-                            avatarUrl = "TODO()",
-                        ),
-                    gameBarPercentage = 0.7f,
-                    question =
-                        Question(
-                            content = "What is the capital of France?",
-                            imageUrl = "https://example.com/paris.jpg",
-                            options =
-                                listOf(
-                                    Option(id = 1, value = "Paris"),
-                                    Option(id = 2, value = "London"),
-                                    Option(id = 3, value = "Berlin"),
-                                    Option(id = 4, value = "Madrid"),
-                                ),
-                        ),
-                    timeRemainingInSeconds = 14,
+                previewGameState(
                     selectedAnswerId = 1,
-                    playerRoundResult =
-                        PlayerRoundResult(
-                            answerId = 1,
-                            isCorrect = true,
-                        ),
+                    playerRoundResult = PlayerRoundResult(answerId = 1, isCorrect = true),
                 ),
             onSubmitAnswer = {},
+            imageLoader = previewImageLoader(context),
         )
     }
 }
@@ -236,44 +159,56 @@ private fun GameRoundContentWithCorrectAnswerPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun GameRoundContentWithWrongAnswerPreview() {
+    val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
             state =
-                GameUiState.RoundOn(
-                    player1 =
-                        Player(
-                            id = "1",
-                            name = "Player 1",
-                            avatarUrl = "TODO()",
-                        ),
-                    player2 =
-                        Player(
-                            id = "2",
-                            name = "Player 2",
-                            avatarUrl = "TODO()",
-                        ),
-                    gameBarPercentage = 0.7f,
-                    question =
-                        Question(
-                            content = "What is the capital of France?",
-                            imageUrl = "https://example.com/paris.jpg",
-                            options =
-                                listOf(
-                                    Option(id = 1, value = "Paris"),
-                                    Option(id = 2, value = "London"),
-                                    Option(id = 3, value = "Berlin"),
-                                    Option(id = 4, value = "Madrid"),
-                                ),
-                        ),
-                    timeRemainingInSeconds = 14,
+                previewGameState(
                     selectedAnswerId = 1,
-                    playerRoundResult =
-                        PlayerRoundResult(
-                            answerId = 1,
-                            isCorrect = false,
-                        ),
+                    playerRoundResult = PlayerRoundResult(answerId = 1, isCorrect = false),
                 ),
             onSubmitAnswer = {},
+            imageLoader = previewImageLoader(context),
         )
     }
 }
+
+// Helper functions for previews
+private fun previewImageLoader(context: Context): ImageLoader =
+    ImageLoader
+        .Builder(context)
+        .build()
+
+private fun previewGameState(
+    selectedAnswerId: Int? = null,
+    playerRoundResult: PlayerRoundResult? = null,
+) = GameUiState.RoundOn(
+    player1 =
+        Player(
+            id = "1",
+            name = "Player 1",
+            avatarUrl = "TODO()",
+        ),
+    player2 =
+        Player(
+            id = "2",
+            name = "Player 2",
+            avatarUrl = "TODO()",
+        ),
+    gameBarPercentage = 0.7f,
+    question =
+        Question(
+            content = "What is the capital of France?",
+            imageUrl = "https://example.com/paris.jpg",
+            options =
+                listOf(
+                    Option(id = 1, value = "Paris"),
+                    Option(id = 2, value = "London"),
+                    Option(id = 3, value = "Berlin"),
+                    Option(id = 4, value = "Madrid"),
+                ),
+        ),
+    timeRemainingInSeconds = 14,
+    selectedAnswerId = selectedAnswerId,
+    playerRoundResult = playerRoundResult,
+)
