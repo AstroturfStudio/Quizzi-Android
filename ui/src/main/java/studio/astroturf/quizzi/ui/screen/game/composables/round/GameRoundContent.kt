@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -52,7 +51,7 @@ fun GameRoundContent(
             AsyncImage(
                 model = state.question.imageUrl,
                 contentDescription = "Question Image",
-                modifier = Modifier.height(120.dp).wrapContentWidth(),
+                modifier = Modifier.width(320.dp).wrapContentHeight(),
             )
         }
 
