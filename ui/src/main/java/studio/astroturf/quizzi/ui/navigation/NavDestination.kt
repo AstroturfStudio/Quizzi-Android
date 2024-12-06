@@ -1,3 +1,5 @@
+package studio.astroturf.quizzi.ui.navigation
+
 sealed class NavDestination(
     val route: String,
 ) {

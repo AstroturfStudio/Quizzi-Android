@@ -1,3 +1,6 @@
+package studio.astroturf.quizzi.ui.navigation
+
+import RoomsScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
