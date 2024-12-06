@@ -7,9 +7,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionHandler
+import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.repository.QuizRepository
 import studio.astroturf.quizzi.domain.storage.PreferencesStorage
-import timber.log.Timber
+import studio.astroturf.quizzi.ui.extensions.handleQuizziResult
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,9 +20,13 @@ class LandingViewModel
     constructor(
         private val repository: QuizRepository,
         private val preferencesStorage: PreferencesStorage,
+        private val exceptionHandler: ExceptionHandler,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(LandingUiState())
         val uiState = _uiState.asStateFlow()
+
+        private val _notification = MutableStateFlow<UiNotification?>(null)
+        val notification = _notification.asStateFlow()
 
         init {
             preferencesStorage.getPlayerId()?.let {
@@ -32,32 +38,44 @@ class LandingViewModel
             name: String,
             avatarUrl: String,
         ) = viewModelScope.launch {
-            repository
-                .createPlayer(name, avatarUrl)
-                .onSuccess { player ->
+            handleQuizziResult(
+                result = repository.createPlayer(name, avatarUrl),
+                onSuccess = { player ->
                     preferencesStorage.savePlayerId(player.id)
                     _uiState.value = uiState.value.copy(playerId = player.id)
-                }.onFailure { err ->
-                    Timber.tag("LandingViewModel").e(err, "createPlayer: ")
-                    _uiState.update {
-                        it.copy(error = err.message)
-                    }
-                }
+                },
+                exceptionHandler = exceptionHandler,
+                onUiNotification = { notification ->
+                    _notification.value = notification
+                },
+                onFatalException = { message, _ ->
+                    _uiState.update { it.copy(error = message) }
+                },
+            )
         }
 
         fun login(playerId: String) =
             viewModelScope.launch {
-                repository
-                    .login(playerId)
-                    .onSuccess { player ->
+                handleQuizziResult(
+                    result = repository.login(playerId),
+                    onSuccess = { player ->
                         preferencesStorage.savePlayerId(player.id)
                         _uiState.value = uiState.value.copy(playerId = player.id)
-                    }.onFailure { err ->
-                        Timber.tag("LandingViewModel").e(err, "Failed to login with playerId = $playerId")
+                    },
+                    exceptionHandler = exceptionHandler,
+                    onUiNotification = { notification ->
+                        _notification.value = notification
+                    },
+                    onFatalException = { message, _ ->
                         preferencesStorage.clearPlayerId()
                         _uiState.update {
-                            it.copy(playerId = null, error = err.message)
+                            it.copy(playerId = null, error = message)
                         }
-                    }
+                    },
+                )
             }
+
+        fun clearNotification() {
+            _notification.value = null
+        }
     }

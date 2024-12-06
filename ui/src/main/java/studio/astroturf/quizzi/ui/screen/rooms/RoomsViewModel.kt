@@ -7,7 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionHandler
+import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.repository.QuizRepository
+import studio.astroturf.quizzi.ui.extensions.handleQuizziResult
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,12 +18,16 @@ class RoomsViewModel
     @Inject
     constructor(
         private val repository: QuizRepository,
+        private val exceptionHandler: ExceptionHandler,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(RoomsUiState())
         val uiState = _uiState.asStateFlow()
 
-        private var _isRefreshing = MutableStateFlow(false)
+        private val _isRefreshing = MutableStateFlow(false)
         val isRefreshing = _isRefreshing.asStateFlow()
+
+        private val _notification = MutableStateFlow<UiNotification?>(null)
+        val notification = _notification.asStateFlow()
 
         init {
             viewModelScope.launch {
@@ -29,23 +36,30 @@ class RoomsViewModel
         }
 
         private suspend fun getRooms() {
-            repository
-                .getRooms()
-                .onSuccess { rooms ->
+            handleQuizziResult(
+                result = repository.getRooms(),
+                onSuccess = { rooms ->
                     _uiState.update {
                         it.copy(
                             isConnected = true,
                             rooms = rooms,
+                            error = null,
                         )
                     }
-                }.onFailure { error ->
+                },
+                exceptionHandler = exceptionHandler,
+                onUiNotification = { notification ->
+                    _notification.value = notification
+                },
+                onFatalException = { message, _ ->
                     _uiState.update {
                         it.copy(
                             isConnected = false,
-                            error = error.message,
+                            error = message,
                         )
                     }
-                }
+                },
+            )
         }
 
         fun refresh() {
@@ -57,6 +71,10 @@ class RoomsViewModel
                     _isRefreshing.value = false
                 }
             }
+        }
+
+        fun clearNotification() {
+            _notification.value = null
         }
 
         override fun onCleared() {

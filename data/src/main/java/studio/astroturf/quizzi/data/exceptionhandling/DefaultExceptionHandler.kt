@@ -13,7 +13,7 @@ import timber.log.Timber
 import java.io.IOException
 
 class DefaultExceptionHandler : ExceptionHandler {
-    override fun handleError(exception: Exception): ExceptionResult {
+    override fun handleException(exception: Exception): ExceptionResult {
         // Log all exceptions
         Timber.e(exception, "Error occurred: ${exception.message}")
 

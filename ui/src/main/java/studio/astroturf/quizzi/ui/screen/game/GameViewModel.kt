@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -21,6 +22,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.di.IoDispatcher
+import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionHandler
+import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
 import studio.astroturf.quizzi.domain.model.GameFeedback
 import studio.astroturf.quizzi.domain.model.Player
@@ -29,6 +32,7 @@ import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.repository.FeedbackRepository
 import studio.astroturf.quizzi.domain.repository.QuizRepository
+import studio.astroturf.quizzi.ui.extensions.handleQuizziResult
 import studio.astroturf.quizzi.ui.navigation.NavDestination
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
@@ -44,6 +48,7 @@ class GameViewModel
         private val savedStateHandle: SavedStateHandle,
         private val repository: QuizRepository,
         private val feedbackRepository: FeedbackRepository,
+        private val exceptionHandler: ExceptionHandler,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
         @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
         val imageLoader: ImageLoader,
@@ -86,6 +91,9 @@ class GameViewModel
         }
 
         private val stateUpdateChannel = Channel<StateUpdate>(Channel.UNLIMITED)
+
+        private val _notification = MutableStateFlow<UiNotification?>(null)
+        val notification = _notification.asStateFlow()
 
         init {
             observeGameState()
@@ -358,12 +366,24 @@ class GameViewModel
 
         fun submitFeedback(feedback: GameFeedback) {
             viewModelScope.launch(ioDispatcher) {
-                try {
-                    feedbackRepository.submitFeedback(feedback)
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to submit feedback")
-                }
+                handleQuizziResult(
+                    result = feedbackRepository.submitFeedback(feedback),
+                    onSuccess = { /* Feedback submitted successfully */ },
+                    exceptionHandler = exceptionHandler,
+                    onUiNotification = { notification ->
+                        _notification.value = notification
+                    },
+                    onFatalException = { message, _ ->
+                        viewModelScope.launch {
+                            _uiEvents.emit(GameUiEvent.Error(message))
+                        }
+                    },
+                )
             }
+        }
+
+        fun clearNotification() {
+            _notification.value = null
         }
 
         override fun onCleared() {
