@@ -6,12 +6,12 @@ import kotlinx.coroutines.launch
 
 fun <T> ViewModel.safeLaunch(
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    errorHandler: (Throwable) -> Unit = { },
+    exceptionHandler: (Throwable) -> Unit = { },
     block: suspend () -> T,
 ) = viewModelScope.launch(dispatcher) {
     try {
         block()
     } catch (e: Exception) {
-        errorHandler(e)
+        exceptionHandler(e)
     }
 }
