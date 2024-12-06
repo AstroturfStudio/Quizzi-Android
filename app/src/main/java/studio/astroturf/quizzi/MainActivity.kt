@@ -5,12 +5,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
+import studio.astroturf.quizzi.ui.exceptionhandling.NotificationHandler
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
 
 @AndroidEntryPoint
@@ -21,11 +28,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             QuizziTheme {
                 val navController = rememberNavController()
+                var currentNotification by remember { mutableStateOf<UiNotification?>(null) }
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    QuizziNavGraph(
-                        navController = navController,
-                        modifier = Modifier.padding(innerPadding),
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        QuizziNavGraph(
+                            navController = navController,
+                            modifier = Modifier.padding(innerPadding),
+                        )
+                    }
+
+                    // Add notification handler overlay
+                    NotificationHandler(
+                        notification = currentNotification,
+                        onDismiss = { currentNotification = null },
                     )
                 }
             }
