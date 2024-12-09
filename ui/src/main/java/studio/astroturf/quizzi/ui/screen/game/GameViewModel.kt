@@ -24,7 +24,7 @@ import kotlinx.coroutines.withContext
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.di.MainDispatcher
-import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionHandler
+import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
 import studio.astroturf.quizzi.domain.model.GameFeedback
@@ -34,7 +34,7 @@ import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.repository.FeedbackRepository
 import studio.astroturf.quizzi.domain.repository.QuizziRepository
-import studio.astroturf.quizzi.ui.extensions.handleQuizziResult
+import studio.astroturf.quizzi.ui.extensions.resolve
 import studio.astroturf.quizzi.ui.navigation.NavDestination
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
@@ -50,7 +50,7 @@ class GameViewModel
         private val savedStateHandle: SavedStateHandle,
         private val repository: QuizziRepository,
         private val feedbackRepository: FeedbackRepository,
-        private val exceptionHandler: ExceptionHandler,
+        private val exceptionResolver: ExceptionResolver,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
         @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
         @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
@@ -75,7 +75,8 @@ class GameViewModel
             )
         val uiEvents: SharedFlow<GameUiEvent> = _uiEvents.asSharedFlow()
 
-        private val gameStateMachine = GameRoomStateMachine(viewModelScope, repository, defaultDispatcher)
+        private val gameStateMachine =
+            GameRoomStateMachine(viewModelScope, repository, defaultDispatcher)
         private val stateMutex = Mutex()
 
         private lateinit var players: List<Player>
@@ -120,6 +121,7 @@ class GameViewModel
                                     _uiState.value = newUiState
                                 }
                             }
+
                             is StateUpdate.FromEffect -> {
                                 handleGameEffect(update.effect)
                             }
@@ -131,19 +133,16 @@ class GameViewModel
 
         private fun initializeGameRoom() {
             launchIo {
-                handleQuizziResult(
-                    result = repository.connect(),
-                    onSuccess = { /* Websocket connected successfully */ },
-                    exceptionHandler = exceptionHandler,
-                    onUiNotification = { notification ->
-                        _notification.value = notification
+                repository.connect().resolve(
+                    exceptionResolver,
+                    onUiNotification = {
+                        _notification.value = it
                     },
-                    onFatalException = { message, _ ->
-                        _uiEvents.emit(GameUiEvent.Error(message))
-                    },
-                )
+                ) {
+                    // Websocket connected successfully
+                    roomId?.let { joinRoom(it) } ?: createRoom()
+                }
             }
-            roomId?.let { joinRoom(it) } ?: createRoom()
         }
 
         private fun observeGameState() {
@@ -172,6 +171,7 @@ class GameViewModel
                     // Add additional processing if needed
                     _uiState.value // Placeholder, replace with actual state transformation
                 }
+
                 is GameRoomState.Waiting -> createLobbyState(gameRoomState)
                 is GameRoomState.Closed -> createGameOverState()
             }
@@ -224,7 +224,8 @@ class GameViewModel
         private fun handleAnswerResult(effect: GameRoomStateUpdater.ReceiveAnswerResult) {
             launchMain {
                 val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
-                val isCurrentPlayerResult = effect.answerResult.playerId == repository.getCurrentPlayerId()
+                val isCurrentPlayerResult =
+                    effect.answerResult.playerId == repository.getCurrentPlayerId()
                 if (isCurrentPlayerResult) {
                     _uiState.value =
                         currentState.copy(
@@ -245,7 +246,8 @@ class GameViewModel
                     is GameUiState.RoundOn -> updateExistingRound(currentState, effect)
                     is GameUiState.RoundEnd -> createNewRound(currentState, effect)
                     else -> {
-                        val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
+                        val gameState =
+                            currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
                         _uiState.value =
                             GameUiState.RoundOn(
                                 player1 = gameState.players[0],
@@ -256,7 +258,9 @@ class GameViewModel
                                 selectedAnswerId = null,
                                 playerRoundResult = null,
                             )
-                        Timber.tag(TAG).w("Forced round start from unexpected state: ${currentState::class.simpleName}")
+                        Timber
+                            .tag(TAG)
+                            .w("Forced round start from unexpected state: ${currentState::class.simpleName}")
                     }
                 }
             }
@@ -402,17 +406,16 @@ class GameViewModel
 
         fun submitFeedback(feedback: GameFeedback) {
             launchIo {
-                handleQuizziResult(
-                    result = feedbackRepository.submitFeedback(feedback),
-                    onSuccess = { /* Feedback submitted successfully */ },
-                    exceptionHandler = exceptionHandler,
-                    onUiNotification = { notification ->
-                        _notification.value = notification
-                    },
-                    onFatalException = { message, _ ->
-                        _uiEvents.emit(GameUiEvent.Error(message))
-                    },
-                )
+                feedbackRepository
+                    .submitFeedback(feedback)
+                    .resolve(
+                        exceptionResolver,
+                        onUiNotification = {
+                            _notification.value = it
+                        },
+                    ) {
+                        // Feedback submitted successfully
+                    }
             }
         }
 

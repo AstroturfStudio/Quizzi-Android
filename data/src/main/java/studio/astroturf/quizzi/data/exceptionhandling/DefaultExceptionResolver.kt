@@ -2,7 +2,7 @@ package studio.astroturf.quizzi.data.exceptionhandling
 
 import studio.astroturf.quizzi.domain.exceptionhandling.AuthErrorCode
 import studio.astroturf.quizzi.domain.exceptionhandling.DialogAction
-import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionHandler
+import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResult
 import studio.astroturf.quizzi.domain.exceptionhandling.GameErrorCode
 import studio.astroturf.quizzi.domain.exceptionhandling.QuizziException
@@ -12,24 +12,24 @@ import studio.astroturf.quizzi.domain.exceptionhandling.WebSocketErrorCode
 import timber.log.Timber
 import java.io.IOException
 
-class DefaultExceptionHandler : ExceptionHandler {
-    override fun handleException(exception: Exception): ExceptionResult {
+class DefaultExceptionResolver : ExceptionResolver {
+    override fun resolve(exception: Exception): ExceptionResult {
         // Log all exceptions
         Timber.e(exception, "Error occurred: ${exception.message}")
 
         return when (exception) {
-            is QuizziException -> handleQuizziException(exception)
-            is IOException -> handleIOException(exception)
+            is QuizziException -> resolveQuizziException(exception)
+            is IOException -> resolveIOException(exception)
             else -> ExceptionResult.Fatal("An unexpected error occurred", exception)
         }
     }
 
-    private fun handleQuizziException(exception: QuizziException): ExceptionResult =
+    private fun resolveQuizziException(exception: QuizziException): ExceptionResult =
         when (exception) {
-            is QuizziException.AuthException -> handleAuthException(exception)
-            is QuizziException.GameException -> handleGameException(exception)
-            is QuizziException.HttpException -> handleHttpException(exception)
-            is QuizziException.WebSocketException -> handleWebSocketException(exception)
+            is QuizziException.AuthException -> resolveAuthException(exception)
+            is QuizziException.GameException -> resolveGameException(exception)
+            is QuizziException.HttpException -> resolveHttpException(exception)
+            is QuizziException.WebSocketException -> resolveWebSocketException(exception)
             is QuizziException.UnexpectedException ->
                 ExceptionResult.Fatal(
                     exception.message,
@@ -37,7 +37,7 @@ class DefaultExceptionHandler : ExceptionHandler {
                 )
         }
 
-    private fun handleAuthException(exception: QuizziException.AuthException): ExceptionResult =
+    private fun resolveAuthException(exception: QuizziException.AuthException): ExceptionResult =
         when (exception.errorCode) {
             AuthErrorCode.SESSION_EXPIRED ->
                 ExceptionResult.Notification(
@@ -69,7 +69,7 @@ class DefaultExceptionHandler : ExceptionHandler {
             null -> ExceptionResult.Silent("Unspecified auth error: ${exception.message}")
         }
 
-    private fun handleGameException(exception: QuizziException.GameException): ExceptionResult =
+    private fun resolveGameException(exception: QuizziException.GameException): ExceptionResult =
         when (exception.errorCode) {
             GameErrorCode.ROOM_NOT_FOUND ->
                 ExceptionResult.Notification(
@@ -97,7 +97,7 @@ class DefaultExceptionHandler : ExceptionHandler {
             null -> ExceptionResult.Silent("Unspecified game error: ${exception.message}")
         }
 
-    private fun handleHttpException(exception: QuizziException.HttpException): ExceptionResult {
+    private fun resolveHttpException(exception: QuizziException.HttpException): ExceptionResult {
         val message =
             when (exception.code) {
                 401 -> "Authentication required"
@@ -115,7 +115,7 @@ class DefaultExceptionHandler : ExceptionHandler {
         )
     }
 
-    private fun handleWebSocketException(exception: QuizziException.WebSocketException): ExceptionResult =
+    private fun resolveWebSocketException(exception: QuizziException.WebSocketException): ExceptionResult =
         when (exception.code) {
             WebSocketErrorCode.CONNECTION_FAILED ->
                 ExceptionResult.Notification(
@@ -147,7 +147,7 @@ class DefaultExceptionHandler : ExceptionHandler {
             null -> ExceptionResult.Silent("Unspecified WebSocket error: ${exception.message}")
         }
 
-    private fun handleIOException(exception: IOException): ExceptionResult =
+    private fun resolveIOException(exception: IOException): ExceptionResult =
         ExceptionResult.Notification(
             UiNotification.Snackbar(
                 message = "Network error. Please check your connection.",

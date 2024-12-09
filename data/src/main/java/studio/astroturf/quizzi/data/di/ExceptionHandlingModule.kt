@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import studio.astroturf.quizzi.data.exceptionhandling.DefaultExceptionHandler
-import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionHandler
+import studio.astroturf.quizzi.data.exceptionhandling.DefaultExceptionResolver
+import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import javax.inject.Singleton
 
 @Module
@@ -13,5 +13,5 @@ import javax.inject.Singleton
 object ExceptionHandlingModule {
     @Provides
     @Singleton
-    fun provideExceptionHandler(): ExceptionHandler = DefaultExceptionHandler()
+    fun provideExceptionResolver(): ExceptionResolver = DefaultExceptionResolver()
 }

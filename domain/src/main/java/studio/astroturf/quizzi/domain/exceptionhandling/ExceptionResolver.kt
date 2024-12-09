@@ -1,7 +1,7 @@
 package studio.astroturf.quizzi.domain.exceptionhandling
 
-interface ExceptionHandler {
-    fun handleException(exception: Exception): ExceptionResult
+interface ExceptionResolver {
+    fun resolve(exception: Exception): ExceptionResult
 }
 
 sealed class ExceptionResult {
