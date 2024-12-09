@@ -6,12 +6,13 @@ import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.buffer
@@ -22,6 +23,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.di.IoDispatcher
+import studio.astroturf.quizzi.domain.di.MainDispatcher
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionHandler
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
@@ -51,12 +53,13 @@ class GameViewModel
         private val exceptionHandler: ExceptionHandler,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
         @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+        @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
         val imageLoader: ImageLoader,
     ) : ViewModel() {
         private val roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
 
         private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
-        val uiState =
+        val uiState: StateFlow<GameUiState> =
             _uiState
                 .buffer(Channel.UNLIMITED)
                 .stateIn(
@@ -70,7 +73,7 @@ class GameViewModel
                 extraBufferCapacity = 64,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST,
             )
-        val uiEvents = _uiEvents.asSharedFlow()
+        val uiEvents: SharedFlow<GameUiEvent> = _uiEvents.asSharedFlow()
 
         private val gameStateMachine = GameRoomStateMachine(viewModelScope, repository, defaultDispatcher)
         private val stateMutex = Mutex()
@@ -93,7 +96,7 @@ class GameViewModel
         private val stateUpdateChannel = Channel<StateUpdate>(Channel.UNLIMITED)
 
         private val _notification = MutableStateFlow<UiNotification?>(null)
-        val notification = _notification.asStateFlow()
+        val notification: StateFlow<UiNotification?> = _notification.asStateFlow()
 
         init {
             observeGameState()
@@ -102,6 +105,10 @@ class GameViewModel
             initializeGameRoom()
         }
 
+        private fun launchIo(block: suspend () -> Unit) = viewModelScope.launch(ioDispatcher) { block() }
+
+        private fun launchMain(block: suspend () -> Unit) = viewModelScope.launch(mainDispatcher) { block() }
+
         private fun processStateUpdatesSequentially() {
             viewModelScope.launch {
                 for (update in stateUpdateChannel) {
@@ -109,7 +116,7 @@ class GameViewModel
                         when (update) {
                             is StateUpdate.FromGameState -> {
                                 val newUiState = processGameState(update.gameState)
-                                withContext(Dispatchers.Main) {
+                                withContext(mainDispatcher) {
                                     _uiState.value = newUiState
                                 }
                             }
@@ -123,7 +130,7 @@ class GameViewModel
         }
 
         private fun initializeGameRoom() {
-            viewModelScope.launch(ioDispatcher) {
+            launchIo {
                 handleQuizziResult(
                     result = repository.connect(),
                     onSuccess = { /* Websocket connected successfully */ },
@@ -132,9 +139,7 @@ class GameViewModel
                         _notification.value = notification
                     },
                     onFatalException = { message, _ ->
-                        viewModelScope.launch {
-                            _uiEvents.emit(GameUiEvent.Error(message))
-                        }
+                        _uiEvents.emit(GameUiEvent.Error(message))
                     },
                 )
             }
@@ -164,7 +169,8 @@ class GameViewModel
                 GameRoomState.Paused -> _uiState.value // Preserve current state
                 is GameRoomState.Playing -> {
                     savePlayers(gameRoomState.players)
-                    _uiState.value
+                    // Add additional processing if needed
+                    _uiState.value // Placeholder, replace with actual state transformation
                 }
                 is GameRoomState.Waiting -> createLobbyState(gameRoomState)
                 is GameRoomState.Closed -> createGameOverState()
@@ -216,39 +222,42 @@ class GameViewModel
         }
 
         private fun handleAnswerResult(effect: GameRoomStateUpdater.ReceiveAnswerResult) {
-            val currentState = _uiState.value as? GameUiState.RoundOn ?: return
-            val isCurrentPlayerResult: Boolean = effect.answerResult.playerId == repository.getCurrentPlayerId()
-            if (isCurrentPlayerResult) {
-                _uiState.value =
-                    currentState.copy(
-                        playerRoundResult =
-                            PlayerRoundResult(
-                                answerId = effect.answerResult.answer,
-                                isCorrect = effect.answerResult.correct,
-                            ),
-                    )
+            launchMain {
+                val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
+                val isCurrentPlayerResult = effect.answerResult.playerId == repository.getCurrentPlayerId()
+                if (isCurrentPlayerResult) {
+                    _uiState.value =
+                        currentState.copy(
+                            playerRoundResult =
+                                PlayerRoundResult(
+                                    answerId = effect.answerResult.answer,
+                                    isCorrect = effect.answerResult.correct,
+                                ),
+                        )
+                }
             }
         }
 
         private fun handleRoundStart(effect: GameRoomStateUpdater.RoundStarted) {
-            when (val currentState = _uiState.value) {
-                is GameUiState.Lobby -> createInitialRound(currentState, effect)
-                is GameUiState.RoundOn -> updateExistingRound(currentState, effect)
-                is GameUiState.RoundEnd -> createNewRound(currentState, effect)
-                else -> {
-                    // Force create new round even if in unexpected state
-                    val gameState = currentGameRoomState as? GameRoomState.Playing ?: return
-                    _uiState.value =
-                        GameUiState.RoundOn(
-                            player1 = gameState.players[0],
-                            player2 = gameState.players[1],
-                            gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
-                            question = effect.message.currentQuestion,
-                            timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
-                            selectedAnswerId = null,
-                            playerRoundResult = null,
-                        )
-                    Timber.tag(TAG).w("Forced round start from unexpected state: ${currentState::class.simpleName}")
+            launchMain {
+                when (val currentState = _uiState.value) {
+                    is GameUiState.Lobby -> createInitialRound(currentState, effect)
+                    is GameUiState.RoundOn -> updateExistingRound(currentState, effect)
+                    is GameUiState.RoundEnd -> createNewRound(currentState, effect)
+                    else -> {
+                        val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
+                        _uiState.value =
+                            GameUiState.RoundOn(
+                                player1 = gameState.players[0],
+                                player2 = gameState.players[1],
+                                gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
+                                question = effect.message.currentQuestion,
+                                timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
+                                selectedAnswerId = null,
+                                playerRoundResult = null,
+                            )
+                        Timber.tag(TAG).w("Forced round start from unexpected state: ${currentState::class.simpleName}")
+                    }
                 }
             }
         }
@@ -270,89 +279,100 @@ class GameViewModel
             currentState: GameUiState.Lobby,
             effect: GameRoomStateUpdater.RoundStarted,
         ) {
-            val gameState = currentGameRoomState as? GameRoomState.Playing ?: return
-            _uiState.value =
-                GameUiState.RoundOn(
-                    player1 = gameState.players[0],
-                    player2 = gameState.players[1],
-                    gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
-                    question = effect.message.currentQuestion,
-                    timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
-                    selectedAnswerId = null,
-                    playerRoundResult = null,
-                )
+            launchMain {
+                val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
+                _uiState.value =
+                    GameUiState.RoundOn(
+                        player1 = gameState.players[0],
+                        player2 = gameState.players[1],
+                        gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
+                        question = effect.message.currentQuestion,
+                        timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
+                        selectedAnswerId = null,
+                        playerRoundResult = null,
+                    )
+            }
         }
 
         private fun createNewRound(
             currentState: GameUiState.RoundEnd,
             effect: GameRoomStateUpdater.RoundStarted,
         ) {
-            val gameState = currentGameRoomState as? GameRoomState.Playing ?: return
-            _uiState.value =
-                GameUiState.RoundOn(
-                    player1 = gameState.players[0],
-                    player2 = gameState.players[1],
-                    gameBarPercentage = currentState.newCursorPosition,
-                    question = effect.message.currentQuestion,
-                    timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
-                    selectedAnswerId = null,
-                    playerRoundResult = null,
-                )
+            launchMain {
+                val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
+                _uiState.value =
+                    GameUiState.RoundOn(
+                        player1 = gameState.players[0],
+                        player2 = gameState.players[1],
+                        gameBarPercentage = currentState.newCursorPosition,
+                        question = effect.message.currentQuestion,
+                        timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
+                        selectedAnswerId = null,
+                        playerRoundResult = null,
+                    )
+            }
         }
 
         private fun handleRoundEnd(effect: GameRoomStateUpdater.RoundEnd) {
-            val currentState = _uiState.value as? GameUiState.RoundOn ?: return
-            val winner =
-                listOf(currentState.player1, currentState.player2)
-                    .find { it.id == effect.message.winnerPlayerId }
+            launchMain {
+                val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
+                val winner =
+                    listOf(currentState.player1, currentState.player2)
+                        .find { it.id == effect.message.winnerPlayerId }
 
-            val roundWinner: RoundWinner =
-                when (winner?.id) {
-                    null -> RoundWinner.None
-                    repository.getCurrentPlayerId() -> RoundWinner.Me(winner.id, winner.name)
-                    else -> RoundWinner.Opponent(winner.id, winner.name)
-                }
+                val roundWinner: RoundWinner =
+                    when (winner?.id) {
+                        null -> RoundWinner.None
+                        repository.getCurrentPlayerId() -> RoundWinner.Me(winner.id, winner.name)
+                        else -> RoundWinner.Opponent(winner.id, winner.name)
+                    }
 
-            val correctAnswerValue =
-                currentState.question
-                    .options
-                    .find { it.id == effect.message.correctAnswer }
-                    ?.value ?: return
+                val correctAnswerValue =
+                    currentState.question.options
+                        .find { it.id == effect.message.correctAnswer }
+                        ?.value ?: return@launchMain
 
-            _uiState.value =
-                GameUiState.RoundEnd(
-                    roundNo = 0, // TODO: Implement round counting
-                    roundWinner = roundWinner,
-                    correctAnswerValue = correctAnswerValue,
-                    newCursorPosition = effect.message.cursorPosition,
-                )
+                _uiState.value =
+                    GameUiState.RoundEnd(
+                        roundNo = 0, // TODO: Implement round counting
+                        roundWinner = roundWinner,
+                        correctAnswerValue = correctAnswerValue,
+                        newCursorPosition = effect.message.cursorPosition,
+                    )
+            }
         }
 
         private fun handleCountdown(effect: GameRoomStateUpdater.Countdown) {
-            val currentUiState = uiState.value as? GameUiState.Lobby ?: return
-            _uiState.value =
-                currentUiState.copy(
-                    countdown = GameUiState.Lobby.CountdownTimer(effect.message.remaining.toInt()),
-                )
+            launchMain {
+                val currentUiState = uiState.value as? GameUiState.Lobby ?: return@launchMain
+                _uiState.value =
+                    currentUiState.copy(
+                        countdown = GameUiState.Lobby.CountdownTimer(effect.message.remaining.toInt()),
+                    )
+            }
         }
 
         private fun handleGameOver(effect: GameRoomStateUpdater.GameRoomOver) {
-            val gameState = currentGameRoomState as? GameRoomState.Closed ?: return
-            val winner = gameState.players.find { it.id == effect.message.winnerPlayerId }
-            _uiState.value =
-                GameUiState.GameOver(
-                    totalRoundCount = 0,
-                    winner = winner,
-                    gameId = roomId ?: "",
-                )
+            launchMain {
+                val gameState = currentGameRoomState as? GameRoomState.Closed ?: return@launchMain
+                val winner = gameState.players.find { it.id == effect.message.winnerPlayerId }
+                _uiState.value =
+                    GameUiState.GameOver(
+                        totalRoundCount = 0,
+                        winner = winner,
+                        gameId = roomId ?: "",
+                    )
+            }
         }
 
         private fun handleTimeUpdate(effect: GameRoomStateUpdater.RoundTimeUpdate) {
-            val currentState = _uiState.value as? GameUiState.RoundOn ?: return
-            _uiState.value =
-                currentState.copy(
-                    timeRemainingInSeconds = effect.message.remaining.toInt(),
-                )
+            launchMain {
+                val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
+                _uiState.value =
+                    currentState.copy(
+                        timeRemainingInSeconds = effect.message.remaining.toInt(),
+                    )
+            }
         }
 
         fun createRoom() {
@@ -368,10 +388,12 @@ class GameViewModel
         }
 
         fun submitAnswer(answerId: Int) {
-            viewModelScope.launch(ioDispatcher) {
+            launchIo {
                 stateMutex.withLock {
                     (_uiState.value as? GameUiState.RoundOn)?.let { currentState ->
-                        _uiState.value = currentState.copy(selectedAnswerId = answerId)
+                        launchMain {
+                            _uiState.value = currentState.copy(selectedAnswerId = answerId)
+                        }
                         repository.sendMessage(ClientMessage.PlayerAnswer(answerId))
                     }
                 }
@@ -379,7 +401,7 @@ class GameViewModel
         }
 
         fun submitFeedback(feedback: GameFeedback) {
-            viewModelScope.launch(ioDispatcher) {
+            launchIo {
                 handleQuizziResult(
                     result = feedbackRepository.submitFeedback(feedback),
                     onSuccess = { /* Feedback submitted successfully */ },
@@ -388,25 +410,27 @@ class GameViewModel
                         _notification.value = notification
                     },
                     onFatalException = { message, _ ->
-                        viewModelScope.launch {
-                            _uiEvents.emit(GameUiEvent.Error(message))
-                        }
+                        _uiEvents.emit(GameUiEvent.Error(message))
                     },
                 )
             }
         }
 
         fun clearNotification() {
-            _notification.value = null
+            launchMain {
+                _notification.value = null
+            }
         }
 
         override fun onCleared() {
             super.onCleared()
-            repository.disconnect()
+            viewModelScope.launch(ioDispatcher) {
+                repository.disconnect()
+            }
         }
 
         companion object {
-            const val INITIAL_ROUND_COUNTDOWN_SEC = 10
-            const val INITIAL_GAMEBAR_PERCENTAGE = 0.5f
+            private const val INITIAL_GAMEBAR_PERCENTAGE = 0.5f
+            private const val INITIAL_ROUND_COUNTDOWN_SEC = 10
         }
     }
