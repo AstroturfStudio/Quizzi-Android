@@ -2,6 +2,7 @@ package studio.astroturf.quizzi.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import studio.astroturf.quizzi.data.exceptionhandling.mapToQuizziException
 import studio.astroturf.quizzi.data.remote.rest.service.QuizziApiService
 import studio.astroturf.quizzi.data.remote.websocket.model.PlayerDto
 import studio.astroturf.quizzi.data.remote.websocket.service.QuizziWebSocketService
@@ -47,9 +48,13 @@ class QuizziRepositoryImpl
                 .getRooms()
                 .map { it.rooms.map { roomDto -> roomDto.toDomain() } }
 
-        override fun connect() {
-            quizziWebSocketService.connect(currentPlayerDto?.id)
-        }
+        override fun connect(): QuizziResult<Unit> =
+            try {
+                quizziWebSocketService.connect(currentPlayerDto?.id)
+                QuizziResult.success(Unit)
+            } catch (e: Exception) {
+                QuizziResult.failure(e.mapToQuizziException())
+            }
 
         override fun observeMessages(): Flow<ServerMessage> = quizziWebSocketService.observeMessages().map { it.toDomain() }
 

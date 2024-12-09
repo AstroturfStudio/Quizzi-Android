@@ -19,7 +19,7 @@ interface QuizziRepository {
 
     suspend fun getRooms(): QuizziResult<List<GameRoom>>
 
-    fun connect()
+    fun connect(): QuizziResult<Unit>
 
     fun observeMessages(): Flow<ServerMessage>
 

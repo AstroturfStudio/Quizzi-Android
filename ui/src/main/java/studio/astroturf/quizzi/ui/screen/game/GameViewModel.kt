@@ -123,7 +123,21 @@ class GameViewModel
         }
 
         private fun initializeGameRoom() {
-            repository.connect()
+            viewModelScope.launch(ioDispatcher) {
+                handleQuizziResult(
+                    result = repository.connect(),
+                    onSuccess = { /* Websocket connected successfully */ },
+                    exceptionHandler = exceptionHandler,
+                    onUiNotification = { notification ->
+                        _notification.value = notification
+                    },
+                    onFatalException = { message, _ ->
+                        viewModelScope.launch {
+                            _uiEvents.emit(GameUiEvent.Error(message))
+                        }
+                    },
+                )
+            }
             roomId?.let { joinRoom(it) } ?: createRoom()
         }
 
