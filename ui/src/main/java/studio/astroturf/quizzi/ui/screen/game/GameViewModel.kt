@@ -1,7 +1,6 @@
 package studio.astroturf.quizzi.ui.screen.game
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.di.MainDispatcher
@@ -34,6 +32,7 @@ import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.repository.FeedbackRepository
 import studio.astroturf.quizzi.domain.repository.QuizziRepository
+import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
 import studio.astroturf.quizzi.ui.navigation.NavDestination
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
@@ -51,11 +50,15 @@ class GameViewModel
         private val repository: QuizziRepository,
         private val feedbackRepository: FeedbackRepository,
         private val exceptionResolver: ExceptionResolver,
+        @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
         @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
-        @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
         val imageLoader: ImageLoader,
-    ) : ViewModel() {
+    ) : BaseViewModel(
+            mainDispatcher,
+            ioDispatcher,
+            defaultDispatcher,
+        ) {
         private val roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
 
         private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
@@ -106,20 +109,14 @@ class GameViewModel
             initializeGameRoom()
         }
 
-        private fun launchIo(block: suspend () -> Unit) = viewModelScope.launch(ioDispatcher) { block() }
-
-        private fun launchMain(block: suspend () -> Unit) = viewModelScope.launch(mainDispatcher) { block() }
-
         private fun processStateUpdatesSequentially() {
-            viewModelScope.launch {
+            launchMain {
                 for (update in stateUpdateChannel) {
                     stateMutex.withLock {
                         when (update) {
                             is StateUpdate.FromGameState -> {
                                 val newUiState = processGameState(update.gameState)
-                                withContext(mainDispatcher) {
-                                    _uiState.value = newUiState
-                                }
+                                updateUiState { newUiState }
                             }
 
                             is StateUpdate.FromEffect -> {
@@ -132,21 +129,23 @@ class GameViewModel
         }
 
         private fun initializeGameRoom() {
-            launchIo {
-                repository.connect().resolve(
-                    exceptionResolver,
-                    onUiNotification = {
-                        _notification.value = it
-                    },
-                ) {
-                    // Websocket connected successfully
-                    roomId?.let { joinRoom(it) } ?: createRoom()
-                }
+            launchIO {
+                repository
+                    .connect()
+                    .resolve(
+                        exceptionResolver,
+                        onUiNotification = {
+                            _notification.value = it
+                        },
+                    ) {
+                        // Websocket connected successfully
+                        roomId?.let { joinRoom(it) } ?: createRoom()
+                    }
             }
         }
 
         private fun observeGameState() {
-            viewModelScope.launch {
+            launchMain {
                 gameStateMachine.state.collect { gameRoomState ->
                     stateUpdateChannel.send(StateUpdate.FromGameState(gameRoomState))
                 }
@@ -154,7 +153,7 @@ class GameViewModel
         }
 
         private fun observeGameEffects() {
-            viewModelScope.launch {
+            launchMain {
                 gameStateMachine.effects.collect { effect ->
                     stateUpdateChannel.send(StateUpdate.FromEffect(effect))
                 }
@@ -227,7 +226,7 @@ class GameViewModel
                 val isCurrentPlayerResult =
                     effect.answerResult.playerId == repository.getCurrentPlayerId()
                 if (isCurrentPlayerResult) {
-                    _uiState.value =
+                    updateUiState {
                         currentState.copy(
                             playerRoundResult =
                                 PlayerRoundResult(
@@ -235,6 +234,7 @@ class GameViewModel
                                     isCorrect = effect.answerResult.correct,
                                 ),
                         )
+                    }
                 }
             }
         }
@@ -248,7 +248,7 @@ class GameViewModel
                     else -> {
                         val gameState =
                             currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
-                        _uiState.value =
+                        updateUiState {
                             GameUiState.RoundOn(
                                 player1 = gameState.players[0],
                                 player2 = gameState.players[1],
@@ -258,9 +258,9 @@ class GameViewModel
                                 selectedAnswerId = null,
                                 playerRoundResult = null,
                             )
-                        Timber
-                            .tag(TAG)
-                            .w("Forced round start from unexpected state: ${currentState::class.simpleName}")
+                        }
+
+                        Timber.tag(TAG).w("Forced round start from unexpected state: ${currentState::class.simpleName}")
                     }
                 }
             }
@@ -270,13 +270,14 @@ class GameViewModel
             currentState: GameUiState.RoundOn,
             effect: GameRoomStateUpdater.RoundStarted,
         ) {
-            _uiState.value =
+            updateUiState {
                 currentState.copy(
                     question = effect.message.currentQuestion,
                     timeRemainingInSeconds = effect.message.timeRemaining.toInt(),
                     selectedAnswerId = null,
                     playerRoundResult = null,
                 )
+            }
         }
 
         private fun createInitialRound(
@@ -285,7 +286,7 @@ class GameViewModel
         ) {
             launchMain {
                 val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
-                _uiState.value =
+                updateUiState {
                     GameUiState.RoundOn(
                         player1 = gameState.players[0],
                         player2 = gameState.players[1],
@@ -295,6 +296,7 @@ class GameViewModel
                         selectedAnswerId = null,
                         playerRoundResult = null,
                     )
+                }
             }
         }
 
@@ -304,7 +306,7 @@ class GameViewModel
         ) {
             launchMain {
                 val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
-                _uiState.value =
+                updateUiState {
                     GameUiState.RoundOn(
                         player1 = gameState.players[0],
                         player2 = gameState.players[1],
@@ -314,6 +316,7 @@ class GameViewModel
                         selectedAnswerId = null,
                         playerRoundResult = null,
                     )
+                }
             }
         }
 
@@ -336,23 +339,25 @@ class GameViewModel
                         .find { it.id == effect.message.correctAnswer }
                         ?.value ?: return@launchMain
 
-                _uiState.value =
+                updateUiState {
                     GameUiState.RoundEnd(
                         roundNo = 0, // TODO: Implement round counting
                         roundWinner = roundWinner,
                         correctAnswerValue = correctAnswerValue,
                         newCursorPosition = effect.message.cursorPosition,
                     )
+                }
             }
         }
 
         private fun handleCountdown(effect: GameRoomStateUpdater.Countdown) {
             launchMain {
                 val currentUiState = uiState.value as? GameUiState.Lobby ?: return@launchMain
-                _uiState.value =
+                updateUiState {
                     currentUiState.copy(
                         countdown = GameUiState.Lobby.CountdownTimer(effect.message.remaining.toInt()),
                     )
+                }
             }
         }
 
@@ -360,22 +365,25 @@ class GameViewModel
             launchMain {
                 val gameState = currentGameRoomState as? GameRoomState.Closed ?: return@launchMain
                 val winner = gameState.players.find { it.id == effect.message.winnerPlayerId }
-                _uiState.value =
+                updateUiState {
                     GameUiState.GameOver(
                         totalRoundCount = 0,
                         winner = winner,
                         gameId = roomId ?: "",
                     )
+                }
             }
         }
 
         private fun handleTimeUpdate(effect: GameRoomStateUpdater.RoundTimeUpdate) {
             launchMain {
                 val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
-                _uiState.value =
+
+                updateUiState {
                     currentState.copy(
                         timeRemainingInSeconds = effect.message.remaining.toInt(),
                     )
+                }
             }
         }
 
@@ -392,11 +400,11 @@ class GameViewModel
         }
 
         fun submitAnswer(answerId: Int) {
-            launchIo {
+            launchIO {
                 stateMutex.withLock {
                     (_uiState.value as? GameUiState.RoundOn)?.let { currentState ->
-                        launchMain {
-                            _uiState.value = currentState.copy(selectedAnswerId = answerId)
+                        updateUiState {
+                            currentState.copy(selectedAnswerId = answerId)
                         }
                         repository.sendMessage(ClientMessage.PlayerAnswer(answerId))
                     }
@@ -405,7 +413,7 @@ class GameViewModel
         }
 
         fun submitFeedback(feedback: GameFeedback) {
-            launchIo {
+            launchIO {
                 feedbackRepository
                     .submitFeedback(feedback)
                     .resolve(
@@ -416,6 +424,12 @@ class GameViewModel
                     ) {
                         // Feedback submitted successfully
                     }
+            }
+        }
+
+        private fun updateUiState(newState: (GameUiState) -> GameUiState) {
+            launchMain {
+                _uiState.value = newState(_uiState.value)
             }
         }
 

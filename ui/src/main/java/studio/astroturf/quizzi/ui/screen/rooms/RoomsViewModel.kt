@@ -1,12 +1,10 @@
 package studio.astroturf.quizzi.ui.screen.rooms
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.di.IoDispatcher
@@ -14,6 +12,7 @@ import studio.astroturf.quizzi.domain.di.MainDispatcher
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.repository.QuizziRepository
+import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
 import javax.inject.Inject
 
@@ -23,10 +22,14 @@ class RoomsViewModel
     constructor(
         private val repository: QuizziRepository,
         private val exceptionResolver: ExceptionResolver,
+        @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
         @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
-        @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
-    ) : ViewModel() {
+    ) : BaseViewModel(
+            mainDispatcher,
+            ioDispatcher,
+            defaultDispatcher,
+        ) {
         private val _uiState = MutableStateFlow(RoomsUiState())
         val uiState = _uiState.asStateFlow()
 
@@ -51,7 +54,7 @@ class RoomsViewModel
                         _notification.value = notification
                     },
                     onFatalException = { message, _ ->
-                        _uiState.update {
+                        updateUiState {
                             it.copy(
                                 isConnected = false,
                                 error = message,
@@ -59,14 +62,12 @@ class RoomsViewModel
                         }
                     },
                 ) { rooms ->
-                    viewModelScope.launch(mainDispatcher) {
-                        _uiState.update {
-                            it.copy(
-                                isConnected = true,
-                                rooms = rooms,
-                                error = null,
-                            )
-                        }
+                    updateUiState {
+                        it.copy(
+                            isConnected = true,
+                            rooms = rooms,
+                            error = null,
+                        )
                     }
                 }
         }
@@ -79,6 +80,12 @@ class RoomsViewModel
                 } finally {
                     _isRefreshing.value = false
                 }
+            }
+        }
+
+        private fun updateUiState(newState: (RoomsUiState) -> RoomsUiState) {
+            launchMain {
+                _uiState.value = newState(_uiState.value)
             }
         }
 
