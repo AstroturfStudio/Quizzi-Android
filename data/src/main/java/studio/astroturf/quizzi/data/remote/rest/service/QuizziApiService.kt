@@ -1,11 +1,12 @@
 package studio.astroturf.quizzi.data.remote.rest.service
 
-import retrofit2.HttpException
+import studio.astroturf.quizzi.data.exceptionhandling.mapToQuizziException
 import studio.astroturf.quizzi.data.remote.rest.api.QuizziApi
 import studio.astroturf.quizzi.data.remote.rest.model.CreatePlayerRequestDto
 import studio.astroturf.quizzi.data.remote.rest.model.LoginRequestDto
 import studio.astroturf.quizzi.data.remote.rest.model.RoomsDto
 import studio.astroturf.quizzi.data.remote.websocket.model.PlayerDto
+import studio.astroturf.quizzi.domain.result.QuizziResult
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,42 +17,35 @@ class QuizziApiService
     constructor(
         private val api: QuizziApi,
     ) {
-        suspend fun login(playerId: String): Result<PlayerDto> =
-            runCatching {
+        suspend fun login(playerId: String): QuizziResult<PlayerDto> =
+            try {
                 val request = LoginRequestDto(id = playerId)
-                api.login(request)
-            }.onFailure { e ->
-                when (e) {
-                    is HttpException -> Timber.e(e, "Login failed for player: $playerId")
-                    else -> Timber.e(e, "Unexpected error during login")
-                }
+                val response = api.login(request)
+                QuizziResult.success(response)
+            } catch (e: Exception) {
+                Timber.e(e, "Login failed for player: $playerId")
+                QuizziResult.failure(e.mapToQuizziException())
             }
 
         suspend fun createPlayer(
             name: String,
             avatarUrl: String,
-        ): Result<PlayerDto> =
-            runCatching {
-                val request =
-                    CreatePlayerRequestDto(
-                        name = name,
-                        avatarUrl = avatarUrl,
-                    )
-                api.createPlayer(request)
-            }.onFailure { e ->
-                when (e) {
-                    is HttpException -> Timber.e(e, "Create player failed for name: $name")
-                    else -> Timber.e(e, "Unexpected error during player creation")
-                }
+        ): QuizziResult<PlayerDto> =
+            try {
+                val request = CreatePlayerRequestDto(name = name, avatarUrl = avatarUrl)
+                val response = api.createPlayer(request)
+                QuizziResult.success(response)
+            } catch (e: Exception) {
+                Timber.e(e, "Create player failed for name: $name")
+                QuizziResult.failure(e.mapToQuizziException())
             }
 
-        suspend fun getRooms(): Result<RoomsDto> =
-            runCatching {
-                api.getRooms()
-            }.onFailure { e ->
-                when (e) {
-                    is HttpException -> Timber.e(e, "Failed to get rooms")
-                    else -> Timber.e(e, "Unexpected error while fetching rooms")
-                }
+        suspend fun getRooms(): QuizziResult<RoomsDto> =
+            try {
+                val response = api.getRooms()
+                QuizziResult.success(response)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to get rooms")
+                QuizziResult.failure(e.mapToQuizziException())
             }
     }

@@ -5,13 +5,14 @@ import kotlinx.coroutines.flow.map
 import studio.astroturf.quizzi.data.remote.rest.service.QuizziApiService
 import studio.astroturf.quizzi.data.remote.websocket.model.PlayerDto
 import studio.astroturf.quizzi.data.remote.websocket.service.QuizziWebSocketService
-import studio.astroturf.quizzi.data.result.toQuizziResult
 import studio.astroturf.quizzi.domain.model.GameRoom
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
 import studio.astroturf.quizzi.domain.repository.QuizziRepository
 import studio.astroturf.quizzi.domain.result.QuizziResult
+import studio.astroturf.quizzi.domain.result.map
+import studio.astroturf.quizzi.domain.result.onSuccess
 import toDomain
 import toDto
 import javax.inject.Inject
@@ -29,7 +30,6 @@ class QuizziRepositoryImpl
                 .login(playerId)
                 .onSuccess { currentPlayerDto = it }
                 .map { it.toDomain() }
-                .toQuizziResult()
 
         override suspend fun createPlayer(
             name: String,
@@ -39,7 +39,6 @@ class QuizziRepositoryImpl
                 .createPlayer(name, avatarUrl)
                 .onSuccess { currentPlayerDto = it }
                 .map { it.toDomain() }
-                .toQuizziResult()
 
         override fun getCurrentPlayerId(): String? = currentPlayerDto?.id
 
@@ -47,7 +46,6 @@ class QuizziRepositoryImpl
             quizziApiService
                 .getRooms()
                 .map { it.rooms.map { roomDto -> roomDto.toDomain() } }
-                .toQuizziResult()
 
         override fun connect() {
             quizziWebSocketService.connect(currentPlayerDto?.id)
