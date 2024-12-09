@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionHandler
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
-import studio.astroturf.quizzi.domain.repository.QuizRepository
+import studio.astroturf.quizzi.domain.repository.QuizziRepository
 import studio.astroturf.quizzi.domain.storage.PreferencesStorage
 import studio.astroturf.quizzi.ui.extensions.handleQuizziResult
 import javax.inject.Inject
@@ -18,7 +18,7 @@ import javax.inject.Inject
 class LandingViewModel
     @Inject
     constructor(
-        private val repository: QuizRepository,
+        private val repository: QuizziRepository,
         private val preferencesStorage: PreferencesStorage,
         private val exceptionHandler: ExceptionHandler,
     ) : ViewModel() {

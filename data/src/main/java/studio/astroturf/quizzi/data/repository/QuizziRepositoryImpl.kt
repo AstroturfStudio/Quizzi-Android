@@ -10,18 +10,18 @@ import studio.astroturf.quizzi.domain.model.GameRoom
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
-import studio.astroturf.quizzi.domain.repository.QuizRepository
+import studio.astroturf.quizzi.domain.repository.QuizziRepository
 import studio.astroturf.quizzi.domain.result.QuizziResult
 import toDomain
 import toDto
 import javax.inject.Inject
 
-class QuizRepositoryImpl
+class QuizziRepositoryImpl
     @Inject
     constructor(
         private val quizziWebSocketService: QuizziWebSocketService,
         private val quizziApiService: QuizziApiService,
-    ) : QuizRepository {
+    ) : QuizziRepository {
         private var currentPlayerDto: PlayerDto? = null
 
         override suspend fun login(playerId: String): QuizziResult<Player> =

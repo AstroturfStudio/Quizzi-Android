@@ -12,9 +12,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import studio.astroturf.quizzi.data.BuildConfig
 import studio.astroturf.quizzi.data.remote.rest.api.QuizziApi
-import studio.astroturf.quizzi.data.repository.QuizRepositoryImpl
+import studio.astroturf.quizzi.data.repository.QuizziRepositoryImpl
 import studio.astroturf.quizzi.data.storage.SharedPreferencesStorage
-import studio.astroturf.quizzi.domain.repository.QuizRepository
+import studio.astroturf.quizzi.domain.repository.QuizziRepository
 import studio.astroturf.quizzi.domain.storage.PreferencesStorage
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -93,5 +93,5 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideQuizRepository(quizziRepositoryImpl: QuizRepositoryImpl): QuizRepository = quizziRepositoryImpl
+    fun provideQuizziRepository(quizziRepositoryImpl: QuizziRepositoryImpl): QuizziRepository = quizziRepositoryImpl
 }

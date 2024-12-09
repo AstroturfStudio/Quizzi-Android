@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionHandler
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
-import studio.astroturf.quizzi.domain.repository.QuizRepository
+import studio.astroturf.quizzi.domain.repository.QuizziRepository
 import studio.astroturf.quizzi.ui.extensions.handleQuizziResult
 import javax.inject.Inject
 
@@ -17,7 +17,7 @@ import javax.inject.Inject
 class RoomsViewModel
     @Inject
     constructor(
-        private val repository: QuizRepository,
+        private val repository: QuizziRepository,
         private val exceptionHandler: ExceptionHandler,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(RoomsUiState())

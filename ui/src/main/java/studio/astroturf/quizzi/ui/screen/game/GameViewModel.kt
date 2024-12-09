@@ -31,7 +31,7 @@ import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.repository.FeedbackRepository
-import studio.astroturf.quizzi.domain.repository.QuizRepository
+import studio.astroturf.quizzi.domain.repository.QuizziRepository
 import studio.astroturf.quizzi.ui.extensions.handleQuizziResult
 import studio.astroturf.quizzi.ui.navigation.NavDestination
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
@@ -46,7 +46,7 @@ class GameViewModel
     @Inject
     constructor(
         private val savedStateHandle: SavedStateHandle,
-        private val repository: QuizRepository,
+        private val repository: QuizziRepository,
         private val feedbackRepository: FeedbackRepository,
         private val exceptionHandler: ExceptionHandler,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,

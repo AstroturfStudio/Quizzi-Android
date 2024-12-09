@@ -7,7 +7,7 @@ import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
 import studio.astroturf.quizzi.domain.result.QuizziResult
 
-interface QuizRepository {
+interface QuizziRepository {
     suspend fun login(playerId: String): QuizziResult<Player>
 
     suspend fun createPlayer(

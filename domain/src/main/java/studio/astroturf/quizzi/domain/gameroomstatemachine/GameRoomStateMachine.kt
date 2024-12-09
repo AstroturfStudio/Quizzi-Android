@@ -17,14 +17,14 @@ import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateChanger
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.statemachine.StateMachine
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
-import studio.astroturf.quizzi.domain.repository.QuizRepository
+import studio.astroturf.quizzi.domain.repository.QuizziRepository
 import timber.log.Timber
 
 private const val TAG = "GameRoomStateMachine"
 
 class GameRoomStateMachine(
     private val coroutineScope: CoroutineScope,
-    private val repository: QuizRepository,
+    private val repository: QuizziRepository,
     @DefaultDispatcher val defaultDispatcher: CoroutineDispatcher,
 ) : StateMachine<GameRoomState, GameRoomStateChanger, GameRoomStateUpdater> {
     private val _state = MutableStateFlow<GameRoomState>(GameRoomState.Idle)
