@@ -91,6 +91,7 @@ class QuizziWebSocketService
                     text: String,
                 ) {
                     try {
+                        Timber.d("Incoming Websocket Message:\n$text")
                         val message = json.decodeFromString<ServerSocketMessage>(text)
                         serviceScope.launch {
                             _messageFlow.emit(message)
