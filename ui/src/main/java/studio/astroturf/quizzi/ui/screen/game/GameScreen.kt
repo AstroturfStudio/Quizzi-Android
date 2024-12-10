@@ -31,8 +31,6 @@ private const val TAG = "GameScreen"
 @Composable
 fun GameScreen(
     onNavigateToRooms: () -> Unit,
-    onShowError: (String) -> Unit,
-    onShowToast: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GameViewModel = hiltViewModel(),
 ) {
@@ -40,29 +38,7 @@ fun GameScreen(
 
     // Log state changes using a side effect
     LaunchedEffect(uiState) {
-        Timber.tag(TAG).d("State changed to: ${uiState::class.simpleName}")
-        when (uiState) {
-            is GameUiState.RoundEnd -> {
-                val roundEnd = uiState as GameUiState.RoundEnd
-                Timber.tag(TAG).d(
-                    "%snull",
-                    "RoundEnd details - Winner: ${roundEnd.roundWinner.winnerName}, " +
-                        "Correct Answer: ${roundEnd.correctAnswerValue}, ",
-                )
-            }
-            is GameUiState.RoundOn -> {
-                val roundOn = uiState as GameUiState.RoundOn
-                Timber.tag(TAG).d(
-                    "%snull",
-                    "RoundOn details - Question: ${roundOn.question.content}, " +
-                        "Time: ${roundOn.timeRemainingInSeconds}, ",
-                )
-            }
-            else -> {
-                // Log additional details for other states if needed
-                Timber.tag(TAG).d("State details: $uiState")
-            }
-        }
+        Timber.tag(TAG).d("State is being changed to: $uiState")
     }
 
     GameScreenContent(
@@ -148,15 +124,11 @@ private fun GameStateContent(
         }
 
         stateKey == GameStateAnimationKey.GAME_OVER && currentState is GameUiState.GameOver -> {
-            if (currentState.winner != null && currentState.totalRoundCount != null) {
-                GameOverContent(
-                    winner = currentState.winner,
-                    totalRounds = currentState.totalRoundCount,
-                    gameId = currentState.gameId,
-                    onNavigateBack = onNavigateToRooms,
-                    onSubmitFeedback = onSubmitFeedback,
-                )
-            }
+            GameOverContent(
+                state = currentState,
+                onNavigateBack = onNavigateToRooms,
+                onSubmitFeedback = onSubmitFeedback,
+            )
         }
 
         stateKey == GameStateAnimationKey.PAUSED && currentState is GameUiState.Paused -> {

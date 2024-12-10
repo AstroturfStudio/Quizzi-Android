@@ -46,8 +46,8 @@ sealed interface GameUiState {
     ) : GameUiState
 
     data class GameOver(
-        val totalRoundCount: Int?,
-        val winner: Player?,
+        val totalRoundCount: Int,
+        val winner: Player,
         val gameId: String,
     ) : GameUiState
 }

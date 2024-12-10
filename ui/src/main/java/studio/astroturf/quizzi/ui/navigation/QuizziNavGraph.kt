@@ -65,8 +65,6 @@ fun QuizziNavGraph(
                         popUpTo(NavDestination.Rooms.route) { inclusive = true }
                     }
                 },
-                onShowError = {},
-                onShowToast = { },
             )
         }
     }

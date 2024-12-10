@@ -59,7 +59,7 @@ class GameViewModel
             ioDispatcher,
             defaultDispatcher,
         ) {
-        private val roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
+        private var roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
 
         private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
         val uiState: StateFlow<GameUiState> =
@@ -160,19 +160,15 @@ class GameViewModel
             }
         }
 
-        private suspend fun processGameState(gameRoomState: GameRoomState): GameUiState =
+        private fun processGameState(gameRoomState: GameRoomState): GameUiState =
             when (gameRoomState) {
                 GameRoomState.Idle -> GameUiState.Idle
-                GameRoomState.Countdown -> _uiState.value // Preserve current state
-                GameRoomState.Paused -> _uiState.value // Preserve current state
                 is GameRoomState.Playing -> {
                     savePlayers(gameRoomState.players)
-                    // Add additional processing if needed
-                    _uiState.value // Placeholder, replace with actual state transformation
+                    _uiState.value
                 }
-
                 is GameRoomState.Waiting -> createLobbyState(gameRoomState)
-                is GameRoomState.Closed -> createGameOverState()
+                else -> _uiState.value // Preserve current state
             }
 
         private fun savePlayers(players: List<Player>) {
@@ -189,18 +185,16 @@ class GameViewModel
             )
         }
 
-        private fun createGameOverState(): GameUiState.GameOver =
-            GameUiState.GameOver(
-                totalRoundCount = 0,
-                winner = null,
-                gameId = roomId ?: "",
-            )
-
         private fun handleGameEffect(effect: GameRoomStateUpdater) {
             when (effect) {
-                is GameRoomStateUpdater.RoomCreated,
-                is GameRoomStateUpdater.RoomJoined,
-                -> sendPlayerReady()
+                is GameRoomStateUpdater.RoomCreated -> {
+                    roomId = effect.message.roomId
+                    sendPlayerReady()
+                }
+                is GameRoomStateUpdater.RoomJoined -> {
+                    roomId = effect.message.roomId
+                    sendPlayerReady()
+                }
 
                 is GameRoomStateUpdater.ReceiveAnswerResult -> handleAnswerResult(effect)
                 is GameRoomStateUpdater.RoundStarted -> handleRoundStart(effect)
@@ -364,12 +358,12 @@ class GameViewModel
         private fun handleGameOver(effect: GameRoomStateUpdater.GameRoomOver) {
             launchMain {
                 val gameState = currentGameRoomState as? GameRoomState.Closed ?: return@launchMain
-                val winner = gameState.players.find { it.id == effect.message.winnerPlayerId }
+                val winner = gameState.players.first { it.id == effect.message.winnerPlayerId }
                 updateUiState {
                     GameUiState.GameOver(
-                        totalRoundCount = 0,
+                        totalRoundCount = 0, // TODO:
                         winner = winner,
-                        gameId = roomId ?: "",
+                        gameId = roomId!!,
                     )
                 }
             }

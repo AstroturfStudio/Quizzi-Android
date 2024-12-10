@@ -21,13 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.domain.model.GameFeedback
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.ui.screen.game.GameUiState
 
 @Composable
 internal fun GameOverContent(
-    winner: Player,
-    totalRounds: Int,
-    gameId: String,
+    state: GameUiState.GameOver,
     onNavigateBack: () -> Unit,
     onSubmitFeedback: (GameFeedback) -> Unit,
 ) {
@@ -49,14 +47,14 @@ internal fun GameOverContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Winner: ${winner.name}",
+            text = "Winner: ${state.winner.name}",
             style = MaterialTheme.typography.headlineMedium,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Total Rounds: $totalRounds",
+            text = "Total Rounds: ${state.totalRoundCount}",
             style = MaterialTheme.typography.bodyLarge,
         )
 
@@ -79,7 +77,7 @@ internal fun GameOverContent(
 
     if (showBugReportDialog) {
         BugReportDialog(
-            gameId = gameId,
+            gameId = state.gameId,
             onDismiss = { showBugReportDialog = false },
         )
     }
