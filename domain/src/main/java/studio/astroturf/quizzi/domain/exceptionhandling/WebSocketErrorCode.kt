@@ -5,4 +5,5 @@ enum class WebSocketErrorCode {
     CONNECTION_LOST,
     INVALID_MESSAGE,
     RECONNECTION_FAILED,
+    UNKNOWN,
 }

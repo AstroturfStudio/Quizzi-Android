@@ -6,4 +6,5 @@ enum class GameErrorCode {
     INVALID_GAME_STATE,
     PLAYER_NOT_FOUND,
     ANSWER_ALREADY_SUBMITTED,
+    UNKNOWN,
 }

@@ -5,4 +5,5 @@ enum class AuthErrorCode {
     SESSION_EXPIRED,
     UNAUTHORIZED,
     USER_NOT_FOUND,
+    UNKNOWN,
 }

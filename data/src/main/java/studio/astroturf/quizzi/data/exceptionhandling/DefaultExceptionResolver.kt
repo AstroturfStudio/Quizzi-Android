@@ -1,158 +1,54 @@
 package studio.astroturf.quizzi.data.exceptionhandling
 
-import studio.astroturf.quizzi.domain.exceptionhandling.AuthErrorCode
-import studio.astroturf.quizzi.domain.exceptionhandling.DialogAction
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResult
-import studio.astroturf.quizzi.domain.exceptionhandling.GameErrorCode
 import studio.astroturf.quizzi.domain.exceptionhandling.QuizziException
 import studio.astroturf.quizzi.domain.exceptionhandling.SnackbarAction
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
-import studio.astroturf.quizzi.domain.exceptionhandling.WebSocketErrorCode
 import timber.log.Timber
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class DefaultExceptionResolver : ExceptionResolver {
-    override fun resolve(exception: Exception): ExceptionResult {
-        // Log all exceptions
-        Timber.e(exception, "Error occurred: ${exception.message}")
+/**
+ * Resolver that delegates exception handling to appropriate strategies.
+ */
+@Singleton
+class DefaultExceptionResolver
+    @Inject
+    constructor(
+        private val authExceptionStrategy: AuthExceptionStrategy,
+        private val gameExceptionStrategy: GameExceptionStrategy,
+        private val httpExceptionStrategy: HttpExceptionStrategy,
+        private val webSocketExceptionStrategy: WebSocketExceptionStrategy,
+        private val unexpectedExceptionStrategy: UnexpectedExceptionStrategy,
+    ) : ExceptionResolver {
+        override fun resolve(exception: Exception): ExceptionResult {
+            // Log all exceptions
+            Timber.e(exception, "Error occurred: ${exception.message}")
 
-        return when (exception) {
-            is QuizziException -> resolveQuizziException(exception)
-            is IOException -> resolveIOException(exception)
-            else -> ExceptionResult.Fatal("An unexpected error occurred", exception)
-        }
-    }
-
-    private fun resolveQuizziException(exception: QuizziException): ExceptionResult =
-        when (exception) {
-            is QuizziException.AuthException -> resolveAuthException(exception)
-            is QuizziException.GameException -> resolveGameException(exception)
-            is QuizziException.HttpException -> resolveHttpException(exception)
-            is QuizziException.WebSocketException -> resolveWebSocketException(exception)
-            is QuizziException.UnexpectedException ->
-                ExceptionResult.Fatal(
-                    exception.message,
-                    exception.cause ?: exception,
-                )
-        }
-
-    private fun resolveAuthException(exception: QuizziException.AuthException): ExceptionResult =
-        when (exception.errorCode) {
-            AuthErrorCode.SESSION_EXPIRED ->
-                ExceptionResult.Notification(
-                    UiNotification.Dialog(
-                        title = "Session Expired",
-                        message = "Your session has expired. Please log in again.",
-                        primaryAction = DialogAction("Login") { /* Login action */ },
-                        isDismissable = false,
-                    ),
-                )
-            AuthErrorCode.INVALID_CREDENTIALS ->
-                ExceptionResult.Notification(
-                    UiNotification.Snackbar(
-                        message = "Invalid username or password",
-                        duration = UiNotification.Duration.LONG,
-                    ),
-                )
-            AuthErrorCode.UNAUTHORIZED ->
-                ExceptionResult.Notification(
-                    UiNotification.Dialog(
-                        message = "You are not authorized to perform this action",
-                        primaryAction = DialogAction("OK") { },
-                    ),
-                )
-            AuthErrorCode.USER_NOT_FOUND ->
-                ExceptionResult.Notification(
-                    UiNotification.Snackbar(message = "User not found"),
-                )
-            null -> ExceptionResult.Silent("Unspecified auth error: ${exception.message}")
+            return when (exception) {
+                is QuizziException -> resolveQuizziException(exception)
+                is IOException -> resolveIOException(exception)
+                else -> ExceptionResult.Fatal("An unexpected error occurred", exception)
+            }
         }
 
-    private fun resolveGameException(exception: QuizziException.GameException): ExceptionResult =
-        when (exception.errorCode) {
-            GameErrorCode.ROOM_NOT_FOUND ->
-                ExceptionResult.Notification(
-                    UiNotification.Dialog(
-                        message = "Game room not found",
-                        primaryAction = DialogAction("Return to Lobby") { },
-                    ),
-                )
-            GameErrorCode.GAME_ALREADY_STARTED ->
-                ExceptionResult.Notification(
-                    UiNotification.Snackbar(message = "Game has already started"),
-                )
-            GameErrorCode.INVALID_GAME_STATE ->
-                ExceptionResult.Silent(
-                    "Invalid game state: ${exception.message}",
-                )
-            GameErrorCode.PLAYER_NOT_FOUND ->
-                ExceptionResult.Notification(
-                    UiNotification.Snackbar(message = "Player not found in game"),
-                )
-            GameErrorCode.ANSWER_ALREADY_SUBMITTED ->
-                ExceptionResult.Notification(
-                    UiNotification.Toast(message = "Answer already submitted"),
-                )
-            null -> ExceptionResult.Silent("Unspecified game error: ${exception.message}")
-        }
-
-    private fun resolveHttpException(exception: QuizziException.HttpException): ExceptionResult {
-        val message =
-            when (exception.code) {
-                401 -> "Authentication required"
-                403 -> "Access denied"
-                404 -> "Resource not found"
-                500 -> "Server error occurred"
-                else -> exception.message
+        private fun resolveQuizziException(exception: QuizziException): ExceptionResult =
+            when (exception) {
+                is QuizziException.AuthException -> authExceptionStrategy.resolve(exception)
+                is QuizziException.GameException -> gameExceptionStrategy.resolve(exception)
+                is QuizziException.HttpException -> httpExceptionStrategy.resolve(exception)
+                is QuizziException.WebSocketException -> webSocketExceptionStrategy.resolve(exception)
+                is QuizziException.UnexpectedException -> unexpectedExceptionStrategy.resolve(exception)
             }
 
-        return ExceptionResult.Notification(
-            UiNotification.Snackbar(
-                message = message,
-                action = SnackbarAction("Retry") { /* Retry action */ },
-            ),
-        )
+        private fun resolveIOException(exception: IOException): ExceptionResult =
+            ExceptionResult.Notification(
+                UiNotification.Snackbar(
+                    message = "Network error. Please check your connection.",
+                    action = SnackbarAction("Retry") { /* Implement retry action */ },
+                    duration = UiNotification.Duration.LONG,
+                ),
+            )
     }
-
-    private fun resolveWebSocketException(exception: QuizziException.WebSocketException): ExceptionResult =
-        when (exception.code) {
-            WebSocketErrorCode.CONNECTION_FAILED ->
-                ExceptionResult.Notification(
-                    UiNotification.Snackbar(
-                        message = "Failed to connect to game server",
-                        action = SnackbarAction("Retry") { /* Retry connection */ },
-                    ),
-                )
-            WebSocketErrorCode.CONNECTION_LOST ->
-                ExceptionResult.Notification(
-                    UiNotification.Dialog(
-                        message = "Connection lost. Attempting to reconnect...",
-                        isDismissable = false,
-                    ),
-                )
-            WebSocketErrorCode.INVALID_MESSAGE ->
-                ExceptionResult.Silent(
-                    "Invalid WebSocket message: ${exception.message}",
-                )
-            WebSocketErrorCode.RECONNECTION_FAILED ->
-                ExceptionResult.Notification(
-                    UiNotification.Dialog(
-                        title = "Connection Error",
-                        message = "Failed to reconnect to game server",
-                        primaryAction = DialogAction("Retry") { /* Retry connection */ },
-                        secondaryAction = DialogAction("Exit") { /* Exit game */ },
-                    ),
-                )
-            null -> ExceptionResult.Silent("Unspecified WebSocket error: ${exception.message}")
-        }
-
-    private fun resolveIOException(exception: IOException): ExceptionResult =
-        ExceptionResult.Notification(
-            UiNotification.Snackbar(
-                message = "Network error. Please check your connection.",
-                action = SnackbarAction("Retry") { /* Retry action */ },
-                duration = UiNotification.Duration.LONG,
-            ),
-        )
-}
