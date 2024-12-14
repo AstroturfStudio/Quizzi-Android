@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
@@ -191,9 +190,14 @@ class GameViewModel
                     roomId = effect.message.roomId
                     sendPlayerReady()
                 }
+
                 is GameRoomStateUpdater.RoomJoined -> {
                     roomId = effect.message.roomId
                     sendPlayerReady()
+                }
+
+                is GameRoomStateUpdater.CloseRoom -> {
+                    roomId = null
                 }
 
                 is GameRoomStateUpdater.ReceiveAnswerResult -> handleAnswerResult(effect)
@@ -207,7 +211,6 @@ class GameViewModel
                 is GameRoomStateUpdater.PlayerDisconnected,
                 is GameRoomStateUpdater.PlayerReconnected,
                 is GameRoomStateUpdater.RoundTimeUp,
-                is GameRoomStateUpdater.CloseRoom,
                 GameRoomStateUpdater.ExitGameRoom,
                 is GameRoomStateUpdater.Error,
                 -> Unit
@@ -389,6 +392,10 @@ class GameViewModel
             repository.sendMessage(ClientMessage.JoinRoom(roomId))
         }
 
+        fun rejoinRoom(roomId: String) {
+            repository.sendMessage(ClientMessage.RejoinRoom(roomId))
+        }
+
         fun sendPlayerReady() {
             repository.sendMessage(ClientMessage.PlayerReady)
         }
@@ -435,8 +442,9 @@ class GameViewModel
 
         override fun onCleared() {
             super.onCleared()
-            viewModelScope.launch(ioDispatcher) {
+            launchIO {
                 repository.disconnect()
+                roomId = null
             }
         }
 

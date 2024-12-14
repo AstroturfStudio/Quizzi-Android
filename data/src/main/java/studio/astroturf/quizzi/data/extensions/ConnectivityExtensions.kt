@@ -1,3 +1,5 @@
+package studio.astroturf.quizzi.data.extensions
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
@@ -8,28 +10,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-
-sealed class NetworkStatus {
-    object Available : NetworkStatus()
-
-    object Unavailable : NetworkStatus()
-
-    data class Connected(
-        val type: ConnectionType,
-    ) : NetworkStatus()
-
-    data class Error(
-        val message: String,
-    ) : NetworkStatus()
-}
-
-enum class ConnectionType {
-    WIFI,
-    CELLULAR,
-    ETHERNET,
-    VPN,
-    UNKNOWN,
-}
+import studio.astroturf.quizzi.data.network.ConnectionType
+import studio.astroturf.quizzi.data.network.NetworkStatus
 
 @SuppressLint("MissingPermission")
 fun Context.observeNetworkStatus(): Flow<NetworkStatus> =
@@ -64,15 +46,15 @@ fun Context.observeNetworkStatus(): Flow<NetworkStatus> =
                     network: Network,
                     maxMsToLive: Int,
                 ) {
-                    trySend(NetworkStatus.Unavailable)
+                    trySend(NetworkStatus.NotConnected)
                 }
 
                 override fun onLost(network: Network) {
-                    trySend(NetworkStatus.Unavailable)
+                    trySend(NetworkStatus.NotConnected)
                 }
 
                 override fun onUnavailable() {
-                    trySend(NetworkStatus.Unavailable)
+                    trySend(NetworkStatus.NotConnected)
                 }
             }
 

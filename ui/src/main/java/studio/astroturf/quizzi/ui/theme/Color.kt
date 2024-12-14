@@ -3,18 +3,18 @@ package studio.astroturf.quizzi.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Primary Color
-val Primary = Color(0xFFFF9800) // VitaminC
+val Primary = Color(0xFFFF6600)
 
 // Secondary Color
-val Secondary = Color(0xFF03A9F4) // Democrat
+val Secondary = Color(0xFF091B5A)
 
 // Tertiary Color
-val Tertiary = Color(0xFF4CAF50) // DevilsGrass
+val Tertiary = Color(0xFFF0F0F0)
 
 // Accent Colors
-val Accent1 = Color(0xFFF44336) // VermillionBird
-val Accent2 = Color(0xFFCDDC39) // Greenivorous
-val Accent3 = Color(0xFFFF5722) // SmashingPumpkins
+val Accent1 = Color(0xFFFFF59D)
+val Accent2 = Color(0xFF4DD0E1)
+val Accent3 = Color(0xFFFFAB91)
 
 // Neutral Colors
 val Black = Color(0xFF49465F)

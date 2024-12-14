@@ -1,8 +1,11 @@
 package studio.astroturf.quizzi.data.repository
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import studio.astroturf.quizzi.data.exceptionhandling.mapToQuizziException
+import studio.astroturf.quizzi.data.extensions.observeNetworkStatus
 import studio.astroturf.quizzi.data.remote.rest.service.QuizziApiService
 import studio.astroturf.quizzi.data.remote.websocket.model.PlayerDto
 import studio.astroturf.quizzi.data.remote.websocket.service.QuizziWebSocketService
@@ -21,10 +24,13 @@ import javax.inject.Inject
 class QuizziRepositoryImpl
     @Inject
     constructor(
+        @ApplicationContext private val context: Context,
         private val quizziWebSocketService: QuizziWebSocketService,
         private val quizziApiService: QuizziApiService,
     ) : QuizziRepository {
         private var currentPlayerDto: PlayerDto? = null
+
+        private val connectionFlow = context.observeNetworkStatus()
 
         override suspend fun login(playerId: String): QuizziResult<Player> =
             quizziApiService
