@@ -35,7 +35,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"https://quizzi-production-16a0.up.railway.app\"",
+                "\"https://quizzi-6xq9.onrender.com\"",
             )
         }
         create("dev") {
