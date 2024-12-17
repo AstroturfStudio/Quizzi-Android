@@ -9,7 +9,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -24,6 +26,7 @@ import studio.astroturf.quizzi.data.remote.websocket.model.ServerSocketMessage
 import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.exceptionhandling.QuizziException
 import studio.astroturf.quizzi.domain.exceptionhandling.WebSocketErrorCode
+import studio.astroturf.quizzi.domain.network.GameConnectionStatus
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,6 +40,9 @@ class QuizziWebSocketService
         private val json: Json,
         @IoDispatcher private val serviceDispatcher: CoroutineDispatcher,
     ) {
+        private val _connectionStatus = MutableStateFlow<GameConnectionStatus>(GameConnectionStatus.Idle)
+        val connectionStatus = _connectionStatus.asStateFlow()
+
         private var webSocket: WebSocket? = null
         private var playerId: String? = null
 
@@ -90,6 +96,7 @@ class QuizziWebSocketService
                     webSocket: WebSocket,
                     response: Response,
                 ) {
+                    _connectionStatus.value = GameConnectionStatus.Connected
                     Timber.d("WebSocket Connection Established")
                     reconnectAttempts = 0
                 }
@@ -125,8 +132,8 @@ class QuizziWebSocketService
                     code: Int,
                     reason: String,
                 ) {
+                    _connectionStatus.value = GameConnectionStatus.Disconnected
                     Timber.d("WebSocket Closed: $code - $reason")
-                    attemptReconnect()
                 }
 
                 override fun onFailure(
@@ -134,6 +141,7 @@ class QuizziWebSocketService
                     t: Throwable,
                     response: Response?,
                 ) {
+                    _connectionStatus.value = GameConnectionStatus.Failed
                     Timber.e(t, "WebSocket Error")
                     handleFailure(t)
                     attemptReconnect()
@@ -148,6 +156,7 @@ class QuizziWebSocketService
                     cause = t,
                 )
             // Handle the Exception
+            webSocket = null
         }
 
         private fun attemptReconnect() {
@@ -161,6 +170,7 @@ class QuizziWebSocketService
             Timber.d("Attempting to reconnect in $delayMillis ms")
             serviceScope.launch {
                 delay(delayMillis)
+                _connectionStatus.value = GameConnectionStatus.Reconnecting(attempt = reconnectAttempts)
                 connect(playerId)
             }
         }

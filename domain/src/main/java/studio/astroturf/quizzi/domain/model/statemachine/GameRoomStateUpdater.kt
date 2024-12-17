@@ -31,6 +31,10 @@ sealed interface GameRoomStateUpdater {
         val message: ServerMessage.JoinedRoom,
     ) : GameRoomStateUpdater
 
+    data class RoomRejoined(
+        val message: ServerMessage.RejoinedRoom,
+    ) : GameRoomStateUpdater
+
     data class RoundEnd(
         val message: ServerMessage.RoundEnded,
     ) : GameRoomStateUpdater

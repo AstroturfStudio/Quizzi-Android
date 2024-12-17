@@ -1,12 +1,13 @@
 package studio.astroturf.quizzi.data.repository.game
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import studio.astroturf.quizzi.data.exceptionhandling.mapToQuizziException
-import studio.astroturf.quizzi.data.remote.websocket.model.PlayerDto
 import studio.astroturf.quizzi.data.remote.websocket.service.QuizziWebSocketService
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
 import studio.astroturf.quizzi.domain.model.websocket.ServerMessage
+import studio.astroturf.quizzi.domain.network.GameConnectionStatus
 import studio.astroturf.quizzi.domain.repository.GameRepository
 import studio.astroturf.quizzi.domain.result.QuizziResult
 import toDomain
@@ -18,11 +19,11 @@ class GameRepositoryImpl
     constructor(
         private val quizziWebSocketService: QuizziWebSocketService,
     ) : GameRepository {
-        private var currentPlayerDto: PlayerDto? = null
+        override fun observeConnectionStatus(): StateFlow<GameConnectionStatus> = quizziWebSocketService.connectionStatus
 
-        override fun connect(): QuizziResult<Unit> =
+        override fun connect(currentPlayerId: String?): QuizziResult<Unit> =
             try {
-                quizziWebSocketService.connect(currentPlayerDto?.id)
+                quizziWebSocketService.connect(currentPlayerId)
                 QuizziResult.success(Unit)
             } catch (e: Exception) {
                 QuizziResult.failure(e.mapToQuizziException())

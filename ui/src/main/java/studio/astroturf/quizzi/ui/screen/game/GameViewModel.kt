@@ -25,6 +25,7 @@ import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
+import studio.astroturf.quizzi.domain.network.GameConnectionStatus
 import studio.astroturf.quizzi.domain.repository.AuthRepository
 import studio.astroturf.quizzi.domain.repository.FeedbackRepository
 import studio.astroturf.quizzi.domain.repository.GameRepository
@@ -94,11 +95,41 @@ class GameViewModel
         private val _notification = MutableStateFlow<UiNotification?>(null)
         val notification: StateFlow<UiNotification?> = _notification.asStateFlow()
 
+        var isReconnecting = false
+
         init {
             observeGameState()
             observeGameEffects()
+            observeGameConnectionState()
             processStateUpdatesSequentially()
             initializeGameRoom()
+        }
+
+        private fun observeGameConnectionState() {
+            launchIO {
+                gameRepository.observeConnectionStatus().collect {
+                    clearNotification()
+                    when (it) {
+                        is GameConnectionStatus.Reconnecting -> {
+                            isReconnecting = true
+                            _notification.value = UiNotification.Toast("Reconnecting. . . Attempt: ${it.attempt}")
+                        }
+                        is GameConnectionStatus.Connected -> {
+                            val isReconnection = isReconnecting
+
+                            if (isReconnection) {
+                                isReconnecting = false
+                                rejoinRoom(roomId!!)
+                                _notification.value = UiNotification.Toast("Reconnected! Rejoining the room...")
+                            }
+                        }
+                        else -> {
+                            isReconnecting = false
+                            _notification.value = UiNotification.Toast(message = it::class.simpleName.toString())
+                        }
+                    }
+                }
+            }
         }
 
         private fun processStateUpdatesSequentially() {
@@ -123,7 +154,7 @@ class GameViewModel
         private fun initializeGameRoom() {
             launchIO {
                 gameRepository
-                    .connect()
+                    .connect(authRepository.getCurrentPlayerId())
                     .resolve(
                         exceptionResolver,
                         onUiNotification = {
@@ -187,6 +218,10 @@ class GameViewModel
                 is GameRoomStateUpdater.RoomJoined -> {
                     roomId = effect.message.roomId
                     sendPlayerReady()
+                }
+
+                is GameRoomStateUpdater.RoomRejoined -> {
+                    roomId = effect.message.roomId
                 }
 
                 is GameRoomStateUpdater.CloseRoom -> {

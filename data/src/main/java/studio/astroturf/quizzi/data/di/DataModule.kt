@@ -62,10 +62,7 @@ object DataModule {
                         }
                 },
             ).connectTimeout(5, TimeUnit.SECONDS)
-            .pingInterval(20, TimeUnit.SECONDS)
-            .readTimeout(0, TimeUnit.MILLISECONDS)
-            .writeTimeout(10, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true)
+            .pingInterval(1, TimeUnit.SECONDS)
             .build()
 
     @Provides

@@ -11,6 +11,12 @@ fun ServerSocketMessage.toDomain(): ServerMessage =
                 roomId = roomId,
                 success = success,
             )
+        is ServerSocketMessage.RejoinedRoom ->
+            ServerMessage.RejoinedRoom(
+                roomId = roomId,
+                playerId = playerId,
+                success = success,
+            )
 
         is ServerSocketMessage.CountdownTimeUpdate -> ServerMessage.CountdownTimeUpdate(remaining = remaining)
         is ServerSocketMessage.RoomUpdate ->

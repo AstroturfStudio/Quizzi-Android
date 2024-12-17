@@ -103,6 +103,7 @@ class GameRoomStateMachine(
             is ServerMessage.PlayerReconnected -> sideEffect(GameRoomStateUpdater.PlayerReconnected(message))
             is ServerMessage.RoomCreated -> sideEffect(GameRoomStateUpdater.RoomCreated(message))
             is ServerMessage.JoinedRoom -> sideEffect(GameRoomStateUpdater.RoomJoined(message))
+            is ServerMessage.RejoinedRoom -> sideEffect(GameRoomStateUpdater.RoomRejoined(message))
             is ServerMessage.RoundStarted -> sideEffect(GameRoomStateUpdater.RoundStarted(message))
             is ServerMessage.TimeUp -> sideEffect(GameRoomStateUpdater.RoundTimeUp(message))
             is ServerMessage.RoundEnded -> sideEffect(GameRoomStateUpdater.RoundEnd(message))
