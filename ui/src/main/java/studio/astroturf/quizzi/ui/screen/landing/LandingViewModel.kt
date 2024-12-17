@@ -9,7 +9,7 @@ import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.di.MainDispatcher
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
-import studio.astroturf.quizzi.domain.repository.QuizziRepository
+import studio.astroturf.quizzi.domain.repository.AuthRepository
 import studio.astroturf.quizzi.domain.storage.PreferencesStorage
 import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
@@ -19,7 +19,7 @@ import javax.inject.Inject
 class LandingViewModel
     @Inject
     constructor(
-        private val repository: QuizziRepository,
+        private val authRepository: AuthRepository,
         private val preferencesStorage: PreferencesStorage,
         private val exceptionResolver: ExceptionResolver,
         @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
@@ -47,7 +47,7 @@ class LandingViewModel
             avatarUrl: String,
         ) {
             launchIO {
-                repository
+                authRepository
                     .createPlayer(name, avatarUrl)
                     .resolve(
                         exceptionResolver,
@@ -66,7 +66,7 @@ class LandingViewModel
 
         fun login(playerId: String) {
             launchIO {
-                repository
+                authRepository
                     .login(playerId)
                     .resolve(
                         exceptionResolver,
