@@ -24,6 +24,14 @@ sealed class ServerSocketMessage {
     ) : ServerSocketMessage()
 
     @Serializable
+    @SerialName("RejoinedRoom")
+    data class RejoinedRoom(
+        val roomId: String,
+        val playerId: String,
+        val success: Boolean,
+    ) : ServerSocketMessage()
+
+    @Serializable
     @SerialName("CountdownTimeUpdate")
     data class CountdownTimeUpdate(
         val remaining: Long,

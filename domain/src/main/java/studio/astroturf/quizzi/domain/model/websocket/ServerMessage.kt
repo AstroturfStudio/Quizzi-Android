@@ -14,6 +14,12 @@ sealed class ServerMessage {
         val success: Boolean,
     ) : ServerMessage()
 
+    data class RejoinedRoom(
+        val roomId: String,
+        val playerId: String,
+        val success: Boolean,
+    ) : ServerMessage()
+
     data class RoomUpdate(
         val players: List<Player>,
         val state: RoomState,

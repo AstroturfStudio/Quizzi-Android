@@ -3,11 +3,15 @@ package studio.astroturf.quizzi.data.remote.websocket.service
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -19,10 +23,14 @@ import studio.astroturf.quizzi.data.BuildConfig
 import studio.astroturf.quizzi.data.di.WebSocketClient
 import studio.astroturf.quizzi.data.remote.websocket.model.ClientSocketMessage
 import studio.astroturf.quizzi.data.remote.websocket.model.ServerSocketMessage
-import studio.astroturf.quizzi.domain.di.DefaultDispatcher
+import studio.astroturf.quizzi.domain.di.IoDispatcher
+import studio.astroturf.quizzi.domain.exceptionhandling.QuizziException
+import studio.astroturf.quizzi.domain.exceptionhandling.WebSocketErrorCode
+import studio.astroturf.quizzi.domain.network.GameConnectionStatus
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.pow
 
 @Singleton
 class QuizziWebSocketService
@@ -30,23 +38,27 @@ class QuizziWebSocketService
     constructor(
         @WebSocketClient private val client: OkHttpClient,
         private val json: Json,
-        @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+        @IoDispatcher private val serviceDispatcher: CoroutineDispatcher,
     ) {
-        // WebSocket connection state
+        private val _connectionStatus = MutableStateFlow<GameConnectionStatus>(GameConnectionStatus.Idle)
+        val connectionStatus = _connectionStatus.asStateFlow()
+
         private var webSocket: WebSocket? = null
         private var playerId: String? = null
 
-        // Service scope for managing coroutines
-        private val serviceScope = CoroutineScope(defaultDispatcher + SupervisorJob())
+        private val serviceScope = CoroutineScope(serviceDispatcher + SupervisorJob())
 
-        // Message flow with unlimited buffer to prevent message loss
         private val _messageFlow =
             MutableSharedFlow<ServerSocketMessage>(
                 replay = 0,
                 extraBufferCapacity = Channel.UNLIMITED,
                 onBufferOverflow = BufferOverflow.SUSPEND,
             )
-        val messageFlow = _messageFlow.asSharedFlow()
+        val messageFlow: Flow<ServerSocketMessage> = _messageFlow.asSharedFlow()
+
+        private var reconnectAttempts = 0
+        private val maxReconnectAttempts = 5
+        private val initialDelayMillis = 1000L // 1 second
 
         fun connect(playerId: String? = null) {
             this.playerId = playerId
@@ -61,6 +73,7 @@ class QuizziWebSocketService
         fun disconnect() {
             webSocket?.close(NORMAL_CLOSURE_STATUS, "User disconnected")
             webSocket = null
+            serviceScope.cancel()
         }
 
         fun observeMessages(): Flow<ServerSocketMessage> = messageFlow
@@ -83,7 +96,9 @@ class QuizziWebSocketService
                     webSocket: WebSocket,
                     response: Response,
                 ) {
+                    _connectionStatus.value = GameConnectionStatus.Connected
                     Timber.d("WebSocket Connection Established")
+                    reconnectAttempts = 0
                 }
 
                 override fun onMessage(
@@ -91,7 +106,7 @@ class QuizziWebSocketService
                     text: String,
                 ) {
                     try {
-                        Timber.d("Incoming Websocket Message:\n$text")
+                        Timber.d("Incoming WebSocket Message:\n$text")
                         val message = json.decodeFromString<ServerSocketMessage>(text)
                         serviceScope.launch {
                             _messageFlow.emit(message)
@@ -117,6 +132,7 @@ class QuizziWebSocketService
                     code: Int,
                     reason: String,
                 ) {
+                    _connectionStatus.value = GameConnectionStatus.Disconnected
                     Timber.d("WebSocket Closed: $code - $reason")
                 }
 
@@ -125,12 +141,39 @@ class QuizziWebSocketService
                     t: Throwable,
                     response: Response?,
                 ) {
+                    _connectionStatus.value = GameConnectionStatus.Failed
                     Timber.e(t, "WebSocket Error")
-                    serviceScope.launch {
-                        _messageFlow.emit(ServerSocketMessage.Error("Connection failed: ${t.message}"))
-                    }
+                    handleFailure(t)
+                    attemptReconnect()
                 }
             }
+
+        private fun handleFailure(t: Throwable) {
+            val exception =
+                QuizziException.WebSocketException(
+                    message = t.message ?: "WebSocket connection failed",
+                    code = WebSocketErrorCode.CONNECTION_FAILED,
+                    cause = t,
+                )
+            // Handle the Exception
+            webSocket = null
+        }
+
+        private fun attemptReconnect() {
+            if (reconnectAttempts >= maxReconnectAttempts) {
+                Timber.e("Max reconnection attempts reached")
+                // Optionally, notify the user about the failed reconnection
+                return
+            }
+            reconnectAttempts++
+            val delayMillis = initialDelayMillis * 2.0.pow(reconnectAttempts.toDouble()).toLong()
+            Timber.d("Attempting to reconnect in $delayMillis ms")
+            serviceScope.launch {
+                delay(delayMillis)
+                _connectionStatus.value = GameConnectionStatus.Reconnecting(attempt = reconnectAttempts)
+                connect(playerId)
+            }
+        }
 
         companion object {
             private const val NORMAL_CLOSURE_STATUS = 1000

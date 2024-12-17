@@ -5,18 +5,13 @@ import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
@@ -30,8 +25,11 @@ import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
+import studio.astroturf.quizzi.domain.network.GameConnectionStatus
+import studio.astroturf.quizzi.domain.repository.AuthRepository
 import studio.astroturf.quizzi.domain.repository.FeedbackRepository
-import studio.astroturf.quizzi.domain.repository.QuizziRepository
+import studio.astroturf.quizzi.domain.repository.GameRepository
+import studio.astroturf.quizzi.domain.repository.RoomsRepository
 import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
 import studio.astroturf.quizzi.ui.navigation.NavDestination
@@ -47,7 +45,9 @@ class GameViewModel
     @Inject
     constructor(
         private val savedStateHandle: SavedStateHandle,
-        private val repository: QuizziRepository,
+        private val authRepository: AuthRepository,
+        private val roomsRepository: RoomsRepository,
+        private val gameRepository: GameRepository,
         private val feedbackRepository: FeedbackRepository,
         private val exceptionResolver: ExceptionResolver,
         @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
@@ -71,15 +71,8 @@ class GameViewModel
                     initialValue = GameUiState.Idle,
                 )
 
-        private val _uiEvents =
-            MutableSharedFlow<GameUiEvent>(
-                extraBufferCapacity = 64,
-                onBufferOverflow = BufferOverflow.DROP_OLDEST,
-            )
-        val uiEvents: SharedFlow<GameUiEvent> = _uiEvents.asSharedFlow()
-
         private val gameStateMachine =
-            GameRoomStateMachine(viewModelScope, repository, defaultDispatcher)
+            GameRoomStateMachine(viewModelScope, gameRepository, defaultDispatcher)
         private val stateMutex = Mutex()
 
         private lateinit var players: List<Player>
@@ -102,11 +95,41 @@ class GameViewModel
         private val _notification = MutableStateFlow<UiNotification?>(null)
         val notification: StateFlow<UiNotification?> = _notification.asStateFlow()
 
+        var isReconnecting = false
+
         init {
             observeGameState()
             observeGameEffects()
+            observeGameConnectionState()
             processStateUpdatesSequentially()
             initializeGameRoom()
+        }
+
+        private fun observeGameConnectionState() {
+            launchIO {
+                gameRepository.observeConnectionStatus().collect {
+                    clearNotification()
+                    when (it) {
+                        is GameConnectionStatus.Reconnecting -> {
+                            isReconnecting = true
+                            _notification.value = UiNotification.Toast("Reconnecting. . . Attempt: ${it.attempt}")
+                        }
+                        is GameConnectionStatus.Connected -> {
+                            val isReconnection = isReconnecting
+
+                            if (isReconnection) {
+                                isReconnecting = false
+                                rejoinRoom(roomId!!)
+                                _notification.value = UiNotification.Toast("Reconnected! Rejoining the room...")
+                            }
+                        }
+                        else -> {
+                            isReconnecting = false
+                            _notification.value = UiNotification.Toast(message = it::class.simpleName.toString())
+                        }
+                    }
+                }
+            }
         }
 
         private fun processStateUpdatesSequentially() {
@@ -130,8 +153,8 @@ class GameViewModel
 
         private fun initializeGameRoom() {
             launchIO {
-                repository
-                    .connect()
+                gameRepository
+                    .connect(authRepository.getCurrentPlayerId())
                     .resolve(
                         exceptionResolver,
                         onUiNotification = {
@@ -191,9 +214,18 @@ class GameViewModel
                     roomId = effect.message.roomId
                     sendPlayerReady()
                 }
+
                 is GameRoomStateUpdater.RoomJoined -> {
                     roomId = effect.message.roomId
                     sendPlayerReady()
+                }
+
+                is GameRoomStateUpdater.RoomRejoined -> {
+                    roomId = effect.message.roomId
+                }
+
+                is GameRoomStateUpdater.CloseRoom -> {
+                    roomId = null
                 }
 
                 is GameRoomStateUpdater.ReceiveAnswerResult -> handleAnswerResult(effect)
@@ -207,7 +239,6 @@ class GameViewModel
                 is GameRoomStateUpdater.PlayerDisconnected,
                 is GameRoomStateUpdater.PlayerReconnected,
                 is GameRoomStateUpdater.RoundTimeUp,
-                is GameRoomStateUpdater.CloseRoom,
                 GameRoomStateUpdater.ExitGameRoom,
                 is GameRoomStateUpdater.Error,
                 -> Unit
@@ -218,7 +249,7 @@ class GameViewModel
             launchMain {
                 val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
                 val isCurrentPlayerResult =
-                    effect.answerResult.playerId == repository.getCurrentPlayerId()
+                    effect.answerResult.playerId == authRepository.getCurrentPlayerId()
                 if (isCurrentPlayerResult) {
                     updateUiState {
                         currentState.copy(
@@ -324,7 +355,7 @@ class GameViewModel
                 val roundWinner: RoundWinner =
                     when (winner?.id) {
                         null -> RoundWinner.None
-                        repository.getCurrentPlayerId() -> RoundWinner.Me(winner.id, winner.name)
+                        authRepository.getCurrentPlayerId() -> RoundWinner.Me(winner.id, winner.name)
                         else -> RoundWinner.Opponent(winner.id, winner.name)
                     }
 
@@ -382,15 +413,19 @@ class GameViewModel
         }
 
         fun createRoom() {
-            repository.sendMessage(ClientMessage.CreateRoom)
+            gameRepository.sendMessage(ClientMessage.CreateRoom)
         }
 
         fun joinRoom(roomId: String) {
-            repository.sendMessage(ClientMessage.JoinRoom(roomId))
+            gameRepository.sendMessage(ClientMessage.JoinRoom(roomId))
+        }
+
+        fun rejoinRoom(roomId: String) {
+            gameRepository.sendMessage(ClientMessage.RejoinRoom(roomId))
         }
 
         fun sendPlayerReady() {
-            repository.sendMessage(ClientMessage.PlayerReady)
+            gameRepository.sendMessage(ClientMessage.PlayerReady)
         }
 
         fun submitAnswer(answerId: Int) {
@@ -400,7 +435,7 @@ class GameViewModel
                         updateUiState {
                             currentState.copy(selectedAnswerId = answerId)
                         }
-                        repository.sendMessage(ClientMessage.PlayerAnswer(answerId))
+                        gameRepository.sendMessage(ClientMessage.PlayerAnswer(answerId))
                     }
                 }
             }
@@ -435,8 +470,9 @@ class GameViewModel
 
         override fun onCleared() {
             super.onCleared()
-            viewModelScope.launch(ioDispatcher) {
-                repository.disconnect()
+            launchIO {
+                gameRepository.disconnect()
+                roomId = null
             }
         }
 

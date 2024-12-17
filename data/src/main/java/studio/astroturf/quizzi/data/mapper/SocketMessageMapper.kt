@@ -11,6 +11,12 @@ fun ServerSocketMessage.toDomain(): ServerMessage =
                 roomId = roomId,
                 success = success,
             )
+        is ServerSocketMessage.RejoinedRoom ->
+            ServerMessage.RejoinedRoom(
+                roomId = roomId,
+                playerId = playerId,
+                success = success,
+            )
 
         is ServerSocketMessage.CountdownTimeUpdate -> ServerMessage.CountdownTimeUpdate(remaining = remaining)
         is ServerSocketMessage.RoomUpdate ->
@@ -58,6 +64,7 @@ fun ClientMessage.toDto(): ClientSocketMessage =
     when (this) {
         is ClientMessage.CreateRoom -> ClientSocketMessage.CreateRoom
         is ClientMessage.JoinRoom -> ClientSocketMessage.JoinRoom(roomId = roomId)
+        is ClientMessage.RejoinRoom -> ClientSocketMessage.RejoinRoom(roomId = roomId)
         is ClientMessage.PlayerReady -> ClientSocketMessage.PlayerReady
         is ClientMessage.PlayerAnswer -> ClientSocketMessage.PlayerAnswer(answer = answer)
         is ClientMessage.PlayerReconnected -> ClientSocketMessage.PlayerReconnected(playerId = playerId)

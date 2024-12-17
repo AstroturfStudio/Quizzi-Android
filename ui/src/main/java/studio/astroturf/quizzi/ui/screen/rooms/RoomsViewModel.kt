@@ -11,7 +11,7 @@ import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.di.MainDispatcher
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
-import studio.astroturf.quizzi.domain.repository.QuizziRepository
+import studio.astroturf.quizzi.domain.repository.RoomsRepository
 import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
 import javax.inject.Inject
@@ -20,7 +20,7 @@ import javax.inject.Inject
 class RoomsViewModel
     @Inject
     constructor(
-        private val repository: QuizziRepository,
+        private val repository: RoomsRepository,
         private val exceptionResolver: ExceptionResolver,
         @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
@@ -91,10 +91,5 @@ class RoomsViewModel
 
         fun clearNotification() {
             _notification.value = null
-        }
-
-        override fun onCleared() {
-            super.onCleared()
-            repository.disconnect()
         }
     }

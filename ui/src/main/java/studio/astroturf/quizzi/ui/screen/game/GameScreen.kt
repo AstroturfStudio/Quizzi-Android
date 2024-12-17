@@ -15,8 +15,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
+import showToast
+import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.model.GameFeedback
 import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameOverContent
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyContent
@@ -34,11 +37,20 @@ fun GameScreen(
     modifier: Modifier = Modifier,
     viewModel: GameViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val uiNotification by viewModel.notification.collectAsState()
 
     // Log state changes using a side effect
     LaunchedEffect(uiState) {
         Timber.tag(TAG).d("State is being changed to: $uiState")
+    }
+
+    LaunchedEffect(uiNotification) {
+        when (uiNotification) {
+            is UiNotification.Toast -> context.showToast((uiNotification as UiNotification.Toast).message)
+            else -> {} // Handle other types of notifications if needed
+        }
     }
 
     GameScreenContent(
