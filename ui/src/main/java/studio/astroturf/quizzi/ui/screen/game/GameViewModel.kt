@@ -413,7 +413,12 @@ class GameViewModel
         }
 
         fun createRoom() {
-            gameRepository.sendMessage(ClientMessage.CreateRoom)
+            gameRepository.sendMessage(
+                ClientMessage.CreateRoom(
+                    categoryId = 1,
+                    gameType = "ResistanceGame",
+                ),
+            )
         }
 
         fun joinRoom(roomId: String) {

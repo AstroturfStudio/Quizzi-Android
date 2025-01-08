@@ -1,7 +1,10 @@
 package studio.astroturf.quizzi.domain.model.websocket
 
 sealed class ClientMessage {
-    data object CreateRoom : ClientMessage()
+    data class CreateRoom(
+        val categoryId: Int,
+        val gameType: String,
+    ) : ClientMessage()
 
     data class JoinRoom(
         val roomId: String,
