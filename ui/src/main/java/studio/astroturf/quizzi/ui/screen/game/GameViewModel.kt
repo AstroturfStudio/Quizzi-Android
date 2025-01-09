@@ -388,7 +388,7 @@ class GameViewModel
 
         private fun handleGameOver(effect: GameRoomStateUpdater.GameRoomOver) {
             launchMain {
-                val gameState = currentGameRoomState as? GameRoomState.Closed ?: return@launchMain
+                val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
                 val winner = gameState.players.first { it.id == effect.message.winnerPlayerId }
                 updateUiState {
                     GameUiState.GameOver(
@@ -413,7 +413,12 @@ class GameViewModel
         }
 
         fun createRoom() {
-            gameRepository.sendMessage(ClientMessage.CreateRoom)
+            gameRepository.sendMessage(
+                ClientMessage.CreateRoom(
+                    categoryId = 1,
+                    gameType = "ResistanceGame",
+                ),
+            )
         }
 
         fun joinRoom(roomId: String) {

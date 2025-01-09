@@ -3,7 +3,9 @@ package studio.astroturf.quizzi.data.remote.rest.api
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import studio.astroturf.quizzi.data.remote.rest.model.CategoriesDto
 import studio.astroturf.quizzi.data.remote.rest.model.CreatePlayerRequestDto
+import studio.astroturf.quizzi.data.remote.rest.model.GameTypesDto
 import studio.astroturf.quizzi.data.remote.rest.model.LoginRequestDto
 import studio.astroturf.quizzi.data.remote.rest.model.RoomsDto
 import studio.astroturf.quizzi.data.remote.websocket.model.PlayerDto
@@ -21,4 +23,10 @@ interface QuizziApi {
 
     @GET("api/room/all")
     suspend fun getRooms(): RoomsDto
+    
+    @GET("api/game/all")
+    suspend fun getGameTypes(): GameTypesDto
+    
+    @GET("api/game/category/all") 
+    suspend fun getCategories(): CategoriesDto
 }

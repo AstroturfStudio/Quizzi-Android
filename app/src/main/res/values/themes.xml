@@ -2,4 +2,8 @@
 <resources>
 
     <style name="Theme.Quizzi" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.Quizzi.Splash" parent="Theme.Quizzi">
+        <item name="android:windowBackground">@color/primary</item>
+    </style>
 </resources>

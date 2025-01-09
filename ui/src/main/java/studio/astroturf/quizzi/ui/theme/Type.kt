@@ -15,6 +15,13 @@ val Rubik =
         Font(R.font.rubik_bold, FontWeight.Bold),
     )
 
+val Nunito =
+    FontFamily(
+        Font(R.font.nunito, FontWeight.Normal),
+        Font(R.font.nunito_medium, FontWeight.Medium),
+        Font(R.font.nunito_bold, FontWeight.Bold),
+    )
+
 // Define all custom text styles
 val Heading1 =
     TextStyle(
@@ -158,6 +165,14 @@ val TextXSmall =
         fontSize = 12.sp,
         lineHeight = 18.sp,
         letterSpacing = 0.4.sp,
+    )
+
+val Logo =
+    TextStyle(
+        fontFamily = Nunito,
+        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp,
+        lineHeight = 24.sp,
     )
 
 // Set of Material typography styles to start with

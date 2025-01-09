@@ -167,7 +167,7 @@ private fun RoomItem(
                     maxLines = 1,
                 )
                 Text(
-                    text = "Created by: ${room.players.first()}",
+                    text = "Created by: ${room.players.firstOrNull() ?: "Unknown"}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -181,7 +181,7 @@ private fun RoomItem(
 
             Button(
                 onClick = onJoinRoom,
-                enabled = room.roomState == RoomState.WAITING && room.players.count() < 2,
+                enabled = room.roomState == RoomState.Waiting && room.players.count() < 2,
             ) {
                 Text("Join")
             }
@@ -198,12 +198,12 @@ private fun RoomsScreenContentPreview() {
                 listOf(
                     GameRoom(
                         id = "Room1",
-                        roomState = RoomState.WAITING,
+                        roomState = RoomState.Waiting,
                         players = listOf("Player1", "Player2"),
                     ),
                     GameRoom(
                         id = "Room2",
-                        roomState = RoomState.PLAYING,
+                        roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
                     ),
                 ),

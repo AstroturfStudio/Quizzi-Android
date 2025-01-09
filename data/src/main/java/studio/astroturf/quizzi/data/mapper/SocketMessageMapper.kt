@@ -62,7 +62,11 @@ fun ServerSocketMessage.toDomain(): ServerMessage =
 
 fun ClientMessage.toDto(): ClientSocketMessage =
     when (this) {
-        is ClientMessage.CreateRoom -> ClientSocketMessage.CreateRoom
+        is ClientMessage.CreateRoom ->
+            ClientSocketMessage.CreateRoom(
+                categoryId = categoryId,
+                gameType = gameType,
+            )
         is ClientMessage.JoinRoom -> ClientSocketMessage.JoinRoom(roomId = roomId)
         is ClientMessage.RejoinRoom -> ClientSocketMessage.RejoinRoom(roomId = roomId)
         is ClientMessage.PlayerReady -> ClientSocketMessage.PlayerReady
