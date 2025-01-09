@@ -388,7 +388,7 @@ class GameViewModel
 
         private fun handleGameOver(effect: GameRoomStateUpdater.GameRoomOver) {
             launchMain {
-                val gameState = currentGameRoomState as? GameRoomState.Closed ?: return@launchMain
+                val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
                 val winner = gameState.players.first { it.id == effect.message.winnerPlayerId }
                 updateUiState {
                     GameUiState.GameOver(

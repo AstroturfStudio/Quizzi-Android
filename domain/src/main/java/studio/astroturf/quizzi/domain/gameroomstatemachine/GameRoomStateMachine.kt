@@ -162,7 +162,7 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
-            RoomState.WAITING -> GameRoomState.Waiting(updateMessage.players)
+            RoomState.Waiting -> GameRoomState.Waiting(updateMessage.players)
             else -> throw IllegalStateException(getInvalidTransitionMessage("Idle", updateMessage))
         }
 
@@ -171,8 +171,8 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
-            RoomState.WAITING -> GameRoomState.Waiting(players = updateMessage.players) // 2nd player joins
-            RoomState.COUNTDOWN -> GameRoomState.Countdown
+            RoomState.Waiting -> GameRoomState.Waiting(players = updateMessage.players) // 2nd player joins
+            RoomState.Countdown -> GameRoomState.Countdown
             else -> throw IllegalStateException(getInvalidTransitionMessage("Waiting", updateMessage))
         }
 
@@ -181,7 +181,7 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
-            RoomState.PLAYING -> GameRoomState.Playing(updateMessage.players)
+            RoomState.Playing -> GameRoomState.Playing(updateMessage.players)
             else -> throw IllegalStateException(getInvalidTransitionMessage("Starting", updateMessage))
         }
 
@@ -190,7 +190,7 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
-            RoomState.CLOSED -> GameRoomState.Closed(updateMessage.players)
+            RoomState.Closing -> GameRoomState.Closed(updateMessage.players)
             else -> throw IllegalStateException(getInvalidTransitionMessage("Playing", updateMessage))
         }
 
@@ -199,7 +199,7 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
-            RoomState.CLOSED -> GameRoomState.Closed(updateMessage.players)
+            RoomState.Closing -> GameRoomState.Closed(updateMessage.players)
             else -> throw IllegalStateException(getInvalidTransitionMessage("Paused", updateMessage))
         }
 
