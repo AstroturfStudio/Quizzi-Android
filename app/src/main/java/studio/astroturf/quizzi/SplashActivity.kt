@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
+import studio.astroturf.quizzi.ui.R as uiR
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : ComponentActivity() {
@@ -47,7 +48,7 @@ private fun SplashScreen() {
         contentAlignment = Alignment.Center,
     ) {
         Image(
-            painter = painterResource(id = R.drawable.quizzi),
+            painter = painterResource(id = uiR.drawable.quizzi),
             contentDescription = "Quizzi Logo",
             modifier = Modifier.size(200.dp),
         )
