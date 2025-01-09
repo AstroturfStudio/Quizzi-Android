@@ -3,10 +3,7 @@
 
     <style name="Theme.Quizzi" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <style name="Theme.Quizzi.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/primary</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/quizzi</item>
-        <item name="windowSplashScreenAnimationDuration">1000</item>
-        <item name="postSplashScreenTheme">@style/Theme.Quizzi</item>
+    <style name="Theme.Quizzi.Splash" parent="Theme.Quizzi">
+        <item name="android:windowBackground">@color/primary</item>
     </style>
 </resources>
