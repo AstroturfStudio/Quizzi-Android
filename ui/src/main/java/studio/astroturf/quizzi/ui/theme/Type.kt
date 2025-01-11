@@ -20,6 +20,7 @@ val Nunito =
         Font(R.font.nunito, FontWeight.Normal),
         Font(R.font.nunito_medium, FontWeight.Medium),
         Font(R.font.nunito_bold, FontWeight.Bold),
+        Font(R.font.nunito_extrabold, FontWeight.ExtraBold),
     )
 
 // Define all custom text styles
@@ -173,6 +174,14 @@ val Logo =
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
         lineHeight = 24.sp,
+    )
+
+val BigLogo =
+    TextStyle(
+        fontFamily = Nunito,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 36.sp,
+        lineHeight = 50.sp,
     )
 
 // Set of Material typography styles to start with
