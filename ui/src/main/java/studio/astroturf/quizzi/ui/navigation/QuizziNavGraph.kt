@@ -9,8 +9,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import studio.astroturf.quizzi.ui.screen.game.GameScreen
+import studio.astroturf.quizzi.ui.screen.home.HomeScreen
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
-import studio.astroturf.quizzi.ui.screen.rooms.RoomIntent
+import studio.astroturf.quizzi.ui.screen.profile.ProfileScreen
+import studio.astroturf.quizzi.ui.screen.search.SearchScreen
+import studio.astroturf.quizzi.ui.screen.statistics.StatisticsScreen
 
 @Composable
 fun QuizziNavGraph(
@@ -26,25 +29,33 @@ fun QuizziNavGraph(
         composable(NavDestination.Landing.route) {
             LandingScreen(
                 onNavigateToRooms = {
-                    navController.navigate(NavDestination.Rooms.route) {
+                    navController.navigate(NavDestination.Home.route) {
                         popUpTo(NavDestination.Landing.route) { inclusive = true }
                     }
                 },
             )
         }
 
+        composable(NavDestination.Home.route) {
+            HomeScreen()
+        }
+
+        composable(NavDestination.Search.route) {
+            SearchScreen()
+        }
+
+        composable(NavDestination.Statistics.route) {
+            StatisticsScreen()
+        }
+
+        composable(NavDestination.Profile.route) {
+            ProfileScreen()
+        }
+
         composable(NavDestination.Rooms.route) {
             RoomsScreen(
-                onNavigateToRoom = { roomIntent ->
-                    when (roomIntent) {
-                        RoomIntent.CreateRoom -> {
-                            navController.navigate(NavDestination.Game.createRoute())
-                        }
-
-                        is RoomIntent.JoinRoom -> {
-                            navController.navigate(NavDestination.Game.createRoute(roomId = roomIntent.roomId))
-                        }
-                    }
+                onNavigateToRoom = { roomId ->
+                    navController.navigate(NavDestination.Game.route + "?roomId=$roomId")
                 },
             )
         }
