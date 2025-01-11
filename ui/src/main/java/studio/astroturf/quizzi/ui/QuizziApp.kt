@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
@@ -32,37 +33,44 @@ fun QuizziApp(modifier: Modifier = Modifier) {
             when (currentDestination?.route) {
                 QuizziNavDestination.Landing.route,
                 QuizziNavDestination.Game.route,
+                QuizziNavDestination.Create.route,
                 null,
                 -> false
                 else -> true
             }
 
-        Box(modifier = modifier.fillMaxSize()) {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                bottomBar = {
-                    if (showBottomBar) {
-                        QuizziBottomNavigation(
-                            navController = navController,
-                            currentDestination = currentDestination,
-                            onFabClick = {
-                                navController.navigate(QuizziNavDestination.Rooms.route)
-                            },
-                        )
-                    }
-                },
-            ) { innerPadding ->
+        Scaffold(
+            modifier = modifier.fillMaxSize(),
+            bottomBar = {
+                if (showBottomBar) {
+                    QuizziBottomNavigation(
+                        navController = navController,
+                        currentDestination = currentDestination,
+                        onFabClick = {
+                            navController.navigate(QuizziNavDestination.Create.route)
+                        },
+                    )
+                }
+            },
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
                 QuizziNavGraph(
                     navController = navController,
                     modifier = Modifier.padding(innerPadding),
                     startDestination = QuizziNavDestination.Landing.route,
                 )
-            }
 
-            NotificationHandler(
-                notification = currentNotification,
-                onDismiss = { currentNotification = null },
-            )
+                NotificationHandler(
+                    notification = currentNotification,
+                    onDismiss = { currentNotification = null },
+                )
+            }
         }
     }
+}
+
+@Preview
+@Composable
+private fun QuizziAppPreview() {
+    QuizziApp()
 }

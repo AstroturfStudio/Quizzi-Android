@@ -8,8 +8,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import studio.astroturf.quizzi.ui.screen.create.CreateScreen
 import studio.astroturf.quizzi.ui.screen.game.GameScreen
-import studio.astroturf.quizzi.ui.screen.home.HomeScreen
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
 import studio.astroturf.quizzi.ui.screen.profile.ProfileScreen
 import studio.astroturf.quizzi.ui.screen.search.SearchScreen
@@ -37,7 +37,11 @@ fun QuizziNavGraph(
         }
 
         composable(NavDestination.Home.route) {
-            HomeScreen()
+            RoomsScreen(
+                onNavigateToRoom = { roomId ->
+                    navController.navigate(NavDestination.Game.route + "?roomId=$roomId")
+                },
+            )
         }
 
         composable(NavDestination.Search.route) {
@@ -52,12 +56,8 @@ fun QuizziNavGraph(
             ProfileScreen()
         }
 
-        composable(NavDestination.Rooms.route) {
-            RoomsScreen(
-                onNavigateToRoom = { roomId ->
-                    navController.navigate(NavDestination.Game.route + "?roomId=$roomId")
-                },
-            )
+        composable(NavDestination.Create.route) {
+            CreateScreen()
         }
 
         composable(
@@ -72,8 +72,8 @@ fun QuizziNavGraph(
         ) {
             GameScreen(
                 onNavigateToRooms = {
-                    navController.navigate(NavDestination.Rooms.route) {
-                        popUpTo(NavDestination.Rooms.route) { inclusive = true }
+                    navController.navigate(NavDestination.Home.route) {
+                        popUpTo(NavDestination.Home.route) { inclusive = true }
                     }
                 },
             )

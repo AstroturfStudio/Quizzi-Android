@@ -1,16 +1,16 @@
 package studio.astroturf.quizzi.ui.navigation
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,16 +22,20 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -39,6 +43,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import studio.astroturf.quizzi.ui.components.QuizziIcon
 import studio.astroturf.quizzi.ui.theme.Primary
+import studio.astroturf.quizzi.ui.theme.White
 import studio.astroturf.quizzi.ui.navigation.NavDestination as QuizziNavDestination
 
 sealed class BottomNavIcon {
@@ -81,6 +86,78 @@ val bottomNavItems =
         ),
     )
 
+private class BottomNavigationShape(
+    private val fabSize: Float,
+    private val fabPadding: Float,
+) : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density,
+    ): Outline {
+        val centerX = size.width / 2
+        val cutoutRadius = (fabSize / 2) + fabPadding
+
+        return Outline.Generic(
+            Path().apply {
+                // Start from top-left with rounded corner
+                moveTo(0f, 20f)
+                lineTo(0f, size.height)
+                lineTo(size.width, size.height)
+                lineTo(size.width, 20f)
+
+                // Top rounded corners
+                arcTo(
+                    rect =
+                        Rect(
+                            left = 0f,
+                            top = 0f,
+                            right = 40f,
+                            bottom = 40f,
+                        ),
+                    startAngleDegrees = 90f,
+                    sweepAngleDegrees = 90f,
+                    forceMoveTo = false,
+                )
+
+                lineTo(centerX - cutoutRadius, 0f)
+
+                // Left cutout curve
+                arcTo(
+                    rect =
+                        Rect(
+                            left = centerX - cutoutRadius,
+                            top = 0f,
+                            right = centerX + cutoutRadius,
+                            bottom = 2 * cutoutRadius,
+                        ),
+                    startAngleDegrees = 180f,
+                    sweepAngleDegrees = 180f,
+                    forceMoveTo = false,
+                )
+
+                lineTo(size.width - 20f, 0f)
+
+                // Top right corner
+                arcTo(
+                    rect =
+                        Rect(
+                            left = size.width - 40f,
+                            top = 0f,
+                            right = size.width,
+                            bottom = 40f,
+                        ),
+                    startAngleDegrees = 180f,
+                    sweepAngleDegrees = 90f,
+                    forceMoveTo = false,
+                )
+
+                close()
+            },
+        )
+    }
+}
+
 @Composable
 fun QuizziBottomNavigation(
     navController: NavHostController,
@@ -94,14 +171,17 @@ fun QuizziBottomNavigation(
         NavigationBar(
             modifier =
                 Modifier
-                    .height(85.dp)
-                    .padding(horizontal = 8.dp)
-                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
-            containerColor = MaterialTheme.colorScheme.surface,
+                    .wrapContentHeight()
+                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                    .background(color = White),
             tonalElevation = 8.dp,
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .background(color = White)
+                        .clip(BottomNavigationShape(fabSize = 52f, fabPadding = 2f)),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -126,7 +206,6 @@ fun QuizziBottomNavigation(
                                 }
                             }
                         },
-                        label = { Text(item.label) },
                         selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
                         onClick = {
                             navController.navigate(item.route) {
@@ -164,7 +243,6 @@ fun QuizziBottomNavigation(
                                 }
                             }
                         },
-                        label = { Text(item.label) },
                         selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
                         onClick = {
                             navController.navigate(item.route) {
@@ -199,7 +277,7 @@ fun QuizziBottomNavigation(
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = "Create Game",
-                tint = Color.White,
+                tint = White,
                 modifier = Modifier.size(24.dp),
             )
         }
