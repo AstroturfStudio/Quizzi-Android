@@ -1,6 +1,5 @@
 package studio.astroturf.quizzi.ui.navigation
 
-import RoomsScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -12,6 +11,7 @@ import studio.astroturf.quizzi.ui.screen.create.CreateScreen
 import studio.astroturf.quizzi.ui.screen.game.GameScreen
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
 import studio.astroturf.quizzi.ui.screen.profile.ProfileScreen
+import studio.astroturf.quizzi.ui.screen.rooms.RoomsScreen
 import studio.astroturf.quizzi.ui.screen.search.SearchScreen
 import studio.astroturf.quizzi.ui.screen.statistics.StatisticsScreen
 

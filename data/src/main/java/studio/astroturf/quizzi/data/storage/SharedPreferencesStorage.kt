@@ -17,6 +17,15 @@ class SharedPreferencesStorage
             sharedPreferences.edit().putString(KEY_PLAYER_ID, playerId).apply()
         }
 
+        override fun savePlayerName(
+            playerId: String,
+            playerName: String,
+        ) {
+            sharedPreferences.edit().putString(playerId, playerName).apply()
+        }
+
+        override fun getPlayerName(playerId: String): String? = sharedPreferences.getString(playerId, null)
+
         override fun getPlayerId(): String? = sharedPreferences.getString(KEY_PLAYER_ID, null)
 
         override fun clearPlayerId() {

@@ -59,6 +59,7 @@ class LandingViewModel
                         },
                     ) { player ->
                         preferencesStorage.savePlayerId(player.id)
+                        preferencesStorage.savePlayerName(player.id, player.name)
                         updateUiState { it.copy(playerId = player.id) }
                     }
             }

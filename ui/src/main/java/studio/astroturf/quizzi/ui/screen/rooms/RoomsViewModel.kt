@@ -12,6 +12,7 @@ import studio.astroturf.quizzi.domain.di.MainDispatcher
 import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.repository.RoomsRepository
+import studio.astroturf.quizzi.domain.storage.PreferencesStorage
 import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
 import javax.inject.Inject
@@ -25,6 +26,7 @@ class RoomsViewModel
         @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
         @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+        preferencesStorage: PreferencesStorage,
     ) : BaseViewModel(
             mainDispatcher,
             ioDispatcher,
@@ -40,6 +42,14 @@ class RoomsViewModel
         val notification = _notification.asStateFlow()
 
         init {
+            preferencesStorage.getPlayerId()?.let { playerId ->
+                preferencesStorage.getPlayerName(playerId)?.let { playerName ->
+                    updateUiState {
+                        it.copy(currentUsername = playerName)
+                    }
+                }
+            }
+
             viewModelScope.launch(ioDispatcher) {
                 getRooms()
             }
