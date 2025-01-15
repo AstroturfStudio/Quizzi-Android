@@ -1,6 +1,5 @@
 package studio.astroturf.quizzi.ui.navigation
 
-import RoomsScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -8,45 +7,73 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import studio.astroturf.quizzi.ui.screen.create.CreateScreen
 import studio.astroturf.quizzi.ui.screen.game.GameScreen
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
-import studio.astroturf.quizzi.ui.screen.rooms.RoomIntent
+import studio.astroturf.quizzi.ui.screen.onboarding.OnboardingScreen
+import studio.astroturf.quizzi.ui.screen.profile.ProfileScreen
+import studio.astroturf.quizzi.ui.screen.rooms.RoomsScreen
+import studio.astroturf.quizzi.ui.screen.search.SearchScreen
+import studio.astroturf.quizzi.ui.screen.statistics.StatisticsScreen
 
 @Composable
 fun QuizziNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: String = NavDestination.Landing.route,
+    startDestination: String = NavDestination.Onboarding.route,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier,
     ) {
+        composable(NavDestination.Onboarding.route) {
+            OnboardingScreen(
+                onSignUpClick = {
+                    navController.navigate(NavDestination.Landing.route) {
+                        popUpTo(NavDestination.Onboarding.route) { inclusive = true }
+                    }
+                },
+                onLoginClick = {
+                    navController.navigate(NavDestination.Landing.route) {
+                        popUpTo(NavDestination.Onboarding.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         composable(NavDestination.Landing.route) {
             LandingScreen(
                 onNavigateToRooms = {
-                    navController.navigate(NavDestination.Rooms.route) {
+                    navController.navigate(NavDestination.Home.route) {
                         popUpTo(NavDestination.Landing.route) { inclusive = true }
                     }
                 },
             )
         }
 
-        composable(NavDestination.Rooms.route) {
+        composable(NavDestination.Home.route) {
             RoomsScreen(
-                onNavigateToRoom = { roomIntent ->
-                    when (roomIntent) {
-                        RoomIntent.CreateRoom -> {
-                            navController.navigate(NavDestination.Game.createRoute())
-                        }
-
-                        is RoomIntent.JoinRoom -> {
-                            navController.navigate(NavDestination.Game.createRoute(roomId = roomIntent.roomId))
-                        }
-                    }
+                onNavigateToRoom = { roomId ->
+                    navController.navigate(NavDestination.Game.route + "?roomId=$roomId")
                 },
             )
+        }
+
+        composable(NavDestination.Search.route) {
+            SearchScreen()
+        }
+
+        composable(NavDestination.Statistics.route) {
+            StatisticsScreen()
+        }
+
+        composable(NavDestination.Profile.route) {
+            ProfileScreen()
+        }
+
+        composable(NavDestination.Create.route) {
+            CreateScreen()
         }
 
         composable(
@@ -61,8 +88,8 @@ fun QuizziNavGraph(
         ) {
             GameScreen(
                 onNavigateToRooms = {
-                    navController.navigate(NavDestination.Rooms.route) {
-                        popUpTo(NavDestination.Rooms.route) { inclusive = true }
+                    navController.navigate(NavDestination.Home.route) {
+                        popUpTo(NavDestination.Home.route) { inclusive = true }
                     }
                 },
             )

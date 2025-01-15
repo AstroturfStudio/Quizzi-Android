@@ -10,32 +10,76 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.ui.exceptionhandling.NotificationHandler
+import studio.astroturf.quizzi.ui.navigation.QuizziBottomNavigation
 import studio.astroturf.quizzi.ui.navigation.QuizziNavGraph
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
+import studio.astroturf.quizzi.ui.navigation.NavDestination as QuizziNavDestination
 
 @Composable
 fun QuizziApp(
     modifier: Modifier = Modifier,
+    onBoardingCompleted: Boolean = false,
 ) {
     QuizziTheme {
         val navController = rememberNavController()
         var currentNotification by remember { mutableStateOf<UiNotification?>(null) }
 
-        Box(modifier = modifier.fillMaxSize()) {
-            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+
+        val showBottomBar =
+            when (currentDestination?.route) {
+                QuizziNavDestination.Onboarding.route,
+                QuizziNavDestination.Landing.route,
+                QuizziNavDestination.Game.route,
+                QuizziNavDestination.Create.route,
+                null,
+                -> false
+                else -> true
+            }
+
+        Scaffold(
+            modifier = modifier.fillMaxSize(),
+            bottomBar = {
+                if (showBottomBar) {
+                    QuizziBottomNavigation(
+                        navController = navController,
+                        currentDestination = currentDestination,
+                        onFabClick = {
+                            navController.navigate(QuizziNavDestination.Create.route)
+                        },
+                    )
+                }
+            },
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
                 QuizziNavGraph(
                     navController = navController,
                     modifier = Modifier.padding(innerPadding),
+                    startDestination =
+                        if (onBoardingCompleted) {
+                            QuizziNavDestination.Landing.route
+                        } else {
+                            QuizziNavDestination.Onboarding.route
+                        },
+                )
+
+                NotificationHandler(
+                    notification = currentNotification,
+                    onDismiss = { currentNotification = null },
                 )
             }
-
-            NotificationHandler(
-                notification = currentNotification,
-                onDismiss = { currentNotification = null },
-            )
         }
     }
-} 
+}
+
+@Preview
+@Composable
+private fun QuizziAppPreview() {
+    QuizziApp()
+}
