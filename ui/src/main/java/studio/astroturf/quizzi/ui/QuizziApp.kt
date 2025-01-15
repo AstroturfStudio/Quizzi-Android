@@ -21,7 +21,10 @@ import studio.astroturf.quizzi.ui.theme.QuizziTheme
 import studio.astroturf.quizzi.ui.navigation.NavDestination as QuizziNavDestination
 
 @Composable
-fun QuizziApp(modifier: Modifier = Modifier) {
+fun QuizziApp(
+    modifier: Modifier = Modifier,
+    onBoardingCompleted: Boolean = false,
+) {
     QuizziTheme {
         val navController = rememberNavController()
         var currentNotification by remember { mutableStateOf<UiNotification?>(null) }
@@ -31,6 +34,7 @@ fun QuizziApp(modifier: Modifier = Modifier) {
 
         val showBottomBar =
             when (currentDestination?.route) {
+                QuizziNavDestination.Onboarding.route,
                 QuizziNavDestination.Landing.route,
                 QuizziNavDestination.Game.route,
                 QuizziNavDestination.Create.route,
@@ -57,7 +61,12 @@ fun QuizziApp(modifier: Modifier = Modifier) {
                 QuizziNavGraph(
                     navController = navController,
                     modifier = Modifier.padding(innerPadding),
-                    startDestination = QuizziNavDestination.Landing.route,
+                    startDestination =
+                        if (onBoardingCompleted) {
+                            QuizziNavDestination.Landing.route
+                        } else {
+                            QuizziNavDestination.Onboarding.route
+                        },
                 )
 
                 NotificationHandler(

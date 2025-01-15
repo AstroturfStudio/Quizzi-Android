@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import studio.astroturf.quizzi.ui.screen.create.CreateScreen
 import studio.astroturf.quizzi.ui.screen.game.GameScreen
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
+import studio.astroturf.quizzi.ui.screen.onboarding.OnboardingScreen
 import studio.astroturf.quizzi.ui.screen.profile.ProfileScreen
 import studio.astroturf.quizzi.ui.screen.rooms.RoomsScreen
 import studio.astroturf.quizzi.ui.screen.search.SearchScreen
@@ -19,13 +20,28 @@ import studio.astroturf.quizzi.ui.screen.statistics.StatisticsScreen
 fun QuizziNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: String = NavDestination.Landing.route,
+    startDestination: String = NavDestination.Onboarding.route,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier,
     ) {
+        composable(NavDestination.Onboarding.route) {
+            OnboardingScreen(
+                onSignUpClick = {
+                    navController.navigate(NavDestination.Landing.route) {
+                        popUpTo(NavDestination.Onboarding.route) { inclusive = true }
+                    }
+                },
+                onLoginClick = {
+                    navController.navigate(NavDestination.Landing.route) {
+                        popUpTo(NavDestination.Onboarding.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         composable(NavDestination.Landing.route) {
             LandingScreen(
                 onNavigateToRooms = {

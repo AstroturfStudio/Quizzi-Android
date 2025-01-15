@@ -13,4 +13,8 @@ interface PreferencesStorage {
     fun getPlayerId(): String?
 
     fun clearPlayerId()
+
+    fun saveOnboardingCompleted()
+
+    fun isOnboardingCompleted(): Boolean
 }

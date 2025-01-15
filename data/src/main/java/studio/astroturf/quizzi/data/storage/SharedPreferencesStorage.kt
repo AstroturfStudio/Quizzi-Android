@@ -31,4 +31,10 @@ class SharedPreferencesStorage
         override fun clearPlayerId() {
             sharedPreferences.edit().remove(KEY_PLAYER_ID).apply()
         }
+
+        override fun saveOnboardingCompleted() {
+            sharedPreferences.edit().putBoolean("onboardingCompleted", true).apply()
+        }
+
+        override fun isOnboardingCompleted(): Boolean = sharedPreferences.getBoolean("onboardingCompleted", false)
     }
