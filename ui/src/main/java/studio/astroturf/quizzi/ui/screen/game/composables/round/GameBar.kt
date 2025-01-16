@@ -4,17 +4,12 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,12 +19,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import studio.astroturf.quizzi.ui.theme.Grey2
+import studio.astroturf.quizzi.ui.theme.Primary
 
 @Composable
 fun GameBar(
@@ -51,7 +46,6 @@ fun GameBar(
         modifier =
             modifier
                 .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .onSizeChanged { containerWidth = it.width },
     ) {
         // Sol taraf (Mavi)
@@ -60,7 +54,7 @@ fun GameBar(
                 Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(cursorPositionAnimated)
-                    .background(Color(0xFF1A3A6E)),
+                    .background(Primary),
         )
 
         // Sağ taraf (Kırmızı)
@@ -70,27 +64,7 @@ fun GameBar(
                     .fillMaxHeight()
                     .fillMaxWidth(1f - cursorPositionAnimated)
                     .align(Alignment.CenterEnd)
-                    .background(Color(0xFFB71C1C)),
-        )
-
-        // Cursor
-        Box(
-            modifier =
-                Modifier
-                    .size(16.dp)
-                    .offset {
-                        IntOffset(
-                            x =
-                                (cursorPositionAnimated * containerWidth).toInt() -
-                                    8
-                                        .dp
-                                        .toPx()
-                                        .toInt(),
-                            y = 0,
-                        )
-                    }.clip(CircleShape)
-                    .background(Color.White)
-                    .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                    .background(Grey2),
         )
     }
 }

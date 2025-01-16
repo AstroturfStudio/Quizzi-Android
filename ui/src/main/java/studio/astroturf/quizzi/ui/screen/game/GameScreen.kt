@@ -1,6 +1,5 @@
 package studio.astroturf.quizzi.ui.screen.game
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -25,7 +24,6 @@ import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameOverConte
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyContent
 import studio.astroturf.quizzi.ui.screen.game.composables.paused.PausedContent
 import studio.astroturf.quizzi.ui.screen.game.composables.round.GameRoundContent
-import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundResultOverlay
 import timber.log.Timber
 
 private const val TAG = "GameScreen"
@@ -73,52 +71,26 @@ private fun GameScreenContent(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        // Log animation state changes
-        val currentAnimationKey = state.toAnimationKey()
-        LaunchedEffect(currentAnimationKey) {
-            Timber.tag(TAG).d("Animation state changed to: $currentAnimationKey")
-        }
-
-        AnimatedContent(
-            targetState = currentAnimationKey,
-            transitionSpec = {
-                val spec = getTransitionSpec(targetState)
-                // Log transition information
-                Timber.tag(TAG).d("Transition from $initialState to $targetState")
-                spec
-            },
-            modifier = Modifier.fillMaxSize(),
-        ) { stateKey ->
-            // Log content state changes
-            LaunchedEffect(stateKey) {
-                Timber.tag(TAG).d("Rendering content for state: $stateKey")
-            }
-
-            GameStateContent(
-                currentState = state,
-                stateKey = stateKey,
-                onNavigateToRooms = onNavigateToRooms,
-                onSubmitAnswer = onSubmitAnswer,
-                onSubmitFeedback = onSubmitFeedback,
-                imageLoader = imageLoader,
-            )
-        }
+        GameStateContent(
+            currentState = state,
+            onNavigateToRooms = onNavigateToRooms,
+            onSubmitAnswer = onSubmitAnswer,
+            onSubmitFeedback = onSubmitFeedback,
+            imageLoader = imageLoader,
+        )
     }
 }
 
 @Composable
 private fun GameStateContent(
     currentState: GameUiState,
-    stateKey: GameStateAnimationKey,
     onNavigateToRooms: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
     onSubmitFeedback: (GameFeedback) -> Unit,
     imageLoader: ImageLoader,
 ) {
     when {
-        stateKey == GameStateAnimationKey.IDLE -> LoadingIndicator()
-
-        stateKey == GameStateAnimationKey.LOBBY && currentState is GameUiState.Lobby -> {
+        currentState is GameUiState.Lobby -> {
             LobbyContent(
                 roomName = currentState.roomName,
                 creator = currentState.creator,
@@ -127,7 +99,7 @@ private fun GameStateContent(
             )
         }
 
-        stateKey == GameStateAnimationKey.ROUND && currentState is GameUiState.RoundOn -> {
+        currentState is GameUiState.RoundOn -> {
             GameRoundContent(
                 state = currentState,
                 onSubmitAnswer = onSubmitAnswer,
@@ -135,7 +107,7 @@ private fun GameStateContent(
             )
         }
 
-        stateKey == GameStateAnimationKey.GAME_OVER && currentState is GameUiState.GameOver -> {
+        currentState is GameUiState.GameOver -> {
             GameOverContent(
                 state = currentState,
                 onNavigateBack = onNavigateToRooms,
@@ -143,7 +115,7 @@ private fun GameStateContent(
             )
         }
 
-        stateKey == GameStateAnimationKey.PAUSED && currentState is GameUiState.Paused -> {
+        currentState is GameUiState.Paused -> {
             PausedContent(
                 reason = currentState.reason,
                 onlinePlayers = currentState.onlinePlayers,
@@ -151,12 +123,12 @@ private fun GameStateContent(
             )
         }
 
-        stateKey == GameStateAnimationKey.ROUND_END && currentState is GameUiState.RoundEnd -> {
-            RoundResultOverlay(
-                correctAnswerText = currentState.correctAnswerValue,
-                roundWinner = currentState.roundWinner,
-            )
-        }
+//        currentState is GameUiState.RoundEnd -> {
+//            RoundResultOverlay(
+//                correctAnswerText = currentState.correctAnswerValue,
+//                roundWinner = currentState.roundWinner,
+//            )
+//        }
 
         else -> LoadingIndicator()
     }
@@ -178,7 +150,7 @@ private fun GameUiState.toAnimationKey(): GameStateAnimationKey =
         is GameUiState.RoundOn -> GameStateAnimationKey.ROUND
         is GameUiState.GameOver -> GameStateAnimationKey.GAME_OVER
         is GameUiState.Paused -> GameStateAnimationKey.PAUSED
-        is GameUiState.RoundEnd -> GameStateAnimationKey.ROUND_END
+//        is GameUiState.RoundEnd -> GameStateAnimationKey.ROUND_END
     }
 
 private fun getTransitionSpec(targetState: GameStateAnimationKey): ContentTransform =

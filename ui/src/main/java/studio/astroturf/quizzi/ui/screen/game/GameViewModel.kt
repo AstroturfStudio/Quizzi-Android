@@ -34,7 +34,6 @@ import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
 import studio.astroturf.quizzi.ui.navigation.NavDestination
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
-import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -230,7 +229,9 @@ class GameViewModel
 
                 is GameRoomStateUpdater.ReceiveAnswerResult -> handleAnswerResult(effect)
                 is GameRoomStateUpdater.RoundStarted -> handleRoundStart(effect)
-                is GameRoomStateUpdater.RoundEnd -> handleRoundEnd(effect)
+                is GameRoomStateUpdater.RoundEnd -> {
+//                    handleRoundEnd(effect)
+                }
                 is GameRoomStateUpdater.Countdown -> handleCountdown(effect)
                 is GameRoomStateUpdater.GameRoomOver -> handleGameOver(effect)
                 is GameRoomStateUpdater.RoundTimeUpdate -> handleTimeUpdate(effect)
@@ -269,7 +270,7 @@ class GameViewModel
                 when (val currentState = _uiState.value) {
                     is GameUiState.Lobby -> createInitialRound(currentState, effect)
                     is GameUiState.RoundOn -> updateExistingRound(currentState, effect)
-                    is GameUiState.RoundEnd -> createNewRound(currentState, effect)
+//                    is GameUiState.RoundEnd -> createNewRound(currentState, effect)
                     else -> {
                         val gameState =
                             currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
@@ -325,55 +326,55 @@ class GameViewModel
             }
         }
 
-        private fun createNewRound(
-            currentState: GameUiState.RoundEnd,
-            effect: GameRoomStateUpdater.RoundStarted,
-        ) {
-            launchMain {
-                val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
-                updateUiState {
-                    GameUiState.RoundOn(
-                        player1 = gameState.players[0],
-                        player2 = gameState.players[1],
-                        gameBarPercentage = currentState.newCursorPosition,
-                        question = effect.message.currentQuestion,
-                        timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
-                        selectedAnswerId = null,
-                        playerRoundResult = null,
-                    )
-                }
-            }
-        }
+//        private fun createNewRound(
+//            currentState: GameUiState.RoundEnd,
+//            effect: GameRoomStateUpdater.RoundStarted,
+//        ) {
+//            launchMain {
+//                val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
+//                updateUiState {
+//                    GameUiState.RoundOn(
+//                        player1 = gameState.players[0],
+//                        player2 = gameState.players[1],
+//                        gameBarPercentage = currentState.newCursorPosition,
+//                        question = effect.message.currentQuestion,
+//                        timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
+//                        selectedAnswerId = null,
+//                        playerRoundResult = null,
+//                    )
+//                }
+//            }
+//        }
 
-        private fun handleRoundEnd(effect: GameRoomStateUpdater.RoundEnd) {
-            launchMain {
-                val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
-                val winner =
-                    listOf(currentState.player1, currentState.player2)
-                        .find { it.id == effect.message.winnerPlayerId }
-
-                val roundWinner: RoundWinner =
-                    when (winner?.id) {
-                        null -> RoundWinner.None
-                        authRepository.getCurrentPlayerId() -> RoundWinner.Me(winner.id, winner.name)
-                        else -> RoundWinner.Opponent(winner.id, winner.name)
-                    }
-
-                val correctAnswerValue =
-                    currentState.question.options
-                        .find { it.id == effect.message.correctAnswer }
-                        ?.value ?: return@launchMain
-
-                updateUiState {
-                    GameUiState.RoundEnd(
-                        roundNo = 0, // TODO: Implement round counting
-                        roundWinner = roundWinner,
-                        correctAnswerValue = correctAnswerValue,
-                        newCursorPosition = effect.message.cursorPosition,
-                    )
-                }
-            }
-        }
+//        private fun handleRoundEnd(effect: GameRoomStateUpdater.RoundEnd) {
+//            launchMain {
+//                val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
+//                val winner =
+//                    listOf(currentState.player1, currentState.player2)
+//                        .find { it.id == effect.message.winnerPlayerId }
+//
+//                val roundWinner: RoundWinner =
+//                    when (winner?.id) {
+//                        null -> RoundWinner.None
+//                        authRepository.getCurrentPlayerId() -> RoundWinner.Me(winner.id, winner.name)
+//                        else -> RoundWinner.Opponent(winner.id, winner.name)
+//                    }
+//
+//                val correctAnswerValue =
+//                    currentState.question.options
+//                        .find { it.id == effect.message.correctAnswer }
+//                        ?.value ?: return@launchMain
+//
+//                updateUiState {
+//                    GameUiState.RoundEnd(
+//                        roundNo = 0, // TODO: Implement round counting
+//                        roundWinner = roundWinner,
+//                        correctAnswerValue = correctAnswerValue,
+//                        newCursorPosition = effect.message.cursorPosition,
+//                    )
+//                }
+//            }
+//        }
 
         private fun handleCountdown(effect: GameRoomStateUpdater.Countdown) {
             launchMain {

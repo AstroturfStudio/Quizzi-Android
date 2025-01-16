@@ -1,53 +1,83 @@
 package studio.astroturf.quizzi.ui.screen.game.composables.round
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import studio.astroturf.quizzi.ui.theme.Heading3
+import studio.astroturf.quizzi.ui.theme.Primary
+import studio.astroturf.quizzi.ui.theme.QuizziTheme
+import studio.astroturf.quizzi.ui.theme.Tertiary
+import studio.astroturf.quizzi.ui.theme.White
 
 @Composable
 internal fun TimeDisplay(
-    modifier: Modifier,
-    timeRemaining: Int?,
+    totalTime: Int,
+    timeLeft: Int,
+    modifier: Modifier = Modifier,
+    onTimeChange: (Int) -> Unit = {},
 ) {
-    val animatedScale by animateFloatAsState(
-        targetValue = if (timeRemaining?.let { it <= 3 } == true) 1.2f else 1f,
-        animationSpec =
-            spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow,
-            ),
-    )
+    val animatedSweepAngle = remember { Animatable(360f - (360f * (timeLeft.toFloat() / totalTime))) }
 
-    Surface(
-        shape = CircleShape,
-        color =
-            when {
-                timeRemaining?.let { it <= 3 } == true -> MaterialTheme.colorScheme.error
-                timeRemaining?.let { it <= 5 } == true -> MaterialTheme.colorScheme.secondary
-                else -> MaterialTheme.colorScheme.primary
-            },
-        modifier = modifier.scale(animatedScale),
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.wrapContentSize(),
-        ) {
-            Text(
-                text = timeRemaining?.toString() ?: "",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onPrimary,
+    LaunchedEffect(key1 = timeLeft) {
+        animatedSweepAngle.animateTo(
+            targetValue = if (timeLeft > 0) 360f - (360f * (timeLeft.toFloat() / totalTime)) else 360f,
+            animationSpec = tween(500), // Adjust animation speed as needed
+        )
+    }
+
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.size(64.dp)) {
+            val sweepAngle = animatedSweepAngle.value
+            val startAngle = -90f // Clockwise
+
+            // Draw the elapsed time arc
+            drawArc(
+                color = Tertiary,
+                startAngle = startAngle,
+                sweepAngle = sweepAngle,
+                useCenter = true,
+                size = Size(size.width, size.height),
+                topLeft = Offset.Zero,
+            )
+
+            // Draw the remaining time arc
+            drawArc(
+                color = Primary,
+                startAngle = startAngle + sweepAngle,
+                sweepAngle = 360f - sweepAngle,
+                useCenter = true,
+                size = Size(size.width, size.height),
+                topLeft = Offset.Zero,
             )
         }
+        Text(
+            text = timeLeft.toString(),
+            style = Heading3,
+            color = White,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun TimeDisplayPreview() {
+    QuizziTheme {
+        TimeDisplay(
+            totalTime = 10,
+            timeLeft = 8,
+            onTimeChange = {},
+        )
     }
 }

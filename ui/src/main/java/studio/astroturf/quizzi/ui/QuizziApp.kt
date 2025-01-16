@@ -33,14 +33,20 @@ fun QuizziApp(
         val currentDestination = navBackStackEntry?.destination
 
         val showBottomBar =
-            when (currentDestination?.route) {
-                QuizziNavDestination.Onboarding.route,
-                QuizziNavDestination.Landing.route,
-                QuizziNavDestination.Game.route,
-                QuizziNavDestination.Create.route,
-                null,
-                -> false
-                else -> true
+            if (currentDestination?.route == QuizziNavDestination.Onboarding.route ||
+                currentDestination?.route == QuizziNavDestination.Landing.route ||
+                currentDestination?.route == QuizziNavDestination.Create.route ||
+                currentDestination?.route == QuizziNavDestination.Game.route ||
+                currentDestination?.route == null
+            ) {
+                false
+            } else if (
+                currentDestination.route != null &&
+                currentDestination.route!!.startsWith(QuizziNavDestination.Game.route)
+            ) {
+                false
+            } else {
+                true
             }
 
         Scaffold(
@@ -51,7 +57,7 @@ fun QuizziApp(
                         navController = navController,
                         currentDestination = currentDestination,
                         onFabClick = {
-                            navController.navigate(QuizziNavDestination.Create.route)
+                            navController.navigate(QuizziNavDestination.Game.route)
                         },
                     )
                 }

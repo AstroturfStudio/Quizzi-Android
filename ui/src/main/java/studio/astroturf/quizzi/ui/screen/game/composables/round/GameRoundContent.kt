@@ -1,7 +1,9 @@
 package studio.astroturf.quizzi.ui.screen.game.composables.round
 
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,15 +11,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
@@ -26,7 +29,11 @@ import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.Question
 import studio.astroturf.quizzi.ui.screen.game.GameUiState
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
+import studio.astroturf.quizzi.ui.screen.game.composables.CachedQuestionImage
+import studio.astroturf.quizzi.ui.theme.BodyXLarge
+import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
+import studio.astroturf.quizzi.ui.theme.White
 
 @Composable
 fun GameRoundContent(
@@ -35,80 +42,93 @@ fun GameRoundContent(
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    Box(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .systemBarsPadding(),
+                .background(color = Primary)
+                .padding(8.dp),
     ) {
         Column(
             modifier =
                 Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
+                    .fillMaxSize()
+                    .background(color = White, shape = RoundedCornerShape(32.dp))
+                    .padding(horizontal = 16.dp, vertical = 36.dp)
+                    .padding(bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(text = state.question.content)
-            Spacer(modifier = Modifier.height(16.dp))
-            QuestionContent(
-                question = state.question,
+            CachedQuestionImage(
+                imageUrl = state.question.imageUrl,
                 imageLoader = imageLoader,
-                modifier =
-                    Modifier
-                        .width(320.dp)
-                        .wrapContentHeight(),
-            )
-        }
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            TimeDisplay(
-                modifier = Modifier.size(42.dp),
-                timeRemaining = state.timeRemainingInSeconds,
+                modifier = Modifier.height(160.dp),
             )
 
-            Row(
+            Box(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .height(60.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                        .height(64.dp)
+                        .fillMaxWidth(),
             ) {
-                PlayerDisplay(
-                    modifier = Modifier.weight(1f),
-                    player = state.player1,
-                    isLeft = true,
-                )
-
-                GameBar(
-                    modifier =
-                        Modifier
-                            .width(160.dp)
-                            .height(12.dp),
-                    cursorPosition = 1 - state.gameBarPercentage,
-                )
-
-                PlayerDisplay(
-                    modifier = Modifier.weight(1f),
-                    player = state.player2,
-                    isLeft = false,
+                Text(
+                    modifier = Modifier.align(Alignment.Center),
+                    text = "Which flag is it?",
+                    style = BodyXLarge,
+                    textAlign = TextAlign.Center, // Still useful for horizontal alignment
                 )
             }
 
-            // Answer grid at the bottom
-            AnswerGrid(
+            Spacer(modifier = Modifier.height(22.dp))
+
+            Row(
+                modifier = Modifier.wrapContentWidth().wrapContentHeight(),
+                horizontalArrangement = Arrangement.spacedBy(56.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                PlayerDisplay(
+                    player = state.player1,
+                    imageLoader = imageLoader,
+                )
+
+                TimeDisplay(
+                    totalTime = 10,
+                    timeLeft = state.timeRemainingInSeconds,
+                    modifier = Modifier.wrapContentSize(),
+                )
+
+                PlayerDisplay(
+                    player = state.player2,
+                    imageLoader = imageLoader,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            GameBar(
                 modifier =
                     Modifier
-                        .wrapContentHeight(),
-                question = state.question,
-                selectedAnswerId = state.selectedAnswerId,
-                playerRoundResult = state.playerRoundResult,
-                onAnswerSelected = onSubmitAnswer,
+                        .padding(horizontal = 36.dp)
+                        .fillMaxWidth()
+                        .height(8.dp),
+                cursorPosition = 1 - state.gameBarPercentage,
             )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                AnswerGrid(
+                    modifier =
+                        Modifier
+                            .wrapContentHeight(),
+                    question = state.question,
+                    selectedAnswerId = state.selectedAnswerId,
+                    playerRoundResult = state.playerRoundResult,
+                    onAnswerSelect = onSubmitAnswer,
+                )
+            }
         }
     }
 }
@@ -208,7 +228,7 @@ private fun previewGameState(
                     Option(id = 4, value = "Madrid"),
                 ),
         ),
-    timeRemainingInSeconds = 14,
+    timeRemainingInSeconds = 7,
     selectedAnswerId = selectedAnswerId,
     playerRoundResult = playerRoundResult,
 )

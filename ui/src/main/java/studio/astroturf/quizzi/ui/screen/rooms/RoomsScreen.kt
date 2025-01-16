@@ -3,6 +3,7 @@ package studio.astroturf.quizzi.ui.screen.rooms
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -218,15 +220,17 @@ fun RoomsList(
     onJoinRoom: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         rooms.forEach { room ->
-            RoomItem(
-                room = room,
-                onJoinRoom = { onJoinRoom(room.id) },
-            )
+            item {
+                RoomItem(
+                    room = room,
+                    onJoinRoom = { onJoinRoom(room.id) },
+                )
+            }
         }
     }
 }
@@ -234,7 +238,7 @@ fun RoomsList(
 @Composable
 private fun RoomItem(
     room: GameRoom,
-    onJoinRoom: () -> Unit,
+    onJoinRoom: (String) -> Unit,
 ) {
     Row(
         modifier =
@@ -244,7 +248,8 @@ private fun RoomItem(
                 .height(80.dp)
                 .background(White)
                 .padding(vertical = 8.dp)
-                .padding(start = 8.dp, end = 16.dp),
+                .padding(start = 8.dp, end = 16.dp)
+                .clickable { onJoinRoom(room.id) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
