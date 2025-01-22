@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -61,7 +62,7 @@ fun GameRoundContent(
             state.question.countryCode?.let {
                 CachedQuestionImage(
                     countryCode = it,
-                    modifier = Modifier.height(160.dp),
+                    modifier = Modifier.width(320.dp).height(160.dp),
                 )
             }
 
@@ -219,7 +220,7 @@ private fun previewGameState(
     gameBarPercentage = 0.7f,
     question =
         Question(
-            countryCode = "tr",
+            countryCode = "np",
             content = "What is the capital of France?",
             options =
                 listOf(
