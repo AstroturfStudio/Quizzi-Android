@@ -1,7 +1,7 @@
 package studio.astroturf.quizzi.domain.model
 
-data class Question(
-    val imageUrl: String?,
+open class Question(
     val content: String,
+    val countryCode: String?,
     val options: List<Option>,
 )

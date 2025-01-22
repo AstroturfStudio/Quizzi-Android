@@ -58,11 +58,12 @@ fun GameRoundContent(
                     .padding(bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            CachedQuestionImage(
-                imageUrl = state.question.imageUrl,
-                imageLoader = imageLoader,
-                modifier = Modifier.height(160.dp),
-            )
+            state.question.countryCode?.let {
+                CachedQuestionImage(
+                    countryCode = it,
+                    modifier = Modifier.height(160.dp),
+                )
+            }
 
             Box(
                 modifier =
@@ -218,8 +219,8 @@ private fun previewGameState(
     gameBarPercentage = 0.7f,
     question =
         Question(
+            countryCode = "tr",
             content = "What is the capital of France?",
-            imageUrl = "https://example.com/paris.jpg",
             options =
                 listOf(
                     Option(id = 1, value = "Paris"),

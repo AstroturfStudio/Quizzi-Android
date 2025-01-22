@@ -46,7 +46,7 @@ private fun AnswerGridPreview() {
     AnswerGrid(
         question =
             Question(
-                imageUrl = "https://www.example.com/image.jpg",
+                countryCode = "af",
                 content = "What is the capital of Turkey?",
                 options =
                     listOf(
