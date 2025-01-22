@@ -11,8 +11,15 @@ data class QuestionDto(
 ) {
     fun toDomain() =
         Question(
-            imageUrl = imageUrl,
+            countryCode = imageUrl?.let { extractCountryCode(imageUrl) },
             content = content,
             options = options.map { it.toDomain() },
         )
+
+    private fun extractCountryCode(flagUrl: String): String =
+        flagUrl
+            .split("/")
+            .last()
+            .split(".")
+            .first()
 }

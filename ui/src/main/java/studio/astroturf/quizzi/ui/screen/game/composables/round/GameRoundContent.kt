@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -58,11 +59,12 @@ fun GameRoundContent(
                     .padding(bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            CachedQuestionImage(
-                imageUrl = state.question.imageUrl,
-                imageLoader = imageLoader,
-                modifier = Modifier.height(160.dp),
-            )
+            state.question.countryCode?.let {
+                CachedQuestionImage(
+                    countryCode = it,
+                    modifier = Modifier.width(320.dp).height(160.dp),
+                )
+            }
 
             Box(
                 modifier =
@@ -218,8 +220,8 @@ private fun previewGameState(
     gameBarPercentage = 0.7f,
     question =
         Question(
+            countryCode = "np",
             content = "What is the capital of France?",
-            imageUrl = "https://example.com/paris.jpg",
             options =
                 listOf(
                     Option(id = 1, value = "Paris"),
