@@ -46,14 +46,14 @@ fun QuizziNavGraph(
         composable(NavDestination.Landing.route) {
             LandingScreen(
                 onNavigateToRooms = {
-                    navController.navigate(NavDestination.Home.route) {
+                    navController.navigate(NavDestination.Rooms.route) {
                         popUpTo(NavDestination.Landing.route) { inclusive = true }
                     }
                 },
             )
         }
 
-        composable(NavDestination.Home.route) {
+        composable(NavDestination.Rooms.route) {
             RoomsScreen(
                 onNavigateToRoom = { roomIntent ->
                     val roomId: String? =
@@ -94,8 +94,8 @@ fun QuizziNavGraph(
         ) {
             GameScreen(
                 onNavigateToRooms = {
-                    navController.navigate(NavDestination.Home.route) {
-                        popUpTo(NavDestination.Home.route) { inclusive = true }
+                    navController.navigate(NavDestination.Rooms.route) {
+                        popUpTo(NavDestination.Rooms.route) { inclusive = true }
                     }
                 },
             )

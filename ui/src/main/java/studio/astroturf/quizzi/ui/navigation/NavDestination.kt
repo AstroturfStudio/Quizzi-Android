@@ -7,8 +7,6 @@ sealed class NavDestination(
 
     data object Landing : NavDestination("landing")
 
-    data object Home : NavDestination("home")
-
     data object Search : NavDestination("search")
 
     data object Statistics : NavDestination("statistics")
