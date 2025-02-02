@@ -65,7 +65,7 @@ import studio.astroturf.quizzi.ui.theme.White
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomsScreen(
-    onNavigateToRoom: (RoomIntent) -> Unit,
+    onNavigateToRoom: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RoomsViewModel = hiltViewModel(),
 ) {
@@ -80,12 +80,9 @@ fun RoomsScreen(
         error = uiState.error,
         isRefreshing = isRefreshing,
         onRefresh = { viewModel.refresh() },
-        onCreateRoom = {
-            onNavigateToRoom(RoomIntent.CreateRoom)
-        },
         onSearch = { viewModel.onSearch(it) },
         onJoinRoom = { roomId ->
-            onNavigateToRoom(RoomIntent.JoinRoom(roomId))
+            onNavigateToRoom(roomId)
         },
         modifier = modifier,
     )
@@ -100,7 +97,6 @@ private fun RoomsScreenContent(
     error: String?,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    onCreateRoom: () -> Unit,
     onSearch: (String) -> Unit,
     onJoinRoom: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -479,7 +475,6 @@ private fun RoomsScreenContentPreview() {
             error = null,
             isRefreshing = false,
             onRefresh = {},
-            onCreateRoom = {},
             onSearch = {},
             onJoinRoom = {},
         )

@@ -13,11 +13,15 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import studio.astroturf.quizzi.data.BuildConfig
 import studio.astroturf.quizzi.data.remote.rest.api.QuizziApi
 import studio.astroturf.quizzi.data.repository.auth.AuthRepositoryImpl
+import studio.astroturf.quizzi.data.repository.category.CategoryRepositoryImpl
 import studio.astroturf.quizzi.data.repository.game.GameRepositoryImpl
+import studio.astroturf.quizzi.data.repository.gametype.GameTypeRepositoryImpl
 import studio.astroturf.quizzi.data.repository.rooms.RoomsRepositoryImpl
 import studio.astroturf.quizzi.data.storage.SharedPreferencesStorage
 import studio.astroturf.quizzi.domain.repository.AuthRepository
+import studio.astroturf.quizzi.domain.repository.CategoryRepository
 import studio.astroturf.quizzi.domain.repository.GameRepository
+import studio.astroturf.quizzi.domain.repository.GameTypeRepository
 import studio.astroturf.quizzi.domain.repository.RoomsRepository
 import studio.astroturf.quizzi.domain.storage.PreferencesStorage
 import java.util.concurrent.TimeUnit
@@ -103,4 +107,12 @@ object DataModule {
     @Provides
     @Singleton
     fun provideGameRepository(gameRepositoryImpl: GameRepositoryImpl): GameRepository = gameRepositoryImpl
+
+    @Provides
+    @Singleton
+    fun provideCategoriesRepository(categoriesRepositoryImpl: CategoryRepositoryImpl): CategoryRepository = categoriesRepositoryImpl
+
+    @Provides
+    @Singleton
+    fun provideGameTypeRepository(gameTypeRepositoryImpl: GameTypeRepositoryImpl): GameTypeRepository = gameTypeRepositoryImpl
 }

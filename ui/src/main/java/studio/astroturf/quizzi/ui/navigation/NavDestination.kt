@@ -15,7 +15,11 @@ sealed class NavDestination(
 
     data object Rooms : NavDestination("rooms")
 
-    data object Create : NavDestination("create")
+    data object CreateRoom : NavDestination("createRoom")
+
+    data object CategorySelection : NavDestination("categorySelection")
+
+    data object GameTypeSelection : NavDestination("gameTypeSelection")
 
     object Game : NavDestination("game") {
         const val ROUTE_PATTERN = "game?roomId={roomId}"

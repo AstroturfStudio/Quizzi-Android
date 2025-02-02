@@ -2,7 +2,9 @@ package studio.astroturf.quizzi.data.remote.rest.service
 
 import studio.astroturf.quizzi.data.exceptionhandling.mapToQuizziException
 import studio.astroturf.quizzi.data.remote.rest.api.QuizziApi
+import studio.astroturf.quizzi.data.remote.rest.model.CategoriesDto
 import studio.astroturf.quizzi.data.remote.rest.model.CreatePlayerRequestDto
+import studio.astroturf.quizzi.data.remote.rest.model.GameTypesDto
 import studio.astroturf.quizzi.data.remote.rest.model.LoginRequestDto
 import studio.astroturf.quizzi.data.remote.rest.model.RoomsDto
 import studio.astroturf.quizzi.data.remote.websocket.model.PlayerDto
@@ -46,6 +48,24 @@ class QuizziApiService
                 QuizziResult.success(response)
             } catch (e: Exception) {
                 Timber.e(e, "Failed to get rooms")
+                QuizziResult.failure(e.mapToQuizziException())
+            }
+
+        suspend fun getGameTypes(): QuizziResult<GameTypesDto> =
+            try {
+                val response = api.getGameTypes()
+                QuizziResult.success(response)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to get game types")
+                QuizziResult.failure(e.mapToQuizziException())
+            }
+
+        suspend fun getCategories(): QuizziResult<CategoriesDto> =
+            try {
+                val response = api.getCategories()
+                QuizziResult.success(response)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to get categories")
                 QuizziResult.failure(e.mapToQuizziException())
             }
     }
