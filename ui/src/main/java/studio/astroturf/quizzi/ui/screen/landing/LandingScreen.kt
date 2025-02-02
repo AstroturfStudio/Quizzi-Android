@@ -206,38 +206,6 @@ fun LandingScreenContent(
                 }
             }
         }
-
-//        OutlinedTextField(
-//            value = name,
-//            onValueChange = { name = it },
-//            label = { Text("Enter your name") },
-//            modifier =
-//                Modifier
-//                    .fillMaxWidth()
-//                    .padding(vertical = 8.dp),
-//        )
-//
-//        Button(
-//            onClick = {
-//                onCreatePlayer(name, avatarUrl)
-//                // Store player ID will be handled in ViewModel after successful creation
-//            },
-//            modifier =
-//                Modifier
-//                    .fillMaxWidth()
-//                    .padding(vertical = 8.dp),
-//            enabled = name.isNotBlank(),
-//        ) {
-//            Text("Start Play")
-//        }
-//
-//        if (error != null) {
-//            Text(
-//                text = error,
-//                color = MaterialTheme.colorScheme.error,
-//                modifier = Modifier.padding(top = 8.dp),
-//            )
-//        }
     }
 }
 

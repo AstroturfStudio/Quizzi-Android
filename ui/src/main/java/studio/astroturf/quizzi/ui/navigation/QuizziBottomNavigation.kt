@@ -5,20 +5,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -65,25 +60,25 @@ data class BottomNavItem(
 val bottomNavItems =
     listOf(
         BottomNavItem(
-            route = QuizziNavDestination.Home.route,
+            route = QuizziNavDestination.Rooms.route,
             icon = BottomNavIcon.VectorIcon(Icons.Default.Home),
             label = "Home",
         ),
-        BottomNavItem(
-            route = QuizziNavDestination.Search.route,
-            icon = BottomNavIcon.VectorIcon(Icons.Default.Search),
-            label = "Search",
-        ),
-        BottomNavItem(
-            route = QuizziNavDestination.Statistics.route,
-            icon = BottomNavIcon.VectorIcon(Icons.Default.Menu),
-            label = "Stats",
-        ),
-        BottomNavItem(
-            route = QuizziNavDestination.Profile.route,
-            icon = BottomNavIcon.VectorIcon(Icons.Default.Person),
-            label = "Profile",
-        ),
+//        BottomNavItem(
+//            route = QuizziNavDestination.Search.route,
+//            icon = BottomNavIcon.VectorIcon(Icons.Default.Search),
+//            label = "Search",
+//        ),
+//        BottomNavItem(
+//            route = QuizziNavDestination.Statistics.route,
+//            icon = BottomNavIcon.VectorIcon(Icons.Default.Menu),
+//            label = "Stats",
+//        ),
+//        BottomNavItem(
+//            route = QuizziNavDestination.Profile.route,
+//            icon = BottomNavIcon.VectorIcon(Icons.Default.Person),
+//            label = "Profile",
+//        ),
     )
 
 private class BottomNavigationShape(
@@ -186,7 +181,7 @@ fun QuizziBottomNavigation(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 // First half of items
-                bottomNavItems.take(2).forEach { item ->
+                bottomNavItems.forEach { item ->
                     NavigationBarItem(
                         icon = {
                             when (val icon = item.icon) {
@@ -197,43 +192,7 @@ fun QuizziBottomNavigation(
                                         modifier = Modifier.size(24.dp),
                                     )
                                 }
-                                is BottomNavIcon.VectorIcon -> {
-                                    Icon(
-                                        imageVector = icon.imageVector,
-                                        contentDescription = item.label,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
-                            }
-                        },
-                        selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                    )
-                }
 
-                // Space for FAB
-                Spacer(modifier = Modifier.width(80.dp))
-
-                // Second half of items
-                bottomNavItems.takeLast(2).forEach { item ->
-                    NavigationBarItem(
-                        icon = {
-                            when (val icon = item.icon) {
-                                is BottomNavIcon.ResourceIcon -> {
-                                    QuizziIcon(
-                                        iconResId = icon.resId,
-                                        contentDescription = item.label,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
                                 is BottomNavIcon.VectorIcon -> {
                                     Icon(
                                         imageVector = icon.imageVector,
