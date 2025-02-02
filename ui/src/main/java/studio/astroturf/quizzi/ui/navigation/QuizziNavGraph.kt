@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import studio.astroturf.quizzi.ui.screen.create.CreateRoomScreen
+import studio.astroturf.quizzi.ui.screen.create.category.CategorySelectionScreen
+import studio.astroturf.quizzi.ui.screen.create.gametype.GameTypeSelectionScreen
 import studio.astroturf.quizzi.ui.screen.game.GameScreen
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
 import studio.astroturf.quizzi.ui.screen.onboarding.OnboardingScreen
@@ -77,12 +79,32 @@ fun QuizziNavGraph(
                 onBackPress = {
                     navController.popBackStack()
                 },
-                onCategoryClick = {},
-                onGameTypeClick = {},
+                onCategoryClick = {
+                    navController.navigate(NavDestination.CategorySelection.route)
+                },
+                onGameTypeClick = {
+                    navController.navigate(NavDestination.GameTypeSelection.route)
+                },
                 onCreateRoom = {
                     navController.navigate(NavDestination.Game.route) {
                         popUpTo(NavDestination.CreateRoom.route) { inclusive = true }
                     }
+                },
+            )
+        }
+
+        composable(NavDestination.CategorySelection.route) {
+            CategorySelectionScreen(
+                onBackPress = {
+                    navController.popBackStack()
+                },
+            )
+        }
+
+        composable(NavDestination.GameTypeSelection.route) {
+            GameTypeSelectionScreen(
+                onBackPress = {
+                    navController.popBackStack()
                 },
             )
         }

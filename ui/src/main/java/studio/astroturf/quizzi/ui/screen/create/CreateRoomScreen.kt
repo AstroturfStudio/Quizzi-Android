@@ -208,6 +208,7 @@ fun CreateRoomScreen(
                     Text(
                         modifier = Modifier.wrapContentSize(),
                         text = "Create Room",
+                        style = BodyNormalMedium.copy(color = White),
                     )
                 }
             }

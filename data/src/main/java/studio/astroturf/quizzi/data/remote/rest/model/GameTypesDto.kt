@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GameTypesDto(
-    @SerialName("gameTypes")
-    val gameTypes: List<String>
-) 
+    @SerialName("types")
+    val gameTypes: List<String>,
+)
