@@ -39,7 +39,6 @@ import androidx.navigation.NavHostController
 import studio.astroturf.quizzi.ui.components.QuizziIcon
 import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.White
-import studio.astroturf.quizzi.ui.navigation.NavDestination as QuizziNavDestination
 
 sealed class BottomNavIcon {
     data class ResourceIcon(

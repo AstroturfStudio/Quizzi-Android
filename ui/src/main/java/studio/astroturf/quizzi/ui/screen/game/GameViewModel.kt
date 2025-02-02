@@ -32,7 +32,7 @@ import studio.astroturf.quizzi.domain.repository.GameRepository
 import studio.astroturf.quizzi.domain.repository.RoomsRepository
 import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
-import studio.astroturf.quizzi.ui.navigation.NavDestination
+import studio.astroturf.quizzi.ui.navigation.QuizziNavDestination
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
 import timber.log.Timber
@@ -59,7 +59,7 @@ class GameViewModel
             ioDispatcher,
             defaultDispatcher,
         ) {
-        private var roomId: String? = savedStateHandle[NavDestination.Game.ARG_ROOM_ID]
+        private var roomId: String? = savedStateHandle[QuizziNavDestination.Game.ARG_ROOM_ID]
 
         private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
         val uiState: StateFlow<GameUiState> =
