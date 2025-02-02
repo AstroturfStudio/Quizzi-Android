@@ -7,12 +7,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import studio.astroturf.quizzi.ui.screen.create.CreateScreen
+import studio.astroturf.quizzi.ui.screen.create.CreateRoomScreen
 import studio.astroturf.quizzi.ui.screen.game.GameScreen
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
 import studio.astroturf.quizzi.ui.screen.onboarding.OnboardingScreen
 import studio.astroturf.quizzi.ui.screen.profile.ProfileScreen
-import studio.astroturf.quizzi.ui.screen.rooms.RoomIntent
 import studio.astroturf.quizzi.ui.screen.rooms.RoomsScreen
 import studio.astroturf.quizzi.ui.screen.search.SearchScreen
 import studio.astroturf.quizzi.ui.screen.statistics.StatisticsScreen
@@ -55,12 +54,7 @@ fun QuizziNavGraph(
 
         composable(NavDestination.Rooms.route) {
             RoomsScreen(
-                onNavigateToRoom = { roomIntent ->
-                    val roomId: String? =
-                        when (roomIntent) {
-                            RoomIntent.CreateRoom -> null
-                            is RoomIntent.JoinRoom -> roomIntent.roomId
-                        }
+                onNavigateToRoom = { roomId ->
                     navController.navigate(NavDestination.Game.route + "?roomId=$roomId")
                 },
             )
@@ -78,8 +72,19 @@ fun QuizziNavGraph(
             ProfileScreen()
         }
 
-        composable(NavDestination.Create.route) {
-            CreateScreen()
+        composable(NavDestination.CreateRoom.route) {
+            CreateRoomScreen(
+                onBackPress = {
+                    navController.popBackStack()
+                },
+                onCategoryClick = {},
+                onGameTypeClick = {},
+                onCreateRoom = {
+                    navController.navigate(NavDestination.Game.route) {
+                        popUpTo(NavDestination.CreateRoom.route) { inclusive = true }
+                    }
+                },
+            )
         }
 
         composable(

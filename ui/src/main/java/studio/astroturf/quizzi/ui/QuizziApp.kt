@@ -35,7 +35,7 @@ fun QuizziApp(
         val showBottomBar =
             if (currentDestination?.route == QuizziNavDestination.Onboarding.route ||
                 currentDestination?.route == QuizziNavDestination.Landing.route ||
-                currentDestination?.route == QuizziNavDestination.Create.route ||
+                currentDestination?.route == QuizziNavDestination.CreateRoom.route ||
                 currentDestination?.route == QuizziNavDestination.Game.route ||
                 currentDestination?.route == null
             ) {
@@ -57,7 +57,7 @@ fun QuizziApp(
                         navController = navController,
                         currentDestination = currentDestination,
                         onFabClick = {
-                            navController.navigate(QuizziNavDestination.Game.route)
+                            navController.navigate(QuizziNavDestination.CreateRoom.route)
                         },
                     )
                 }
