@@ -37,13 +37,6 @@ sealed interface GameUiState {
         val onlinePlayers: List<Player>,
     ) : GameUiState
 
-//    data class RoundEnd(
-//        val roundNo: Int,
-//        val roundWinner: RoundWinner,
-//        val correctAnswerValue: String,
-//        val newCursorPosition: Float,
-//    ) : GameUiState
-
     data class GameOver(
         val totalRoundCount: Int,
         val winner: Player,

@@ -1,12 +1,6 @@
 package studio.astroturf.quizzi.ui.screen.game
 
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -123,41 +117,6 @@ private fun GameStateContent(
             )
         }
 
-//        currentState is GameUiState.RoundEnd -> {
-//            RoundResultOverlay(
-//                correctAnswerText = currentState.correctAnswerValue,
-//                roundWinner = currentState.roundWinner,
-//            )
-//        }
-
         else -> LoadingIndicator()
     }
 }
-
-private enum class GameStateAnimationKey {
-    IDLE,
-    LOBBY,
-    ROUND,
-    GAME_OVER,
-    PAUSED,
-    ROUND_END,
-}
-
-private fun GameUiState.toAnimationKey(): GameStateAnimationKey =
-    when (this) {
-        is GameUiState.Idle -> GameStateAnimationKey.IDLE
-        is GameUiState.Lobby -> GameStateAnimationKey.LOBBY
-        is GameUiState.RoundOn -> GameStateAnimationKey.ROUND
-        is GameUiState.GameOver -> GameStateAnimationKey.GAME_OVER
-        is GameUiState.Paused -> GameStateAnimationKey.PAUSED
-//        is GameUiState.RoundEnd -> GameStateAnimationKey.ROUND_END
-    }
-
-private fun getTransitionSpec(targetState: GameStateAnimationKey): ContentTransform =
-    when (targetState) {
-        GameStateAnimationKey.GAME_OVER ->
-            (slideInVertically { height -> height } + fadeIn())
-                .togetherWith(slideOutVertically { height -> -height } + fadeOut())
-
-        else -> fadeIn() togetherWith fadeOut()
-    }
