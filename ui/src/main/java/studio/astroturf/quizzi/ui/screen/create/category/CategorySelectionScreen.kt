@@ -153,6 +153,7 @@ private fun CategorySelectionContent(
                     .align(Alignment.BottomCenter),
             onClick = onNextClick,
             colors = ButtonDefaults.buttonColors().copy(containerColor = Secondary),
+            enabled = categories.any { it.isSelected },
         ) {
             Text(
                 modifier = Modifier.wrapContentSize(),

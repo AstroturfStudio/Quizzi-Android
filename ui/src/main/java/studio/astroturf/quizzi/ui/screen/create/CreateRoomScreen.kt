@@ -55,7 +55,7 @@ fun CreateRoomScreen(
     onCategoryClick: () -> Unit,
     onGameTypeClick: () -> Unit,
     viewModel: CreateRoomViewModel = hiltViewModel(),
-    onCreateRoom: () -> Unit,
+    onCreateRoom: (Category, GameType) -> Unit,
 ) {
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
 
@@ -89,7 +89,7 @@ private fun CreateRoomScreenContent(
     onRoomTitleChange: (String) -> Unit,
     onCategoryClick: () -> Unit,
     onGameTypeClick: () -> Unit,
-    onCreateRoom: () -> Unit,
+    onCreateRoom: (Category, GameType) -> Unit,
 ) {
     AppBarScreen(
         title = "Create Room",
@@ -237,9 +237,10 @@ private fun CreateRoomScreenContent(
                             .height(56.dp)
                             .background(color = Primary, shape = RoundedCornerShape(size = 20.dp)),
                     onClick = {
-                        onCreateRoom()
+                        onCreateRoom(quizCategory!!, gameType!!)
                     },
                     colors = ButtonDefaults.buttonColors().copy(containerColor = Primary),
+                    enabled = quizCategory != null && gameType != null,
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
@@ -263,7 +264,7 @@ private fun CreateRoomPreview() {
             quizCategory = Category(0, "Category"),
             onGameTypeClick = {},
             gameType = GameType("Resistence Game"),
-            onCreateRoom = {},
+            onCreateRoom = { _, _ -> },
             onRoomTitleChange = {},
         )
     }

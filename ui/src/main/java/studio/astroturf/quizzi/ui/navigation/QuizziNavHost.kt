@@ -59,7 +59,7 @@ fun QuizziNavHost(
         composable(QuizziNavDestination.Rooms.route) {
             RoomsScreen(
                 onNavigateToRoom = { roomId ->
-                    navController.navigate(QuizziNavDestination.Game.route + "?roomId=$roomId")
+                    navController.navigate(QuizziNavDestination.Game.createRouteForJoining(roomId))
                 },
             )
         }
@@ -79,10 +79,18 @@ fun QuizziNavHost(
         addCreateRoomGraph(navController)
 
         composable(
-            route = QuizziNavDestination.Game.ROUTE_PATTERN,
+            route = QuizziNavDestination.Game.route,
             arguments =
                 listOf(
                     navArgument(QuizziNavDestination.Game.ARG_ROOM_ID) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(QuizziNavDestination.Game.ARG_CATEGORY_ID) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(QuizziNavDestination.Game.ARG_GAME_TYPE) {
                         type = NavType.StringType
                         nullable = true
                     },
@@ -116,8 +124,8 @@ private fun NavGraphBuilder.addCreateRoomGraph(navController: NavHostController)
                 onGameTypeClick = {
                     navController.navigate(QuizziNavDestination.GameTypeSelection.route)
                 },
-                onCreateRoom = {
-                    navController.navigate(QuizziNavDestination.Game.route) {
+                onCreateRoom = { category, gameType ->
+                    navController.navigate(QuizziNavDestination.Game.createRouteForCreating(category.id.toString(), gameType.name)) {
                         popUpTo(QuizziNavGraph.CreateRoom.route) { inclusive = true }
                     }
                 },

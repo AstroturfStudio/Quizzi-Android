@@ -60,6 +60,8 @@ class GameViewModel
             defaultDispatcher,
         ) {
         private var roomId: String? = savedStateHandle[QuizziNavDestination.Game.ARG_ROOM_ID]
+        private var categoryId: String? = savedStateHandle[QuizziNavDestination.Game.ARG_CATEGORY_ID]
+        private var gameType: String? = savedStateHandle[QuizziNavDestination.Game.ARG_GAME_TYPE]
 
         private val _uiState = MutableStateFlow<GameUiState>(GameUiState.Idle)
         val uiState: StateFlow<GameUiState> =
@@ -102,7 +104,10 @@ class GameViewModel
             observeGameEffects()
             observeGameConnectionState()
             processStateUpdatesSequentially()
-            initializeGameRoom()
+            initializeGameRoom(
+                categoryId = categoryId?.toInt(),
+                gameType = gameType,
+            )
         }
 
         private fun observeGameConnectionState() {
@@ -112,20 +117,25 @@ class GameViewModel
                     when (it) {
                         is GameConnectionStatus.Reconnecting -> {
                             isReconnecting = true
-                            _notification.value = UiNotification.Toast("Reconnecting. . . Attempt: ${it.attempt}")
+                            _notification.value =
+                                UiNotification.Toast("Reconnecting. . . Attempt: ${it.attempt}")
                         }
+
                         is GameConnectionStatus.Connected -> {
                             val isReconnection = isReconnecting
 
                             if (isReconnection) {
                                 isReconnecting = false
                                 rejoinRoom(roomId!!)
-                                _notification.value = UiNotification.Toast("Reconnected! Rejoining the room...")
+                                _notification.value =
+                                    UiNotification.Toast("Reconnected! Rejoining the room...")
                             }
                         }
+
                         else -> {
                             isReconnecting = false
-                            _notification.value = UiNotification.Toast(message = it::class.simpleName.toString())
+                            _notification.value =
+                                UiNotification.Toast(message = it::class.simpleName.toString())
                         }
                     }
                 }
@@ -151,7 +161,10 @@ class GameViewModel
             }
         }
 
-        private fun initializeGameRoom() {
+        private fun initializeGameRoom(
+            categoryId: Int?,
+            gameType: String?,
+        ) {
             launchIO {
                 gameRepository
                     .connect(authRepository.getCurrentPlayerId())
@@ -162,7 +175,10 @@ class GameViewModel
                         },
                     ) {
                         // Websocket connected successfully
-                        roomId?.let { joinRoom(it) } ?: createRoom()
+                        roomId?.let { joinRoom(it) } ?: createRoom(
+                            categoryId = categoryId ?: throw IllegalStateException("Category ID is null when creating room"),
+                            gameType = gameType ?: throw IllegalStateException("Game type is null when creating room"),
+                        )
                     }
             }
         }
@@ -190,6 +206,7 @@ class GameViewModel
                     savePlayers(gameRoomState.players)
                     _uiState.value
                 }
+
                 is GameRoomState.Waiting -> createLobbyState(gameRoomState)
                 else -> _uiState.value // Preserve current state
             }
@@ -233,6 +250,7 @@ class GameViewModel
                 is GameRoomStateUpdater.RoundEnd -> {
                     handleRoundEnd(effect)
                 }
+
                 is GameRoomStateUpdater.Countdown -> handleCountdown(effect)
                 is GameRoomStateUpdater.GameRoomOver -> handleGameOver(effect)
                 is GameRoomStateUpdater.RoundTimeUpdate -> handleTimeUpdate(effect)
@@ -286,7 +304,9 @@ class GameViewModel
                             )
                         }
 
-                        Timber.tag(TAG).w("Forced round start from unexpected state: ${currentState::class.simpleName}")
+                        Timber
+                            .tag(TAG)
+                            .w("Forced round start from unexpected state: ${currentState::class.simpleName}")
                     }
                 }
             }
@@ -390,11 +410,14 @@ class GameViewModel
             }
         }
 
-        fun createRoom() {
+        fun createRoom(
+            categoryId: Int,
+            gameType: String,
+        ) {
             gameRepository.sendMessage(
                 ClientMessage.CreateRoom(
-                    categoryId = 1,
-                    gameType = "ResistanceGame",
+                    categoryId = categoryId,
+                    gameType = gameType,
                 ),
             )
         }

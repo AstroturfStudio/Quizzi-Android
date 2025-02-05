@@ -153,6 +153,7 @@ private fun GameTypeSelectionContent(
                     .align(Alignment.BottomCenter),
             onClick = onNextClick,
             colors = ButtonDefaults.buttonColors().copy(containerColor = Secondary),
+            enabled = gameTypes.any { it.isSelected },
         ) {
             Text(
                 modifier = Modifier.wrapContentSize(),
