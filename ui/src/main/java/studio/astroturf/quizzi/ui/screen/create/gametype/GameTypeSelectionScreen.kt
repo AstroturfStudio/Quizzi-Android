@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import studio.astroturf.quizzi.domain.model.GameType
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
@@ -40,8 +41,9 @@ import studio.astroturf.quizzi.ui.theme.White
 @Suppress("ktlint:compose:modifier-missing-check")
 @Composable
 fun GameTypeSelectionScreen(
-    viewModel: GameTypeViewModel = hiltViewModel(),
     onBackPress: () -> Unit,
+    onProceed: (GameType?) -> Unit,
+    viewModel: GameTypeViewModel = hiltViewModel(),
 ) {
     val gameTypes by viewModel.gameTypesUiModel.collectAsState()
 
@@ -56,6 +58,7 @@ fun GameTypeSelectionScreen(
         GameTypeSelectionContent(
             gameTypes = gameTypes,
             onGameTypeClick = { viewModel.selectGameType(it) },
+            onNextClick = { onProceed(viewModel.getSelectedGameType()) },
         )
     }
 }
@@ -64,6 +67,7 @@ fun GameTypeSelectionScreen(
 private fun GameTypeSelectionContent(
     gameTypes: List<GameTypeUiModel>,
     onGameTypeClick: (GameTypeUiModel) -> Unit = {},
+    onNextClick: () -> Unit = {},
 ) {
     Box(
         modifier =
@@ -115,7 +119,7 @@ private fun GameTypeSelectionContent(
 
                         Text(
                             modifier = Modifier.wrapContentSize(),
-                            text = it.gameTypeName,
+                            text = it.gameType.name,
                             style = BodyNormalMedium.copy(color = if (it.isSelected) White else Secondary),
                             maxLines = 1,
                         )
@@ -147,8 +151,7 @@ private fun GameTypeSelectionContent(
                     .height(56.dp)
                     .background(color = Secondary, shape = RoundedCornerShape(size = 20.dp))
                     .align(Alignment.BottomCenter),
-            onClick = {
-            },
+            onClick = onNextClick,
             colors = ButtonDefaults.buttonColors().copy(containerColor = Secondary),
         ) {
             Text(
@@ -167,14 +170,38 @@ private fun GameTypeSelectionScreenPreview() {
         GameTypeSelectionContent(
             gameTypes =
                 listOf(
-                    GameTypeUiModel("Math", isSelected = false),
-                    GameTypeUiModel("Science", isSelected = true),
-                    GameTypeUiModel("History", isSelected = false),
-                    GameTypeUiModel("Geography", isSelected = false),
-                    GameTypeUiModel("Art", isSelected = false),
-                    GameTypeUiModel("Music", isSelected = false),
-                    GameTypeUiModel("Sports", isSelected = false),
-                    GameTypeUiModel("Movies", isSelected = false),
+                    GameTypeUiModel(
+                        GameType("Math"),
+                        isSelected = false,
+                    ),
+                    GameTypeUiModel(
+                        GameType("Science"),
+                        isSelected = true,
+                    ),
+                    GameTypeUiModel(
+                        GameType("History"),
+                        isSelected = false,
+                    ),
+                    GameTypeUiModel(
+                        GameType("Geography"),
+                        isSelected = false,
+                    ),
+                    GameTypeUiModel(
+                        GameType("Art"),
+                        isSelected = false,
+                    ),
+                    GameTypeUiModel(
+                        GameType("Music"),
+                        isSelected = false,
+                    ),
+                    GameTypeUiModel(
+                        GameType("Sports"),
+                        isSelected = false,
+                    ),
+                    GameTypeUiModel(
+                        GameType("Movies"),
+                        isSelected = false,
+                    ),
                 ),
         )
     }

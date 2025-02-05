@@ -15,7 +15,10 @@ sealed class QuizziNavDestination(
 
     data object Rooms : QuizziNavDestination("rooms")
 
-    data object CreateRoom : QuizziNavDestination("createRoom")
+    data object CreateRoom : QuizziNavDestination("createRoom") {
+        const val ARG_SELECTED_QUIZ_CATEGORY = "selectedQuizCategory"
+        const val ARG_SELECTED_GAME_TYPE = "selectedGameType"
+    }
 
     data object CategorySelection : QuizziNavDestination("categorySelection")
 

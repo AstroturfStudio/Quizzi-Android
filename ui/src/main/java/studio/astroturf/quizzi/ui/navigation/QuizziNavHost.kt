@@ -106,6 +106,7 @@ private fun NavGraphBuilder.addCreateRoomGraph(navController: NavHostController)
     ) {
         composable(QuizziNavDestination.CreateRoom.route) {
             CreateRoomScreen(
+                navController = navController,
                 onBackPress = {
                     navController.popBackStack()
                 },
@@ -128,6 +129,15 @@ private fun NavGraphBuilder.addCreateRoomGraph(navController: NavHostController)
                 onBackPress = {
                     navController.popBackStack()
                 },
+                onProceed = { selectedCategory ->
+                    navController.run {
+                        previousBackStackEntry?.savedStateHandle?.set(
+                            QuizziNavDestination.CreateRoom.ARG_SELECTED_QUIZ_CATEGORY,
+                            selectedCategory,
+                        )
+                        navigateUp()
+                    }
+                },
             )
         }
 
@@ -135,6 +145,15 @@ private fun NavGraphBuilder.addCreateRoomGraph(navController: NavHostController)
             GameTypeSelectionScreen(
                 onBackPress = {
                     navController.popBackStack()
+                },
+                onProceed = { selectedGameType ->
+                    navController.run {
+                        previousBackStackEntry?.savedStateHandle?.set(
+                            QuizziNavDestination.CreateRoom.ARG_SELECTED_GAME_TYPE,
+                            selectedGameType,
+                        )
+                        navigateUp()
+                    }
                 },
             )
         }

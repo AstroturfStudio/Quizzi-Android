@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import studio.astroturf.quizzi.domain.model.GameType
 import studio.astroturf.quizzi.domain.repository.GameTypeRepository
 import studio.astroturf.quizzi.domain.result.onFailure
 import studio.astroturf.quizzi.domain.result.onSuccess
@@ -45,4 +46,6 @@ class GameTypeViewModel
                     it.copy(isSelected = if (it == gameType) !it.isSelected else false)
                 }
         }
+
+        fun getSelectedGameType(): GameType? = _gameTypesUiModel.value.find { it.isSelected }?.gameType
     }

@@ -20,10 +20,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -31,9 +30,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import studio.astroturf.quizzi.domain.model.Category
+import studio.astroturf.quizzi.domain.model.GameType
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
+import studio.astroturf.quizzi.ui.navigation.QuizziNavDestination
 import studio.astroturf.quizzi.ui.theme.Black
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
@@ -46,15 +50,47 @@ import studio.astroturf.quizzi.ui.theme.White
 @Suppress("ktlint:compose:modifier-missing-check")
 @Composable
 fun CreateRoomScreen(
+    navController: NavController,
     onBackPress: () -> Unit,
+    onCategoryClick: () -> Unit,
+    onGameTypeClick: () -> Unit,
+    viewModel: CreateRoomViewModel = hiltViewModel(),
+    onCreateRoom: () -> Unit,
+) {
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+
+    val roomTitle by viewModel.roomTitle.collectAsState()
+    val quizCategory by viewModel.quizCategory.collectAsState()
+    val gameType by viewModel.gameType.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.setQuizCategory(savedStateHandle?.get<Category>(QuizziNavDestination.CreateRoom.ARG_SELECTED_QUIZ_CATEGORY))
+        viewModel.setGameType(savedStateHandle?.get<GameType>(QuizziNavDestination.CreateRoom.ARG_SELECTED_GAME_TYPE))
+    }
+
+    CreateRoomScreenContent(
+        onBackPress = onBackPress,
+        roomTitle = roomTitle,
+        quizCategory = quizCategory,
+        gameType = gameType,
+        onRoomTitleChange = viewModel::setRoomTitle,
+        onCategoryClick = onCategoryClick,
+        onGameTypeClick = onGameTypeClick,
+        onCreateRoom = onCreateRoom,
+    )
+}
+
+@Composable
+private fun CreateRoomScreenContent(
+    onBackPress: () -> Unit,
+    roomTitle: String,
+    quizCategory: Category?,
+    gameType: GameType?,
+    onRoomTitleChange: (String) -> Unit,
     onCategoryClick: () -> Unit,
     onGameTypeClick: () -> Unit,
     onCreateRoom: () -> Unit,
 ) {
-    var roomTitle by remember { mutableStateOf("") }
-    var quizCategory by remember { mutableStateOf("Choose quiz category") }
-    var gameType by remember { mutableStateOf("Choose game type") }
-
     AppBarScreen(
         title = "Create Room",
         leadingIcon =
@@ -85,7 +121,7 @@ fun CreateRoomScreen(
 
                 BasicTextField(
                     value = roomTitle,
-                    onValueChange = { roomTitle = it },
+                    onValueChange = onRoomTitleChange,
                     textStyle =
                         BodyNormalRegular.copy(
                             color = Black,
@@ -143,7 +179,7 @@ fun CreateRoomScreen(
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
-                        text = quizCategory,
+                        text = quizCategory?.name ?: "Choose quiz category",
                         style = BodyNormalRegular.copy(color = Grey2),
                         textAlign = TextAlign.Center,
                     )
@@ -180,7 +216,7 @@ fun CreateRoomScreen(
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
-                        text = gameType,
+                        text = gameType?.name ?: "Choose game type",
                         style = BodyNormalRegular.copy(color = Grey2),
                         textAlign = TextAlign.Center,
                     )
@@ -220,13 +256,15 @@ fun CreateRoomScreen(
 @Composable
 private fun CreateRoomPreview() {
     QuizziTheme {
-        CreateRoomScreen(
-            onBackPress = {
-            },
+        CreateRoomScreenContent(
+            onBackPress = {},
+            roomTitle = "Room Title",
             onCategoryClick = {},
+            quizCategory = Category(0, "Category"),
             onGameTypeClick = {},
-            onCreateRoom = {
-            },
+            gameType = GameType("Resistence Game"),
+            onCreateRoom = {},
+            onRoomTitleChange = {},
         )
     }
 }

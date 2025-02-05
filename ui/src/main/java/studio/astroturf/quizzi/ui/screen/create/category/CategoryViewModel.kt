@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import studio.astroturf.quizzi.domain.model.Category
 import studio.astroturf.quizzi.domain.repository.CategoryRepository
 import studio.astroturf.quizzi.domain.result.onFailure
 import studio.astroturf.quizzi.domain.result.onSuccess
@@ -45,4 +46,6 @@ class CategoryViewModel
                     it.copy(isSelected = if (it == category) !it.isSelected else false)
                 }
         }
+
+        fun getSelectedCategory(): Category? = _categoriesUiModel.value.find { it.isSelected }?.category
     }
