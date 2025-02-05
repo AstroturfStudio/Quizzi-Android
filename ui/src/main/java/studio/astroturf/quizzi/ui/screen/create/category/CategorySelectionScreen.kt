@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import studio.astroturf.quizzi.domain.model.Category
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
@@ -40,8 +41,9 @@ import studio.astroturf.quizzi.ui.theme.White
 @Suppress("ktlint:compose:modifier-missing-check")
 @Composable
 fun CategorySelectionScreen(
-    viewModel: CategoryViewModel = hiltViewModel(),
+    onProceed: (Category?) -> Unit,
     onBackPress: () -> Unit,
+    viewModel: CategoryViewModel = hiltViewModel(),
 ) {
     val categories by viewModel.categoriesUiModel.collectAsState()
 
@@ -56,6 +58,7 @@ fun CategorySelectionScreen(
         CategorySelectionContent(
             categories = categories,
             onCategoryClick = { viewModel.selectCategory(it) },
+            onNextClick = { onProceed(viewModel.getSelectedCategory()) },
         )
     }
 }
@@ -64,6 +67,7 @@ fun CategorySelectionScreen(
 private fun CategorySelectionContent(
     categories: List<CategoryUiModel>,
     onCategoryClick: (CategoryUiModel) -> Unit = {},
+    onNextClick: () -> Unit = {},
 ) {
     Box(
         modifier =
@@ -115,7 +119,7 @@ private fun CategorySelectionContent(
 
                         Text(
                             modifier = Modifier.wrapContentSize(),
-                            text = it.categoryName,
+                            text = it.category.name,
                             style = BodyNormalMedium.copy(color = if (it.isSelected) White else Secondary),
                             maxLines = 1,
                         )
@@ -147,9 +151,9 @@ private fun CategorySelectionContent(
                     .height(56.dp)
                     .background(color = Secondary, shape = RoundedCornerShape(size = 20.dp))
                     .align(Alignment.BottomCenter),
-            onClick = {
-            },
+            onClick = onNextClick,
             colors = ButtonDefaults.buttonColors().copy(containerColor = Secondary),
+            enabled = categories.any { it.isSelected },
         ) {
             Text(
                 modifier = Modifier.wrapContentSize(),
@@ -168,27 +172,19 @@ private fun CategorySelectionScreenPreview() {
             categories =
                 listOf(
                     CategoryUiModel(
-                        categoryName = "Math",
+                        category = Category(0, "Math"),
                         isSelected = false,
                     ),
                     CategoryUiModel(
-                        categoryName = "Science",
+                        category = Category(1, "Science"),
                         isSelected = true,
                     ),
                     CategoryUiModel(
-                        categoryName = "History",
+                        category = Category(2, "History"),
                         isSelected = false,
                     ),
                     CategoryUiModel(
-                        categoryName = "Geography",
-                        isSelected = false,
-                    ),
-                    CategoryUiModel(
-                        categoryName = "English",
-                        isSelected = false,
-                    ),
-                    CategoryUiModel(
-                        categoryName = "Computer Science",
+                        category = Category(3, "Geography"),
                         isSelected = false,
                     ),
                 ),

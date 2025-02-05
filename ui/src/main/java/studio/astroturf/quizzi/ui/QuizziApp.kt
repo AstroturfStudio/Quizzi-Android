@@ -16,9 +16,9 @@ import androidx.navigation.compose.rememberNavController
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.ui.exceptionhandling.NotificationHandler
 import studio.astroturf.quizzi.ui.navigation.QuizziBottomNavigation
-import studio.astroturf.quizzi.ui.navigation.QuizziNavGraph
+import studio.astroturf.quizzi.ui.navigation.QuizziNavDestination
+import studio.astroturf.quizzi.ui.navigation.QuizziNavHost
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
-import studio.astroturf.quizzi.ui.navigation.NavDestination as QuizziNavDestination
 
 @Composable
 fun QuizziApp(
@@ -64,7 +64,7 @@ fun QuizziApp(
             },
         ) { innerPadding ->
             Box(modifier = Modifier.fillMaxSize()) {
-                QuizziNavGraph(
+                QuizziNavHost(
                     navController = navController,
                     modifier = Modifier.padding(innerPadding),
                     startDestination =

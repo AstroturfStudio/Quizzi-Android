@@ -1,13 +1,15 @@
 package studio.astroturf.quizzi.ui.screen.create.category
 
+import studio.astroturf.quizzi.domain.model.Category
+
 data class CategoryUiModel(
-    val categoryName: String,
+    val category: Category,
     val isSelected: Boolean = false,
 ) {
     companion object {
-        fun from(category: studio.astroturf.quizzi.domain.model.Category): CategoryUiModel =
+        fun from(category: Category): CategoryUiModel =
             CategoryUiModel(
-                categoryName = category.name,
+                category = category,
             )
     }
 }
