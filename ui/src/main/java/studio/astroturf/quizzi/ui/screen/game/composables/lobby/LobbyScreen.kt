@@ -2,15 +2,16 @@ package studio.astroturf.quizzi.ui.screen.game.composables.lobby
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,9 +21,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
@@ -30,16 +33,26 @@ import studio.astroturf.quizzi.ui.theme.Black
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
 import studio.astroturf.quizzi.ui.theme.BodySmallMedium
+import studio.astroturf.quizzi.ui.theme.BodyXSmallRegular
 import studio.astroturf.quizzi.ui.theme.Grey2
 import studio.astroturf.quizzi.ui.theme.Grey5
 import studio.astroturf.quizzi.ui.theme.Heading3
 import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
+import studio.astroturf.quizzi.ui.theme.Tertiary
 import studio.astroturf.quizzi.ui.theme.White
 
 @Suppress("ktlint:compose:modifier-missing-check")
 @Composable
-fun LobbyScreen(onBackPress: (() -> Unit)? = null) {
+fun LobbyScreen(
+    roomTitle: String,
+    categoryName: String,
+    gameType: String,
+    currentUserReady: Boolean,
+    creator: Player,
+    challenger: Player?,
+    onBackPress: (() -> Unit)? = null,
+) {
     AppBarScreen(
         title = null,
         leadingIcon =
@@ -70,28 +83,47 @@ fun LobbyScreen(onBackPress: (() -> Unit)? = null) {
                         .padding(horizontal = 16.dp, vertical = 24.dp),
             ) {
                 Text(
-                    text = "SPORTS",
+                    text = categoryName,
                     style = BodySmallMedium.copy(color = Grey2),
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Guven’s Room",
+                    text = roomTitle,
                     style = Heading3.copy(color = Black),
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Box(
+                Row(
                     Modifier
-                        .width(327.dp)
-                        .height(66.79365.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
                         .background(
                             color = Grey5,
                             shape = RoundedCornerShape(size = 20.dp),
-                        ),
-                )
+                        ).padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Image(
+                        modifier =
+                            Modifier
+                                .size(32.dp)
+                                .background(
+                                    color = Tertiary,
+                                    shape = CircleShape,
+                                ).clip(CircleShape),
+                        painter = painterResource(id = R.drawable.de_160),
+                        contentDescription = null,
+                    )
+
+                    Text(
+                        text = gameType,
+                        style = BodySmallMedium.copy(color = Black),
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -112,25 +144,12 @@ fun LobbyScreen(onBackPress: (() -> Unit)? = null) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Box(
-                    Modifier
-                        .size(40.dp)
-                        .background(
-                            color = Grey5,
-                            shape = CircleShape,
-                        ),
-                )
+                PlayerInLobby(creator)
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Box(
-                    Modifier
-                        .size(40.dp)
-                        .background(
-                            color = Grey5,
-                            shape = CircleShape,
-                        ),
-                )
+                challenger?.let {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    PlayerInLobby(it)
+                }
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -146,7 +165,7 @@ fun LobbyScreen(onBackPress: (() -> Unit)? = null) {
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
-                        text = "Ready To Play",
+                        text = if (currentUserReady) "Not Ready" else "Ready To Play",
                         style = BodyNormalMedium.copy(color = White),
                     )
                 }
@@ -156,9 +175,66 @@ fun LobbyScreen(onBackPress: (() -> Unit)? = null) {
 }
 
 @Composable
+private fun PlayerInLobby(player: Player) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Image(
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .background(
+                        color = Tertiary,
+                        shape = CircleShape,
+                    ).clip(CircleShape),
+            painter = painterResource(id = R.drawable.ic_person),
+            contentDescription = null,
+        )
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = player.name,
+                style = BodyNormalMedium.copy(color = Black),
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = "Ready",
+                style = BodyXSmallRegular.copy(color = Grey2),
+            )
+        }
+    }
+}
+
+@Composable
 @Preview
 private fun LobbyScreenPreview() {
     QuizziTheme {
-        LobbyScreen()
+        LobbyScreen(
+            onBackPress = {},
+            roomTitle = "Guven’s Room",
+            categoryName = "Flag Quiz",
+            gameType = "Resistance Game",
+            currentUserReady = false,
+            creator =
+                Player(
+                    id = "1",
+                    name = "Guven",
+                    avatarUrl = "https://randomuser.me/api/portraits",
+                ),
+            challenger =
+                Player(
+                    id = "2",
+                    name = "Alican",
+                    avatarUrl = "https://randomuser.me/api/portraits",
+                ),
+        )
     }
 }
