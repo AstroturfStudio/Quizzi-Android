@@ -45,13 +45,9 @@ import studio.astroturf.quizzi.ui.theme.White
 @Suppress("ktlint:compose:modifier-missing-check")
 @Composable
 fun LobbyScreen(
-    roomTitle: String,
-    categoryName: String,
-    gameType: String,
-    currentUserReady: Boolean,
-    creator: Player,
-    challenger: Player?,
+    lobbyUiModel: LobbyUiModel,
     onBackPress: (() -> Unit)? = null,
+    onReadyToPlay: (() -> Unit)? = null,
 ) {
     AppBarScreen(
         title = null,
@@ -83,14 +79,14 @@ fun LobbyScreen(
                         .padding(horizontal = 16.dp, vertical = 24.dp),
             ) {
                 Text(
-                    text = categoryName,
+                    text = lobbyUiModel.categoryName,
                     style = BodySmallMedium.copy(color = Grey2),
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = roomTitle,
+                    text = lobbyUiModel.roomTitle,
                     style = Heading3.copy(color = Black),
                 )
 
@@ -120,7 +116,7 @@ fun LobbyScreen(
                     )
 
                     Text(
-                        text = gameType,
+                        text = lobbyUiModel.gameType,
                         style = BodySmallMedium.copy(color = Black),
                     )
                 }
@@ -144,9 +140,9 @@ fun LobbyScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                PlayerInLobby(creator)
+                PlayerInLobby(lobbyUiModel.players.getHost())
 
-                challenger?.let {
+                lobbyUiModel.players.getChallengerOrNull()?.let {
                     Spacer(modifier = Modifier.height(24.dp))
                     PlayerInLobby(it)
                 }
@@ -160,12 +156,13 @@ fun LobbyScreen(
                             .height(56.dp)
                             .background(color = Primary, shape = RoundedCornerShape(size = 20.dp)),
                     onClick = {
+                        onReadyToPlay?.invoke()
                     },
                     colors = ButtonDefaults.buttonColors().copy(containerColor = Primary),
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
-                        text = if (currentUserReady) "Not Ready" else "Ready To Play",
+                        text = if (lobbyUiModel.currentUserReady) "Not Ready" else "Ready To Play",
                         style = BodyNormalMedium.copy(color = White),
                     )
                 }
@@ -175,7 +172,10 @@ fun LobbyScreen(
 }
 
 @Composable
-private fun PlayerInLobby(player: Player) {
+private fun PlayerInLobby(lobbyPlayerUiModel: LobbyPlayerUiModel) {
+    val player = lobbyPlayerUiModel.player
+    val isReady = lobbyPlayerUiModel.isReady
+
     Row(
         Modifier
             .fillMaxWidth()
@@ -206,7 +206,7 @@ private fun PlayerInLobby(player: Player) {
             Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                text = "Ready",
+                text = if (isReady) "Ready" else "Not Ready",
                 style = BodyXSmallRegular.copy(color = Grey2),
             )
         }
@@ -218,23 +218,43 @@ private fun PlayerInLobby(player: Player) {
 private fun LobbyScreenPreview() {
     QuizziTheme {
         LobbyScreen(
-            onBackPress = {},
-            roomTitle = "Guven’s Room",
-            categoryName = "Flag Quiz",
-            gameType = "Resistance Game",
-            currentUserReady = false,
-            creator =
-                Player(
-                    id = "1",
-                    name = "Guven",
-                    avatarUrl = "https://randomuser.me/api/portraits",
-                ),
-            challenger =
-                Player(
-                    id = "2",
-                    name = "Alican",
-                    avatarUrl = "https://randomuser.me/api/portraits",
+            lobbyUiModel =
+                LobbyUiModel(
+                    roomTitle = "Guven’s Room",
+                    categoryName = "Flag Quiz",
+                    gameType = "Resistance Game",
+                    currentUserReady = false,
+                    players =
+                        listOf(
+                            LobbyPlayerUiModel(
+                                player =
+                                    Player(
+                                        id = "1",
+                                        name = "Guven",
+                                        avatarUrl = "https://www.example.com/avatar.png",
+                                        isReady = true,
+                                    ),
+                                isCreator = true,
+                                isReady = true,
+                            ),
+                            LobbyPlayerUiModel(
+                                player =
+                                    Player(
+                                        id = "2",
+                                        name = "John",
+                                        avatarUrl = "https://www.example.com/avatar.png",
+                                        isReady = false,
+                                    ),
+                                isCreator = false,
+                                isReady = false,
+                            ),
+                        ),
+                    countdown = 10,
                 ),
         )
     }
 }
+
+fun List<LobbyPlayerUiModel>.getHost(): LobbyPlayerUiModel = this.find { it.isCreator }!!
+
+fun List<LobbyPlayerUiModel>.getChallengerOrNull(): LobbyPlayerUiModel? = this.firstOrNull { !it.isCreator }

@@ -210,12 +210,14 @@ private fun previewGameState(
             id = "1",
             name = "Player 1",
             avatarUrl = "TODO()",
+            isReady = true,
         ),
     player2 =
         Player(
             id = "2",
             name = "Player 2",
             avatarUrl = "TODO()",
+            isReady = true,
         ),
     gameBarPercentage = 0.7f,
     question =

@@ -68,6 +68,7 @@ private fun PlayerDisplayPreview() {
                     id = "1",
                     name = "Güven",
                     avatarUrl = "https://example.com/avatar.png",
+                    isReady = true,
                 ),
             imageLoader = ImageLoader(LocalContext.current),
         )

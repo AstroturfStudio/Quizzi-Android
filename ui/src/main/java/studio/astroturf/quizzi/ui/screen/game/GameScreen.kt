@@ -15,7 +15,7 @@ import showToast
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.model.GameFeedback
 import studio.astroturf.quizzi.ui.screen.game.composables.gameover.GameOverContent
-import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyContent
+import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyScreen
 import studio.astroturf.quizzi.ui.screen.game.composables.paused.PausedContent
 import studio.astroturf.quizzi.ui.screen.game.composables.round.GameRoundContent
 import timber.log.Timber
@@ -48,6 +48,7 @@ fun GameScreen(
     GameScreenContent(
         state = uiState,
         onNavigateToRooms = onNavigateToRooms,
+        onReadyToPlay = viewModel::readyToPlay,
         onSubmitAnswer = viewModel::submitAnswer,
         onSubmitFeedback = viewModel::submitFeedback,
         imageLoader = viewModel.imageLoader,
@@ -59,6 +60,7 @@ fun GameScreen(
 private fun GameScreenContent(
     state: GameUiState,
     onNavigateToRooms: () -> Unit,
+    onReadyToPlay: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
     onSubmitFeedback: (GameFeedback) -> Unit,
     imageLoader: ImageLoader,
@@ -68,6 +70,7 @@ private fun GameScreenContent(
         GameStateContent(
             currentState = state,
             onNavigateToRooms = onNavigateToRooms,
+            onReadyToPlay = onReadyToPlay,
             onSubmitAnswer = onSubmitAnswer,
             onSubmitFeedback = onSubmitFeedback,
             imageLoader = imageLoader,
@@ -79,17 +82,17 @@ private fun GameScreenContent(
 private fun GameStateContent(
     currentState: GameUiState,
     onNavigateToRooms: () -> Unit,
+    onReadyToPlay: () -> Unit,
     onSubmitAnswer: (Int) -> Unit,
     onSubmitFeedback: (GameFeedback) -> Unit,
     imageLoader: ImageLoader,
 ) {
     when {
         currentState is GameUiState.Lobby -> {
-            LobbyContent(
-                roomName = currentState.roomName,
-                creator = currentState.creator,
-                challenger = currentState.challenger,
-                countdown = currentState.countdown?.timeRemainingInSeconds,
+            LobbyScreen(
+                lobbyUiModel = currentState.lobbyUiModel,
+                onBackPress = onNavigateToRooms,
+                onReadyToPlay = onReadyToPlay,
             )
         }
 

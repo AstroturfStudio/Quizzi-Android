@@ -64,6 +64,7 @@ fun ClientMessage.toDto(): ClientSocketMessage =
     when (this) {
         is ClientMessage.CreateRoom ->
             ClientSocketMessage.CreateRoom(
+                roomName = roomName,
                 categoryId = categoryId,
                 gameType = gameType,
             )

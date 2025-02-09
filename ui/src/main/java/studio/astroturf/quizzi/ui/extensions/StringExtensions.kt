@@ -17,3 +17,5 @@ fun String.truncate(
     }
 
 fun String.isNumeric(): Boolean = matches(Regex("^[0-9]+$"))
+
+fun String?.isNotNullOrBlank(): Boolean = !isNullOrBlank()

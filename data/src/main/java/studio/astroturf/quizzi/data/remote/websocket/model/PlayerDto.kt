@@ -16,3 +16,8 @@ data class PlayerDto(
             avatarUrl = avatarUrl,
         )
 }
+
+enum class PlayerState {
+    WAIT,
+    READY,
+}

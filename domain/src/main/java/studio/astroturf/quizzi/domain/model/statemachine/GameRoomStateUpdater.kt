@@ -51,7 +51,7 @@ sealed interface GameRoomStateUpdater {
         val message: ServerMessage.RoomClosed,
     ) : GameRoomStateUpdater
 
-    object ExitGameRoom : GameRoomStateUpdater
+    data object ExitGameRoom : GameRoomStateUpdater
 
     data class RoundTimeUpdate(
         val message: ServerMessage.TimeUpdate,

@@ -2,15 +2,13 @@ package studio.astroturf.quizzi.ui.screen.game
 
 import studio.astroturf.quizzi.domain.model.Player
 import studio.astroturf.quizzi.domain.model.Question
+import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyUiModel
 
 sealed interface GameUiState {
     object Idle : GameUiState
 
     data class Lobby(
-        val roomName: String,
-        val creator: Player,
-        val challenger: Player?,
-        val countdown: CountdownTimer?,
+        val lobbyUiModel: LobbyUiModel,
     ) : GameUiState {
         data class CountdownTimer(
             val timeRemainingInSeconds: Int,

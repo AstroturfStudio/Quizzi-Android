@@ -124,8 +124,10 @@ private fun NavGraphBuilder.addCreateRoomGraph(navController: NavHostController)
                 onGameTypeClick = {
                     navController.navigate(QuizziNavDestination.GameTypeSelection.route)
                 },
-                onCreateRoom = { category, gameType ->
-                    navController.navigate(QuizziNavDestination.Game.createRouteForCreating(category.id.toString(), gameType.name)) {
+                onCreateRoom = { roomName, category, gameType ->
+                    navController.navigate(
+                        QuizziNavDestination.Game.createRouteForCreating(roomName, category.id.toString(), gameType.name),
+                    ) {
                         popUpTo(QuizziNavGraph.CreateRoom.route) { inclusive = true }
                     }
                 },
