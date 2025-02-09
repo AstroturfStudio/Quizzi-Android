@@ -1,6 +1,6 @@
 package studio.astroturf.quizzi.domain.model.websocket
 
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.PlayerInRoom
 import studio.astroturf.quizzi.domain.model.Question
 import studio.astroturf.quizzi.domain.model.RoomState
 
@@ -21,7 +21,7 @@ sealed class ServerMessage {
     ) : ServerMessage()
 
     data class RoomUpdate(
-        val players: List<Player>,
+        val players: List<PlayerInRoom>,
         val state: RoomState,
     ) : ServerMessage()
 

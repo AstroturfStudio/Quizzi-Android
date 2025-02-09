@@ -26,7 +26,7 @@ class CreateRoomViewModel
             ioDispatcher,
             defaultDispatcher,
         ) {
-        private val _roomTitle = MutableStateFlow("")
+        private val _roomTitle = MutableStateFlow<String?>(null)
         val roomTitle = _roomTitle.asStateFlow()
 
         private val _quizCategory =

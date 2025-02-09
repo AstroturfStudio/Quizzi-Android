@@ -21,7 +21,7 @@ import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
 import studio.astroturf.quizzi.domain.model.GameFeedback
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.PlayerInRoom
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
@@ -29,12 +29,12 @@ import studio.astroturf.quizzi.domain.network.GameConnectionStatus
 import studio.astroturf.quizzi.domain.repository.AuthRepository
 import studio.astroturf.quizzi.domain.repository.FeedbackRepository
 import studio.astroturf.quizzi.domain.repository.GameRepository
-import studio.astroturf.quizzi.domain.repository.RoomsRepository
 import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
 import studio.astroturf.quizzi.ui.navigation.QuizziNavDestination
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
-import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
+import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyPlayerUiModel
+import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyUiModel
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -44,9 +44,8 @@ private const val TAG = "GameViewModel"
 class GameViewModel
     @Inject
     constructor(
-        private val savedStateHandle: SavedStateHandle,
+        savedStateHandle: SavedStateHandle,
         private val authRepository: AuthRepository,
-        private val roomsRepository: RoomsRepository,
         private val gameRepository: GameRepository,
         private val feedbackRepository: FeedbackRepository,
         private val exceptionResolver: ExceptionResolver,
@@ -60,6 +59,7 @@ class GameViewModel
             defaultDispatcher,
         ) {
         private var roomId: String? = savedStateHandle[QuizziNavDestination.Game.ARG_ROOM_ID]
+        private var roomName: String? = savedStateHandle[QuizziNavDestination.Game.ARG_ROOM_NAME]
         private var categoryId: String? = savedStateHandle[QuizziNavDestination.Game.ARG_CATEGORY_ID]
         private var gameType: String? = savedStateHandle[QuizziNavDestination.Game.ARG_GAME_TYPE]
 
@@ -77,7 +77,7 @@ class GameViewModel
             GameRoomStateMachine(viewModelScope, gameRepository, defaultDispatcher)
         private val stateMutex = Mutex()
 
-        private lateinit var players: List<Player>
+        private lateinit var players: List<PlayerInRoom>
 
         val currentGameRoomState: GameRoomState
             get() = gameStateMachine.getCurrentState()
@@ -105,6 +105,7 @@ class GameViewModel
             observeGameConnectionState()
             processStateUpdatesSequentially()
             initializeGameRoom(
+                roomName = roomName,
                 categoryId = categoryId?.toInt(),
                 gameType = gameType,
             )
@@ -162,6 +163,7 @@ class GameViewModel
         }
 
         private fun initializeGameRoom(
+            roomName: String?,
             categoryId: Int?,
             gameType: String?,
         ) {
@@ -176,8 +178,15 @@ class GameViewModel
                     ) {
                         // Websocket connected successfully
                         roomId?.let { joinRoom(it) } ?: createRoom(
-                            categoryId = categoryId ?: throw IllegalStateException("Category ID is null when creating room"),
-                            gameType = gameType ?: throw IllegalStateException("Game type is null when creating room"),
+                            roomName =
+                                roomName
+                                    ?: throw IllegalStateException("Room name is null when creating room"),
+                            categoryId =
+                                categoryId
+                                    ?: throw IllegalStateException("Category ID is null when creating room"),
+                            gameType =
+                                gameType
+                                    ?: throw IllegalStateException("Game type is null when creating room"),
                         )
                     }
             }
@@ -211,17 +220,30 @@ class GameViewModel
                 else -> _uiState.value // Preserve current state
             }
 
-        private fun savePlayers(players: List<Player>) {
+        private fun savePlayers(players: List<PlayerInRoom>) {
             this.players = players
         }
 
         private fun createLobbyState(gameRoomState: GameRoomState.Waiting): GameUiState.Lobby {
-            val creator = gameRoomState.players.first()
+            val currentPlayer = gameRoomState.players.first { it.id == authRepository.getCurrentPlayerId() }
+
             return GameUiState.Lobby(
-                roomName = "${creator.name}'s Room",
-                creator = creator,
-                challenger = gameRoomState.players.getOrNull(1),
-                countdown = null,
+                lobbyUiModel =
+                    LobbyUiModel(
+                        roomTitle = roomName ?: "",
+                        categoryName = categoryId.toString(),
+                        gameType = gameType ?: "",
+                        players =
+                            gameRoomState.players.mapIndexed { index, it ->
+                                LobbyPlayerUiModel(
+                                    player = it,
+                                    isCreator = index == 0,
+                                    isReady = it.isReady,
+                                )
+                            },
+                        currentUserReady = currentPlayer.isReady,
+                        countdown = null,
+                    ),
             )
         }
 
@@ -229,12 +251,10 @@ class GameViewModel
             when (effect) {
                 is GameRoomStateUpdater.RoomCreated -> {
                     roomId = effect.message.roomId
-                    sendPlayerReady()
                 }
 
                 is GameRoomStateUpdater.RoomJoined -> {
                     roomId = effect.message.roomId
-                    sendPlayerReady()
                 }
 
                 is GameRoomStateUpdater.RoomRejoined -> {
@@ -349,21 +369,6 @@ class GameViewModel
         private fun handleRoundEnd(effect: GameRoomStateUpdater.RoundEnd) {
             launchMain {
                 val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
-                val winner =
-                    listOf(currentState.player1, currentState.player2)
-                        .find { it.id == effect.message.winnerPlayerId }
-
-                val roundWinner: RoundWinner =
-                    when (winner?.id) {
-                        null -> RoundWinner.None
-                        authRepository.getCurrentPlayerId() -> RoundWinner.Me(winner.id, winner.name)
-                        else -> RoundWinner.Opponent(winner.id, winner.name)
-                    }
-
-                val correctAnswerValue =
-                    currentState.question.options
-                        .find { it.id == effect.message.correctAnswer }
-                        ?.value ?: return@launchMain
 
                 updateUiState {
                     currentState.copy(
@@ -378,7 +383,7 @@ class GameViewModel
                 val currentUiState = uiState.value as? GameUiState.Lobby ?: return@launchMain
                 updateUiState {
                     currentUiState.copy(
-                        countdown = GameUiState.Lobby.CountdownTimer(effect.message.remaining.toInt()),
+                        lobbyUiModel = currentUiState.lobbyUiModel.copy(countdown = effect.message.remaining.toInt()),
                     )
                 }
             }
@@ -411,11 +416,13 @@ class GameViewModel
         }
 
         fun createRoom(
+            roomName: String,
             categoryId: Int,
             gameType: String,
         ) {
             gameRepository.sendMessage(
                 ClientMessage.CreateRoom(
+                    roomName = roomName,
                     categoryId = categoryId,
                     gameType = gameType,
                 ),
@@ -480,6 +487,10 @@ class GameViewModel
                 gameRepository.disconnect()
                 roomId = null
             }
+        }
+
+        fun readyToPlay() {
+            sendPlayerReady()
         }
 
         companion object {

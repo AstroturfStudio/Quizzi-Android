@@ -1,16 +1,14 @@
 package studio.astroturf.quizzi.ui.screen.game
 
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.PlayerInRoom
 import studio.astroturf.quizzi.domain.model.Question
+import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyUiModel
 
 sealed interface GameUiState {
     object Idle : GameUiState
 
     data class Lobby(
-        val roomName: String,
-        val creator: Player,
-        val challenger: Player?,
-        val countdown: CountdownTimer?,
+        val lobbyUiModel: LobbyUiModel,
     ) : GameUiState {
         data class CountdownTimer(
             val timeRemainingInSeconds: Int,
@@ -18,8 +16,8 @@ sealed interface GameUiState {
     }
 
     data class RoundOn(
-        val player1: Player,
-        val player2: Player,
+        val player1: PlayerInRoom,
+        val player2: PlayerInRoom,
         val gameBarPercentage: Float,
         val question: Question,
         val timeRemainingInSeconds: Int,
@@ -34,12 +32,12 @@ sealed interface GameUiState {
 
     data class Paused(
         val reason: String,
-        val onlinePlayers: List<Player>,
+        val onlinePlayers: List<PlayerInRoom>,
     ) : GameUiState
 
     data class GameOver(
         val totalRoundCount: Int,
-        val winner: Player,
+        val winner: PlayerInRoom,
         val gameId: String,
     ) : GameUiState
 }

@@ -16,14 +16,15 @@ import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.PlayerInRoom
+import studio.astroturf.quizzi.domain.model.PlayerState
 import studio.astroturf.quizzi.ui.theme.Black
 import studio.astroturf.quizzi.ui.theme.BodySmallMedium
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
 
 @Composable
 internal fun PlayerDisplay(
-    player: Player,
+    player: PlayerInRoom,
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
 ) {
@@ -64,10 +65,11 @@ private fun PlayerDisplayPreview() {
     QuizziTheme {
         PlayerDisplay(
             player =
-                Player(
+                PlayerInRoom(
                     id = "1",
                     name = "Güven",
                     avatarUrl = "https://example.com/avatar.png",
+                    state = PlayerState.READY,
                 ),
             imageLoader = ImageLoader(LocalContext.current),
         )

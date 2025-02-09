@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import isNotNullOrBlank
 import studio.astroturf.quizzi.domain.model.Category
 import studio.astroturf.quizzi.domain.model.GameType
 import studio.astroturf.quizzi.ui.R
@@ -55,7 +56,7 @@ fun CreateRoomScreen(
     onCategoryClick: () -> Unit,
     onGameTypeClick: () -> Unit,
     viewModel: CreateRoomViewModel = hiltViewModel(),
-    onCreateRoom: (Category, GameType) -> Unit,
+    onCreateRoom: (String, Category, GameType) -> Unit,
 ) {
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
 
@@ -83,13 +84,13 @@ fun CreateRoomScreen(
 @Composable
 private fun CreateRoomScreenContent(
     onBackPress: () -> Unit,
-    roomTitle: String,
+    roomTitle: String?,
     quizCategory: Category?,
     gameType: GameType?,
     onRoomTitleChange: (String) -> Unit,
     onCategoryClick: () -> Unit,
     onGameTypeClick: () -> Unit,
-    onCreateRoom: (Category, GameType) -> Unit,
+    onCreateRoom: (String, Category, GameType) -> Unit,
 ) {
     AppBarScreen(
         title = "Create Room",
@@ -120,7 +121,7 @@ private fun CreateRoomScreenContent(
                 Spacer(Modifier.height(8.dp))
 
                 BasicTextField(
-                    value = roomTitle,
+                    value = roomTitle ?: "",
                     onValueChange = onRoomTitleChange,
                     textStyle =
                         BodyNormalRegular.copy(
@@ -131,7 +132,7 @@ private fun CreateRoomScreenContent(
                     decorationBox = { innerTextField ->
 
                         Box(contentAlignment = Alignment.CenterStart) {
-                            if (roomTitle.isEmpty()) {
+                            if (roomTitle.isNullOrEmpty()) {
                                 Text(
                                     modifier = Modifier.wrapContentSize(),
                                     text = "Enter room title",
@@ -230,17 +231,26 @@ private fun CreateRoomScreenContent(
 
                 Spacer(Modifier.weight(1f))
 
+                val isButtonEnabled =
+                    roomTitle.isNotNullOrBlank() && quizCategory != null && gameType != null
+
                 Button(
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .height(56.dp)
-                            .background(color = Primary, shape = RoundedCornerShape(size = 20.dp)),
+                            .background(
+                                color = if (isButtonEnabled) Primary else Grey2,
+                                shape = RoundedCornerShape(size = 20.dp),
+                            ),
                     onClick = {
-                        onCreateRoom(quizCategory!!, gameType!!)
+                        onCreateRoom(roomTitle!!, quizCategory!!, gameType!!)
                     },
-                    colors = ButtonDefaults.buttonColors().copy(containerColor = Primary),
-                    enabled = quizCategory != null && gameType != null,
+                    colors =
+                        ButtonDefaults
+                            .buttonColors()
+                            .copy(containerColor = Primary, disabledContainerColor = Grey2),
+                    enabled = isButtonEnabled,
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
@@ -264,7 +274,7 @@ private fun CreateRoomPreview() {
             quizCategory = Category(0, "Category"),
             onGameTypeClick = {},
             gameType = GameType("Resistence Game"),
-            onCreateRoom = { _, _ -> },
+            onCreateRoom = { _, _, _ -> },
             onRoomTitleChange = {},
         )
     }

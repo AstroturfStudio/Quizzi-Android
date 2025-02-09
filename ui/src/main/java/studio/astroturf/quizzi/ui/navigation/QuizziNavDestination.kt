@@ -24,16 +24,21 @@ sealed class QuizziNavDestination(
 
     data object GameTypeSelection : QuizziNavDestination("gameTypeSelection")
 
-    object Game : QuizziNavDestination("game?roomId={roomId}&categoryId={categoryId}&gameType={gameType}") {
+    object Game : QuizziNavDestination("game?roomId={roomId}&roomName={roomName}&categoryId={categoryId}&gameType={gameType}") {
         const val ARG_ROOM_ID = "roomId"
+        const val ARG_ROOM_NAME = "roomName"
         const val ARG_CATEGORY_ID = "categoryId"
         const val ARG_GAME_TYPE = "gameType"
 
         fun createRouteForCreating(
+            roomName: String,
             categoryId: String,
             gameType: String,
-        ): String = "game?$ARG_CATEGORY_ID=$categoryId&$ARG_GAME_TYPE=$gameType"
+        ): String = "game?$ARG_ROOM_NAME=$roomName&$ARG_CATEGORY_ID=$categoryId&$ARG_GAME_TYPE=$gameType"
 
-        fun createRouteForJoining(roomId: String): String = "game?$ARG_ROOM_ID=$roomId"
+        fun createRouteForJoining(
+            roomId: String,
+            roomName: String,
+        ): String = "game?$ARG_ROOM_ID=$roomId&$ARG_ROOM_NAME=$roomName"
     }
 }
