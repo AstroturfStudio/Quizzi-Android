@@ -150,20 +150,30 @@ fun LobbyScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
+                val isButtonEnabled = lobbyUiModel.countdown == null
+
                 Button(
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .height(56.dp)
-                            .background(color = Primary, shape = RoundedCornerShape(size = 20.dp)),
+                            .background(color = if (isButtonEnabled) Primary else Grey2, shape = RoundedCornerShape(size = 20.dp)),
                     onClick = {
                         onReadyToPlay?.invoke()
                     },
-                    colors = ButtonDefaults.buttonColors().copy(containerColor = Primary),
+                    colors = ButtonDefaults.buttonColors().copy(containerColor = if (isButtonEnabled) Primary else Grey2),
+                    enabled = isButtonEnabled,
                 ) {
+                    val text =
+                        if (isButtonEnabled) {
+                            if (lobbyUiModel.currentUserReady) "Not Ready" else "Ready To Play"
+                        } else {
+                            "Starting in... ${lobbyUiModel.countdown}"
+                        }
+
                     Text(
                         modifier = Modifier.wrapContentSize(),
-                        text = if (lobbyUiModel.currentUserReady) "Not Ready" else "Ready To Play",
+                        text = text,
                         style = BodyNormalMedium.copy(color = White),
                     )
                 }
@@ -250,7 +260,7 @@ private fun LobbyScreenPreview() {
                                 isReady = false,
                             ),
                         ),
-                    countdown = 10,
+                    countdown = null,
                 ),
         )
     }

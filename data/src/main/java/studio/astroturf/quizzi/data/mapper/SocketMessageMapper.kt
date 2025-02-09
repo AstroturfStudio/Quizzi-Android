@@ -42,9 +42,14 @@ fun ServerSocketMessage.toDomain(): ServerMessage =
 
         is ServerSocketMessage.PlayerReconnected -> ServerMessage.PlayerReconnected(playerId = playerId)
         is ServerSocketMessage.RoomClosed -> ServerMessage.RoomClosed(reason = reason)
-        is ServerSocketMessage.RoundEnded ->
-            ServerMessage.RoundEnded(
+        is ServerSocketMessage.CursorRoundEnded ->
+            ServerMessage.CursorRoundEnded(
                 cursorPosition = cursorPosition,
+                correctAnswer = correctAnswer,
+                winnerPlayerId = winnerPlayerId,
+            )
+        is ServerSocketMessage.StandardRoundEnded ->
+            ServerMessage.StandardRoundEnded(
                 correctAnswer = correctAnswer,
                 winnerPlayerId = winnerPlayerId,
             )

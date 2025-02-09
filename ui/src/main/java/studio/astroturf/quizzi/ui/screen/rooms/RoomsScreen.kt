@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -72,6 +73,13 @@ fun RoomsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
+    DisposableEffect(Unit) {
+        viewModel.startPeriodicRoomUpdates()
+        onDispose {
+            viewModel.stopPeriodicRequests()
+        }
+    }
+
     RoomsScreenContent(
         currentUsername = uiState.currentUsername,
         rooms = uiState.filteredRooms,
@@ -82,6 +90,7 @@ fun RoomsScreen(
         onRefresh = { viewModel.refresh() },
         onSearch = { viewModel.onSearch(it) },
         onJoinRoom = { room ->
+            viewModel.stopPeriodicRequests()
             onNavigateToRoom(room)
         },
         modifier = modifier,
@@ -410,7 +419,7 @@ private fun RoomItem(
         ) {
             Text(
                 modifier = Modifier.height(24.dp).wrapContentWidth(),
-                text = room.players.firstOrNull() + "'s Room",
+                text = room.name,
                 style = BodySmallMedium.copy(color = Black),
             )
 

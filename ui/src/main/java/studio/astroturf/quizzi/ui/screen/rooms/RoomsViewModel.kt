@@ -3,10 +3,14 @@ package studio.astroturf.quizzi.ui.screen.rooms
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import studio.astroturf.quizzi.domain.di.DefaultDispatcher
 import studio.astroturf.quizzi.domain.di.IoDispatcher
 import studio.astroturf.quizzi.domain.di.MainDispatcher
@@ -33,6 +37,9 @@ class RoomsViewModel
             ioDispatcher,
             defaultDispatcher,
         ) {
+        private var periodicGetRoomsJob: Job? = null
+        private val jobMutex = Mutex() // Add this for thread safety
+
         private val _uiState = MutableStateFlow(RoomsUiState())
         val uiState = _uiState.asStateFlow()
 
@@ -54,11 +61,32 @@ class RoomsViewModel
             startPeriodicRoomUpdates()
         }
 
-        private fun startPeriodicRoomUpdates() {
-            viewModelScope.launch(ioDispatcher) {
-                while (true) {
-                    getRooms()
-                    delay(Companion.PERIODIC_ROOMS_UPDATE_MS) // Fetch rooms every 5 seconds
+        fun startPeriodicRoomUpdates() {
+            launchIO {
+                jobMutex.withLock {
+                    // Only start if not already running
+                    if (periodicGetRoomsJob?.isActive != true) {
+                        periodicGetRoomsJob =
+                            viewModelScope.launch(ioDispatcher) {
+                                while (isActive) {
+                                    getRooms()
+                                    delay(PERIODIC_ROOMS_UPDATE_MS)
+                                }
+                            }
+                    }
+                }
+            }
+        }
+
+        fun stopPeriodicRequests() {
+            launchIO {
+                jobMutex.withLock {
+                    periodicGetRoomsJob?.let { job ->
+                        if (job.isActive) {
+                            job.cancel()
+                        }
+                        periodicGetRoomsJob = null
+                    }
                 }
             }
         }
@@ -89,7 +117,9 @@ class RoomsViewModel
                                     rooms
                                 } else {
                                     rooms.filter { room ->
-                                        room.players.firstOrNull()?.contains(currentState.searchText, ignoreCase = true) ?: false
+                                        room.players
+                                            .firstOrNull()
+                                            ?.contains(currentState.searchText, ignoreCase = true) ?: false
                                     }
                                 },
                             error = null,
@@ -142,6 +172,11 @@ class RoomsViewModel
                     filteredRooms = currentState.rooms,
                 )
             }
+        }
+
+        override fun onCleared() {
+            super.onCleared()
+            stopPeriodicRequests()
         }
 
         companion object {

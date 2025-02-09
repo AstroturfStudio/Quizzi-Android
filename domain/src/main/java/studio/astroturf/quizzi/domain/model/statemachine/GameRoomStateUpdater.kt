@@ -36,7 +36,7 @@ sealed interface GameRoomStateUpdater {
     ) : GameRoomStateUpdater
 
     data class RoundEnd(
-        val message: ServerMessage.RoundEnded,
+        val message: ServerMessage.CursorRoundEnded,
     ) : GameRoomStateUpdater
 
     data class Countdown(

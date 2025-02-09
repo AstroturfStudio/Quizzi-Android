@@ -15,11 +15,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
+import studio.astroturf.quizzi.ui.theme.Accent1
 import studio.astroturf.quizzi.ui.theme.Black
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
 import studio.astroturf.quizzi.ui.theme.Grey5
-import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.White
 
 @Composable
@@ -44,7 +44,7 @@ internal fun AnswerButton(
                 }
             }
             // Sadece seçilmişse ve sonuç henüz gelmediyse
-            isSelected -> Primary
+            isSelected -> Accent1
             // Seçilmemiş normal durum
             else -> White
         }

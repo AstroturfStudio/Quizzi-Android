@@ -116,6 +116,10 @@ class GameViewModel
                 gameRepository.observeConnectionStatus().collect {
                     clearNotification()
                     when (it) {
+                        is GameConnectionStatus.Idle -> {
+                            isReconnecting = false
+                        }
+
                         is GameConnectionStatus.Reconnecting -> {
                             isReconnecting = true
                             _notification.value =

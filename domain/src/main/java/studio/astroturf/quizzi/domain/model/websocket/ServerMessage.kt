@@ -45,8 +45,13 @@ sealed class ServerMessage {
         val correct: Boolean,
     ) : ServerMessage()
 
-    data class RoundEnded(
+    data class CursorRoundEnded(
         val cursorPosition: Float,
+        val correctAnswer: Int,
+        val winnerPlayerId: String?,
+    ) : ServerMessage()
+
+    data class StandardRoundEnded(
         val correctAnswer: Int,
         val winnerPlayerId: String?,
     ) : ServerMessage()
