@@ -25,7 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.PlayerInRoom
+import studio.astroturf.quizzi.domain.model.PlayerState
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
@@ -228,22 +229,22 @@ private fun LobbyScreenPreview() {
                         listOf(
                             LobbyPlayerUiModel(
                                 player =
-                                    Player(
+                                    PlayerInRoom(
                                         id = "1",
                                         name = "Guven",
                                         avatarUrl = "https://www.example.com/avatar.png",
-                                        isReady = true,
+                                        state = PlayerState.READY,
                                     ),
                                 isCreator = true,
                                 isReady = true,
                             ),
                             LobbyPlayerUiModel(
                                 player =
-                                    Player(
+                                    PlayerInRoom(
                                         id = "2",
                                         name = "John",
                                         avatarUrl = "https://www.example.com/avatar.png",
-                                        isReady = false,
+                                        state = PlayerState.WAIT,
                                     ),
                                 isCreator = false,
                                 isReady = false,

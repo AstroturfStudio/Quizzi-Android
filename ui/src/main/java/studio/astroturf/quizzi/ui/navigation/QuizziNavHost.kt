@@ -58,8 +58,8 @@ fun QuizziNavHost(
 
         composable(QuizziNavDestination.Rooms.route) {
             RoomsScreen(
-                onNavigateToRoom = { roomId ->
-                    navController.navigate(QuizziNavDestination.Game.createRouteForJoining(roomId))
+                onNavigateToRoom = { room ->
+                    navController.navigate(QuizziNavDestination.Game.createRouteForJoining(room.id, room.name))
                 },
             )
         }

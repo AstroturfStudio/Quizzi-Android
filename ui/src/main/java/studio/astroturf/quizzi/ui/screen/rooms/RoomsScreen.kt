@@ -65,7 +65,7 @@ import studio.astroturf.quizzi.ui.theme.White
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoomsScreen(
-    onNavigateToRoom: (String) -> Unit,
+    onNavigateToRoom: (GameRoom) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RoomsViewModel = hiltViewModel(),
 ) {
@@ -81,8 +81,8 @@ fun RoomsScreen(
         isRefreshing = isRefreshing,
         onRefresh = { viewModel.refresh() },
         onSearch = { viewModel.onSearch(it) },
-        onJoinRoom = { roomId ->
-            onNavigateToRoom(roomId)
+        onJoinRoom = { room ->
+            onNavigateToRoom(room)
         },
         modifier = modifier,
     )
@@ -98,7 +98,7 @@ private fun RoomsScreenContent(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     onSearch: (String) -> Unit,
-    onJoinRoom: (String) -> Unit,
+    onJoinRoom: (GameRoom) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -345,7 +345,7 @@ fun SearchField(
 @Composable
 private fun RoomsList(
     rooms: List<GameRoom>,
-    onJoinRoom: (String) -> Unit,
+    onJoinRoom: (GameRoom) -> Unit,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
@@ -365,7 +365,7 @@ private fun RoomsList(
                     items(rooms) { room ->
                         RoomItem(
                             room = room,
-                            onJoinRoom = { onJoinRoom(room.id) },
+                            onJoinRoom = { onJoinRoom(room) },
                         )
                     }
                 }
@@ -382,7 +382,7 @@ private fun RoomsList(
 @Composable
 private fun RoomItem(
     room: GameRoom,
-    onJoinRoom: (String) -> Unit,
+    onJoinRoom: (GameRoom) -> Unit,
 ) {
     Row(
         modifier =
@@ -393,7 +393,7 @@ private fun RoomItem(
                 .background(White)
                 .padding(vertical = 8.dp)
                 .padding(start = 8.dp, end = 16.dp)
-                .clickable { onJoinRoom(room.id) },
+                .clickable { onJoinRoom(room) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
@@ -446,26 +446,31 @@ private fun RoomsScreenContentPreview() {
                 listOf(
                     GameRoom(
                         id = "Room1",
+                        name = "Room1",
                         roomState = RoomState.Waiting,
                         players = listOf("Player1", "Player2"),
                     ),
                     GameRoom(
                         id = "Room2",
+                        name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
                     ),
                     GameRoom(
                         id = "Room2",
+                        name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
                     ),
                     GameRoom(
                         id = "Room2",
+                        name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
                     ),
                     GameRoom(
                         id = "Room2",
+                        name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
                     ),

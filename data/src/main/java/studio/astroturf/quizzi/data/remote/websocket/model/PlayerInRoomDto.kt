@@ -1,18 +1,21 @@
 package studio.astroturf.quizzi.data.remote.websocket.model
 
 import kotlinx.serialization.Serializable
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.PlayerInRoom
+import studio.astroturf.quizzi.domain.model.PlayerState
 
 @Serializable
-data class PlayerDto(
+data class PlayerInRoomDto(
     val id: String,
     val name: String,
     val avatarUrl: String,
+    val state: String,
 ) {
     fun toDomain() =
-        Player(
+        PlayerInRoom(
             id = id,
             name = name,
             avatarUrl = avatarUrl,
+            state = PlayerState.valueOf(state),
         )
 }

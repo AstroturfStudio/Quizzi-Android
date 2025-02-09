@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.PlayerInRoom
 
 @Composable
 internal fun PausedContent(
     reason: String,
-    onlinePlayers: List<Player>,
+    onlinePlayers: List<PlayerInRoom>,
     onRetry: () -> Unit,
 ) {
     Column(/*...*/) {

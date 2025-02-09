@@ -26,7 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import studio.astroturf.quizzi.domain.model.Option
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.PlayerInRoom
+import studio.astroturf.quizzi.domain.model.PlayerState
 import studio.astroturf.quizzi.domain.model.Question
 import studio.astroturf.quizzi.ui.screen.game.GameUiState
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
@@ -206,18 +207,18 @@ private fun previewGameState(
     playerRoundResult: PlayerRoundResult? = null,
 ) = GameUiState.RoundOn(
     player1 =
-        Player(
+        PlayerInRoom(
             id = "1",
             name = "Player 1",
             avatarUrl = "TODO()",
-            isReady = true,
+            state = PlayerState.READY,
         ),
     player2 =
-        Player(
+        PlayerInRoom(
             id = "2",
             name = "Player 2",
             avatarUrl = "TODO()",
-            isReady = true,
+            state = PlayerState.WAIT,
         ),
     gameBarPercentage = 0.7f,
     question =

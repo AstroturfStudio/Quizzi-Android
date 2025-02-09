@@ -40,7 +40,7 @@ sealed class ServerSocketMessage {
     @Serializable
     @SerialName("RoomUpdate")
     data class RoomUpdate(
-        val players: List<PlayerDto>,
+        val players: List<PlayerInRoomDto>,
         val state: RoomState,
     ) : ServerSocketMessage()
 

@@ -12,6 +12,7 @@ data class RoomsDto(
 @Serializable
 data class GameRoomDto(
     val id: String,
+    val name: String,
     val playerCount: Int,
     val roomState: RoomState,
     val players: List<String>,
@@ -19,6 +20,7 @@ data class GameRoomDto(
     fun toDomain() =
         GameRoom(
             id = id,
+            name = name,
             roomState = roomState,
             players = players,
         )

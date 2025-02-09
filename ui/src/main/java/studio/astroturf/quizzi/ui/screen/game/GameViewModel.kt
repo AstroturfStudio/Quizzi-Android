@@ -21,7 +21,7 @@ import studio.astroturf.quizzi.domain.exceptionhandling.ExceptionResolver
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.domain.gameroomstatemachine.GameRoomStateMachine
 import studio.astroturf.quizzi.domain.model.GameFeedback
-import studio.astroturf.quizzi.domain.model.Player
+import studio.astroturf.quizzi.domain.model.PlayerInRoom
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomState
 import studio.astroturf.quizzi.domain.model.statemachine.GameRoomStateUpdater
 import studio.astroturf.quizzi.domain.model.websocket.ClientMessage
@@ -29,14 +29,12 @@ import studio.astroturf.quizzi.domain.network.GameConnectionStatus
 import studio.astroturf.quizzi.domain.repository.AuthRepository
 import studio.astroturf.quizzi.domain.repository.FeedbackRepository
 import studio.astroturf.quizzi.domain.repository.GameRepository
-import studio.astroturf.quizzi.domain.repository.RoomsRepository
 import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
 import studio.astroturf.quizzi.ui.navigation.QuizziNavDestination
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyPlayerUiModel
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyUiModel
-import studio.astroturf.quizzi.ui.screen.game.composables.roundend.RoundWinner
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -46,9 +44,8 @@ private const val TAG = "GameViewModel"
 class GameViewModel
     @Inject
     constructor(
-        private val savedStateHandle: SavedStateHandle,
+        savedStateHandle: SavedStateHandle,
         private val authRepository: AuthRepository,
-        private val roomsRepository: RoomsRepository,
         private val gameRepository: GameRepository,
         private val feedbackRepository: FeedbackRepository,
         private val exceptionResolver: ExceptionResolver,
@@ -80,7 +77,7 @@ class GameViewModel
             GameRoomStateMachine(viewModelScope, gameRepository, defaultDispatcher)
         private val stateMutex = Mutex()
 
-        private lateinit var players: List<Player>
+        private lateinit var players: List<PlayerInRoom>
 
         val currentGameRoomState: GameRoomState
             get() = gameStateMachine.getCurrentState()
@@ -223,12 +220,12 @@ class GameViewModel
                 else -> _uiState.value // Preserve current state
             }
 
-        private fun savePlayers(players: List<Player>) {
+        private fun savePlayers(players: List<PlayerInRoom>) {
             this.players = players
         }
 
         private fun createLobbyState(gameRoomState: GameRoomState.Waiting): GameUiState.Lobby {
-            val currentPlayer = players.first { it.id == authRepository.getCurrentPlayerId() }
+            val currentPlayer = gameRoomState.players.first { it.id == authRepository.getCurrentPlayerId() }
 
             return GameUiState.Lobby(
                 lobbyUiModel =
@@ -372,21 +369,6 @@ class GameViewModel
         private fun handleRoundEnd(effect: GameRoomStateUpdater.RoundEnd) {
             launchMain {
                 val currentState = _uiState.value as? GameUiState.RoundOn ?: return@launchMain
-                val winner =
-                    listOf(currentState.player1, currentState.player2)
-                        .find { it.id == effect.message.winnerPlayerId }
-
-                val roundWinner: RoundWinner =
-                    when (winner?.id) {
-                        null -> RoundWinner.None
-                        authRepository.getCurrentPlayerId() -> RoundWinner.Me(winner.id, winner.name)
-                        else -> RoundWinner.Opponent(winner.id, winner.name)
-                    }
-
-                val correctAnswerValue =
-                    currentState.question.options
-                        .find { it.id == effect.message.correctAnswer }
-                        ?.value ?: return@launchMain
 
                 updateUiState {
                     currentState.copy(
