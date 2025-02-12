@@ -367,15 +367,24 @@ private fun RoomsList(
             onRefresh = onRefresh,
         ) {
             if (!isRefreshing) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    items(rooms) { room ->
-                        RoomItem(
-                            room = room,
-                            onJoinRoom = { onJoinRoom(room) },
-                        )
+                if (rooms.isEmpty()) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "No rooms available.\n Would you like to create one?",
+                        style = BodySmallMedium.copy(color = Grey2),
+                        textAlign = TextAlign.Center,
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        items(rooms) { room ->
+                            RoomItem(
+                                room = room,
+                                onJoinRoom = { onJoinRoom(room) },
+                            )
+                        }
                     }
                 }
             } else {
@@ -484,6 +493,24 @@ private fun RoomsScreenContentPreview() {
                         players = listOf("Player3", "Player4", "Player5"),
                     ),
                 ),
+            isConnected = true,
+            searchText = "Alican",
+            error = null,
+            isRefreshing = false,
+            onRefresh = {},
+            onSearch = {},
+            onJoinRoom = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RoomsScreenContentPreview_NoRooms() {
+    MaterialTheme {
+        RoomsScreenContent(
+            currentUsername = "Player1",
+            rooms = emptyList(),
             isConnected = true,
             searchText = "Alican",
             error = null,

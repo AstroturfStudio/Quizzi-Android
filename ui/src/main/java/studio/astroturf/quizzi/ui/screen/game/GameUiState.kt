@@ -17,7 +17,7 @@ sealed interface GameUiState {
 
     data class RoundOn(
         val player1: PlayerInRoom,
-        val player2: PlayerInRoom,
+        val player2: PlayerInRoom?,
         val gameBarPercentage: Float,
         val question: Question,
         val timeRemainingInSeconds: Int,

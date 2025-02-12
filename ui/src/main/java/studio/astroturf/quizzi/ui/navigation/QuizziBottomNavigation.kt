@@ -7,10 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
@@ -22,9 +22,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
@@ -166,16 +166,12 @@ fun QuizziBottomNavigation(
             modifier =
                 Modifier
                     .wrapContentHeight()
-                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                    .background(color = White),
+                    .background(Color.Transparent),
             tonalElevation = 8.dp,
+            containerColor = Color.Transparent,
         ) {
             Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .background(color = White)
-                        .clip(BottomNavigationShape(fabSize = 52f, fabPadding = 2f)),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -221,8 +217,9 @@ fun QuizziBottomNavigation(
             onClick = onFabClick,
             modifier =
                 Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(y = (-22).dp)
+                    .align(Alignment.TopEnd)
+                    .padding(end = 16.dp)
+                    .offset(y = (-24).dp)
                     .size(48.dp),
             containerColor = Primary,
             shape = CircleShape,

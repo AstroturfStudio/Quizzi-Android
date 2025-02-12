@@ -319,7 +319,7 @@ class GameViewModel
                         updateUiState {
                             GameUiState.RoundOn(
                                 player1 = gameState.players[0],
-                                player2 = gameState.players[1],
+                                player2 = gameState.players.getOrNull(1),
                                 gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
                                 question = effect.message.currentQuestion,
                                 timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
@@ -359,7 +359,7 @@ class GameViewModel
                 updateUiState {
                     GameUiState.RoundOn(
                         player1 = gameState.players[0],
-                        player2 = gameState.players[1],
+                        player2 = gameState.players.getOrNull(1),
                         gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
                         question = effect.message.currentQuestion,
                         timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
@@ -496,6 +496,8 @@ class GameViewModel
         fun readyToPlay() {
             sendPlayerReady()
         }
+
+        fun getGameType(): String? = gameType
 
         companion object {
             private const val INITIAL_GAMEBAR_PERCENTAGE = 0.5f

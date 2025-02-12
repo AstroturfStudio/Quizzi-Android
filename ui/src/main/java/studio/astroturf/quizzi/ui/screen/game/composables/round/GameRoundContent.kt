@@ -39,6 +39,7 @@ import studio.astroturf.quizzi.ui.theme.White
 
 @Composable
 fun GameRoundContent(
+    gameType: String,
     state: GameUiState.RoundOn,
     onSubmitAnswer: (Int) -> Unit,
     imageLoader: ImageLoader,
@@ -83,25 +84,13 @@ fun GameRoundContent(
 
             Spacer(modifier = Modifier.height(22.dp))
 
-            Row(
-                modifier = Modifier.wrapContentWidth().wrapContentHeight(),
-                horizontalArrangement = Arrangement.spacedBy(56.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                PlayerDisplay(
-                    player = state.player1,
-                    imageLoader = imageLoader,
-                )
-
+            if (state.player2 != null) {
+                VersusDisplay(state.player1, state.player2, state.timeRemainingInSeconds, imageLoader)
+            } else {
                 TimeDisplay(
-                    totalTime = 10,
+                    totalTime = getTotalTime(gameType),
                     timeLeft = state.timeRemainingInSeconds,
                     modifier = Modifier.wrapContentSize(),
-                )
-
-                PlayerDisplay(
-                    player = state.player2,
-                    imageLoader = imageLoader,
                 )
             }
 
@@ -136,12 +125,53 @@ fun GameRoundContent(
     }
 }
 
+fun getTotalTime(gameType: String): Int =
+    when (gameType) {
+        "ResistanceGame" -> 10
+        "ResistToTimeGame" -> 30
+        else -> 10
+    }
+
+@Composable
+private fun VersusDisplay(
+    player1: PlayerInRoom,
+    player2: PlayerInRoom,
+    timeRemainingInSeconds: Int,
+    imageLoader: ImageLoader,
+) {
+    Row(
+        modifier =
+            Modifier
+                .wrapContentWidth()
+                .wrapContentHeight(),
+        horizontalArrangement = Arrangement.spacedBy(56.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        PlayerDisplay(
+            player = player1,
+            imageLoader = imageLoader,
+        )
+
+        TimeDisplay(
+            totalTime = 10,
+            timeLeft = timeRemainingInSeconds,
+            modifier = Modifier.wrapContentSize(),
+        )
+
+        PlayerDisplay(
+            player = player2,
+            imageLoader = imageLoader,
+        )
+    }
+}
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun GameRoundContentPreview() {
     val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
+            gameType = "ResistanceGame",
             state = previewGameState(),
             onSubmitAnswer = {},
             imageLoader = previewImageLoader(context),
@@ -155,6 +185,7 @@ private fun GameRoundContentWithSelectedAnswerPreview() {
     val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
+            gameType = "ResistanceGame",
             state = previewGameState(selectedAnswerId = 1),
             onSubmitAnswer = {},
             imageLoader = previewImageLoader(context),
@@ -168,6 +199,7 @@ private fun GameRoundContentWithCorrectAnswerPreview() {
     val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
+            gameType = "ResistanceGame",
             state =
                 previewGameState(
                     selectedAnswerId = 1,
@@ -185,6 +217,7 @@ private fun GameRoundContentWithWrongAnswerPreview() {
     val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
+            gameType = "ResistanceGame",
             state =
                 previewGameState(
                     selectedAnswerId = 1,
@@ -213,13 +246,14 @@ private fun previewGameState(
             avatarUrl = "TODO()",
             state = PlayerState.READY,
         ),
-    player2 =
-        PlayerInRoom(
-            id = "2",
-            name = "Player 2",
-            avatarUrl = "TODO()",
-            state = PlayerState.WAIT,
-        ),
+//    player2 =
+//        PlayerInRoom(
+//            id = "2",
+//            name = "Player 2",
+//            avatarUrl = "TODO()",
+//            state = PlayerState.WAIT,
+//        ),
+    player2 = null,
     gameBarPercentage = 0.7f,
     question =
         Question(

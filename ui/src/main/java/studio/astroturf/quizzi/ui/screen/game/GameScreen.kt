@@ -46,6 +46,7 @@ fun GameScreen(
     }
 
     GameScreenContent(
+        gameType = viewModel.getGameType()!!,
         state = uiState,
         onNavigateToRooms = onNavigateToRooms,
         onReadyToPlay = viewModel::readyToPlay,
@@ -58,6 +59,7 @@ fun GameScreen(
 
 @Composable
 private fun GameScreenContent(
+    gameType: String,
     state: GameUiState,
     onNavigateToRooms: () -> Unit,
     onReadyToPlay: () -> Unit,
@@ -68,6 +70,7 @@ private fun GameScreenContent(
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         GameStateContent(
+            gameType = gameType,
             currentState = state,
             onNavigateToRooms = onNavigateToRooms,
             onReadyToPlay = onReadyToPlay,
@@ -80,6 +83,7 @@ private fun GameScreenContent(
 
 @Composable
 private fun GameStateContent(
+    gameType: String,
     currentState: GameUiState,
     onNavigateToRooms: () -> Unit,
     onReadyToPlay: () -> Unit,
@@ -98,6 +102,7 @@ private fun GameStateContent(
 
         currentState is GameUiState.RoundOn -> {
             GameRoundContent(
+                gameType = gameType,
                 state = currentState,
                 onSubmitAnswer = onSubmitAnswer,
                 imageLoader = imageLoader,
