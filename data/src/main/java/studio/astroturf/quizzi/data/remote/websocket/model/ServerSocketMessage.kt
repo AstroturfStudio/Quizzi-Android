@@ -90,7 +90,7 @@ sealed class ServerSocketMessage {
     @Serializable
     @SerialName("GameOver")
     data class GameOver(
-        val winnerPlayerId: String,
+        val winnerPlayerId: String?,
     ) : ServerSocketMessage()
 
     @Serializable

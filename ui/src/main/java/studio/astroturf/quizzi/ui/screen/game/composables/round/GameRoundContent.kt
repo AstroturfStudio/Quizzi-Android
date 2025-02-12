@@ -128,7 +128,7 @@ fun GameRoundContent(
 fun getTotalTime(gameType: String): Int =
     when (gameType) {
         "ResistanceGame" -> 10
-        "ResistToTimeGame" -> 30
+        "ResistToTimeGame" -> 3
         else -> 10
     }
 

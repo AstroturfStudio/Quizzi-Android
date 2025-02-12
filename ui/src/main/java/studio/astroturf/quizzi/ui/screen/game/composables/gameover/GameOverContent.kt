@@ -47,7 +47,7 @@ internal fun GameOverContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Winner: ${state.winner.name}",
+            text = "Winner: ${state.winnerName}",
             style = MaterialTheme.typography.headlineMedium,
         )
 

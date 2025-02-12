@@ -322,7 +322,7 @@ class GameViewModel
                                 player2 = gameState.players.getOrNull(1),
                                 gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
                                 question = effect.message.currentQuestion,
-                                timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
+                                timeRemainingInSeconds = getInitialRoundCountdownSec(),
                                 selectedAnswerId = null,
                                 playerRoundResult = null,
                             )
@@ -362,13 +362,20 @@ class GameViewModel
                         player2 = gameState.players.getOrNull(1),
                         gameBarPercentage = INITIAL_GAMEBAR_PERCENTAGE,
                         question = effect.message.currentQuestion,
-                        timeRemainingInSeconds = INITIAL_ROUND_COUNTDOWN_SEC,
+                        timeRemainingInSeconds = getInitialRoundCountdownSec(),
                         selectedAnswerId = null,
                         playerRoundResult = null,
                     )
                 }
             }
         }
+
+        private fun getInitialRoundCountdownSec(): Int =
+            when (gameType) {
+                "ResistanceGame" -> 10
+                "ResistToTimeGame" -> 3
+                else -> 10
+            }
 
         private fun handleRoundEnd(effect: GameRoomStateUpdater.RoundEnd) {
             launchMain {
@@ -396,11 +403,11 @@ class GameViewModel
         private fun handleGameOver(effect: GameRoomStateUpdater.GameRoomOver) {
             launchMain {
                 val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
-                val winner = gameState.players.first { it.id == effect.message.winnerPlayerId }
+                val winner = gameState.players.firstOrNull { it.id == effect.message.winnerPlayerId }
                 updateUiState {
                     GameUiState.GameOver(
                         totalRoundCount = 0, // TODO:
-                        winner = winner,
+                        winnerName = winner?.name ?: "Quizzi Bot",
                         gameId = roomId!!,
                     )
                 }
@@ -501,6 +508,5 @@ class GameViewModel
 
         companion object {
             private const val INITIAL_GAMEBAR_PERCENTAGE = 0.5f
-            private const val INITIAL_ROUND_COUNTDOWN_SEC = 10
         }
     }

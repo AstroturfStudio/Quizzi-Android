@@ -61,7 +61,7 @@ sealed class ServerMessage {
     ) : ServerMessage()
 
     data class GameOver(
-        val winnerPlayerId: String,
+        val winnerPlayerId: String?,
     ) : ServerMessage()
 
     data class Error(

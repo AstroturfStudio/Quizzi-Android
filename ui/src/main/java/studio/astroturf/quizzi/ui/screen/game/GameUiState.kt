@@ -9,11 +9,7 @@ sealed interface GameUiState {
 
     data class Lobby(
         val lobbyUiModel: LobbyUiModel,
-    ) : GameUiState {
-        data class CountdownTimer(
-            val timeRemainingInSeconds: Int,
-        )
-    }
+    ) : GameUiState
 
     data class RoundOn(
         val player1: PlayerInRoom,
@@ -37,7 +33,7 @@ sealed interface GameUiState {
 
     data class GameOver(
         val totalRoundCount: Int,
-        val winner: PlayerInRoom,
+        val winnerName: String,
         val gameId: String,
     ) : GameUiState
 }

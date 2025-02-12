@@ -158,7 +158,7 @@ class RoomsViewModel
                             currentState.rooms
                         } else {
                             currentState.rooms.filter { room ->
-                                room.players.firstOrNull()?.contains(query, ignoreCase = true) ?: false
+                                room.name.contains(query, ignoreCase = true)
                             }
                         },
                 )
