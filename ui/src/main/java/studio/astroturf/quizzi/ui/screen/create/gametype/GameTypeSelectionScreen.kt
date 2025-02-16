@@ -149,16 +149,16 @@ private fun GameTypeSelectionContent(
                 Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .background(color = Secondary, shape = RoundedCornerShape(size = 20.dp))
                     .align(Alignment.BottomCenter),
             onClick = onNextClick,
             colors = ButtonDefaults.buttonColors().copy(containerColor = Secondary),
+            shape = RoundedCornerShape(size = 20.dp),
             enabled = gameTypes.any { it.isSelected },
         ) {
             Text(
                 modifier = Modifier.wrapContentSize(),
                 text = "Next",
-                style = BodyNormalMedium.copy(color = White),
+                style = BodyNormalMedium,
             )
         }
     }

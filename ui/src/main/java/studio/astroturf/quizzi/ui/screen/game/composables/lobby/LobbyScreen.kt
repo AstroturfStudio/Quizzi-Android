@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -159,7 +158,6 @@ fun LobbyScreen(
                     onClick = {
                         onReadyToPlay?.invoke()
                     },
-                    colors = ButtonDefaults.buttonColors().copy(disabledContainerColor = Grey2),
                     enabled = isButtonEnabled,
                     shape = RoundedCornerShape(size = 20.dp),
                 ) {
@@ -173,7 +171,7 @@ fun LobbyScreen(
                     Text(
                         modifier = Modifier.wrapContentSize(),
                         text = text,
-                        style = BodyNormalMedium.copy(color = White),
+                        style = BodyNormalMedium,
                     )
                 }
             }

@@ -109,7 +109,7 @@ fun LandingScreenContent(
                 Modifier
                     .fillMaxWidth()
                     .height(340.dp)
-                    .background(color = Color.White, shape = RoundedCornerShape(size = 20.dp))
+                    .background(color = White, shape = RoundedCornerShape(size = 20.dp))
                     .padding(16.dp),
         ) {
             Column(
@@ -188,14 +188,14 @@ fun LandingScreenContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
-                            .background(color = Primary, shape = RoundedCornerShape(size = 20.dp)),
+                            .height(56.dp),
+                    shape = RoundedCornerShape(size = 20.dp),
                     enabled = name.isNotBlank(),
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
                         text = "Login",
-                        style = BodyNormalMedium.copy(color = White),
+                        style = BodyNormalMedium,
                     )
                 }
 

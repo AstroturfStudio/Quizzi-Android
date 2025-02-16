@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -243,17 +242,13 @@ private fun CreateRoomScreenContent(
                     onClick = {
                         onCreateRoom(roomTitle!!, quizCategory!!, gameType!!)
                     },
-                    colors =
-                        ButtonDefaults
-                            .buttonColors()
-                            .copy(disabledContainerColor = Grey2),
                     shape = RoundedCornerShape(size = 20.dp),
                     enabled = isButtonEnabled,
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
                         text = "Create Room",
-                        style = BodyNormalMedium.copy(color = White),
+                        style = BodyNormalMedium,
                     )
                 }
             }
