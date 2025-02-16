@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import studio.astroturf.quizzi.domain.model.PlayerInRoom
+import studio.astroturf.quizzi.ui.R
 
 @Composable
 internal fun PausedContent(
@@ -15,7 +17,7 @@ internal fun PausedContent(
     Column(/*...*/) {
         Text(reason)
         Button(onClick = onRetry) {
-            Text("Retry")
+            Text(stringResource(R.string.retry))
         }
     }
 }

@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.domain.model.PlayerInRoom
@@ -56,7 +57,10 @@ fun LobbyScreen(
             ),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(bottom = 24.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 24.dp),
         ) {
             Image(
                 painter = painterResource(id = R.drawable.illustration_lobby),
@@ -152,9 +156,15 @@ fun LobbyScreen(
                 QButton(
                     text =
                         if (isButtonEnabled) {
-                            if (lobbyUiModel.currentUserReady) "Not Ready" else "Ready To Play"
+                            if (lobbyUiModel.currentUserReady) {
+                                stringResource(R.string.not_ready)
+                            } else {
+                                stringResource(
+                                    R.string.ready_to_play,
+                                )
+                            }
                         } else {
-                            "Starting in... ${lobbyUiModel.countdown}"
+                            stringResource(R.string.starting_in, lobbyUiModel.countdown!!)
                         },
                     onClick = {
                         onReadyToPlay?.invoke()
@@ -201,7 +211,7 @@ private fun PlayerInLobby(lobbyPlayerUiModel: LobbyPlayerUiModel) {
             Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                text = if (isReady) "Ready" else "Not Ready",
+                text = if (isReady) stringResource(R.string.ready) else stringResource(R.string.not_ready),
                 style = BodyXSmallRegular.copy(color = Grey2),
             )
         }

@@ -76,7 +76,7 @@ fun GameRoundContent(
             ) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
-                    text = "Which flag is it?",
+                    text = state.question.content,
                     style = BodyXLarge,
                     textAlign = TextAlign.Center, // Still useful for horizontal alignment
                 )

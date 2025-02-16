@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -92,7 +93,7 @@ private fun CreateRoomScreenContent(
     onCreateRoom: (String, Category, GameType) -> Unit,
 ) {
     AppBarScreen(
-        title = "Create Room",
+        title = stringResource(R.string.create_room),
         leadingIcon =
             ClickableIcon(
                 iconResId = R.drawable.ic_back,
@@ -114,7 +115,7 @@ private fun CreateRoomScreenContent(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 Text(
-                    text = "Title",
+                    text = stringResource(R.string.title),
                     style = BodyNormalMedium.copy(color = Black),
                 )
 
@@ -135,7 +136,7 @@ private fun CreateRoomScreenContent(
                             if (roomTitle.isNullOrEmpty()) {
                                 Text(
                                     modifier = Modifier.wrapContentSize(),
-                                    text = "Enter room title",
+                                    text = stringResource(R.string.enter_room_title),
                                     style = BodyNormalRegular.copy(color = Grey2),
                                     textAlign = TextAlign.Center,
                                 )
@@ -158,7 +159,7 @@ private fun CreateRoomScreenContent(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = "Quiz Category",
+                    text = stringResource(R.string.quiz_category),
                     style = BodyNormalMedium.copy(color = Black),
                 )
 
@@ -180,7 +181,7 @@ private fun CreateRoomScreenContent(
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
-                        text = quizCategory?.name ?: "Choose quiz category",
+                        text = quizCategory?.name ?: stringResource(R.string.choose_quiz_category),
                         style = BodyNormalRegular.copy(color = Grey2),
                         textAlign = TextAlign.Center,
                     )
@@ -195,7 +196,7 @@ private fun CreateRoomScreenContent(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    text = "Game Type",
+                    text = stringResource(R.string.game_type),
                     style = BodyNormalMedium.copy(color = Black),
                 )
 
@@ -217,7 +218,7 @@ private fun CreateRoomScreenContent(
                 ) {
                     Text(
                         modifier = Modifier.wrapContentSize(),
-                        text = gameType?.name ?: "Choose game type",
+                        text = gameType?.name ?: stringResource(R.string.choose_game_type),
                         style = BodyNormalRegular.copy(color = Grey2),
                         textAlign = TextAlign.Center,
                     )
@@ -235,7 +236,7 @@ private fun CreateRoomScreenContent(
                     roomTitle.isNotNullOrBlank() && quizCategory != null && gameType != null
 
                 QButton(
-                    text = "Create Room",
+                    text = stringResource(R.string.create_room),
                     enabled = isButtonEnabled,
                     onClick = {
                         onCreateRoom(roomTitle!!, quizCategory!!, gameType!!)

@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
@@ -119,7 +120,7 @@ private fun RoomsScreenContent(
     ) {
         if (!isConnected) {
             Text(
-                text = "Connecting...",
+                text = stringResource(R.string.connecting),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary,
             )
@@ -152,8 +153,11 @@ private fun RoomsScreenContent(
                     )
 
                     Text(
-                        modifier = Modifier.wrapContentHeight().align(Alignment.CenterVertically),
-                        text = "GOOD MORNING",
+                        modifier =
+                            Modifier
+                                .wrapContentHeight()
+                                .align(Alignment.CenterVertically),
+                        text = stringResource(R.string.good_morning),
                         textAlign = TextAlign.Center,
                         style =
                             BodyXSmallMedium.copy(
@@ -228,7 +232,7 @@ private fun RoomsScreenContent(
                         Modifier
                             .height(28.dp)
                             .wrapContentWidth(),
-                    text = "Rooms",
+                    text = stringResource(R.string.rooms),
                     style = BodyXLarge.copy(color = Black),
                     textAlign = TextAlign.Center,
                 )
@@ -339,7 +343,7 @@ fun SearchField(
                 Box {
                     if (searchText.isEmpty()) {
                         Text(
-                            text = "Search Rooms",
+                            text = stringResource(R.string.search_rooms),
                             style = BodyNormalRegular.copy(color = Grey3),
                         )
                     }
@@ -370,7 +374,7 @@ private fun RoomsList(
                 if (rooms.isEmpty()) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "No rooms available.\n Would you like to create one?",
+                        text = stringResource(R.string.no_rooms_available),
                         style = BodySmallMedium.copy(color = Grey2),
                         textAlign = TextAlign.Center,
                     )
@@ -415,7 +419,10 @@ private fun RoomItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            modifier = Modifier.padding(1.dp).size(64.dp),
+            modifier =
+                Modifier
+                    .padding(1.dp)
+                    .size(64.dp),
             painter = painterResource(id = R.drawable.game_mode_resistence),
             contentDescription = "image description",
         )
@@ -423,11 +430,17 @@ private fun RoomItem(
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(
-            modifier = Modifier.fillMaxHeight().weight(1f),
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .weight(1f),
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                modifier = Modifier.height(24.dp).wrapContentWidth(),
+                modifier =
+                    Modifier
+                        .height(24.dp)
+                        .wrapContentWidth(),
                 text = room.name,
                 style = BodySmallMedium.copy(color = Black),
             )
@@ -435,7 +448,10 @@ private fun RoomItem(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                modifier = Modifier.height(18.dp).wrapContentWidth(),
+                modifier =
+                    Modifier
+                        .height(18.dp)
+                        .wrapContentWidth(),
                 text = room.roomState.name, // TODO: Change to game mode
                 style = BodySmallMedium.copy(color = Grey2),
             )

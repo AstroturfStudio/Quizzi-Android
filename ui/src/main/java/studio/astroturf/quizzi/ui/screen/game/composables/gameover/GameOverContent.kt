@@ -17,8 +17,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.domain.model.GameFeedback
+import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.screen.game.GameUiState
 
@@ -39,21 +41,21 @@ internal fun GameOverContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Game Over!",
+            text = stringResource(R.string.game_over),
             style = MaterialTheme.typography.displayMedium,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Winner: ${state.winnerName}",
+            text = stringResource(R.string.winner, state.winnerName),
             style = MaterialTheme.typography.headlineMedium,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Total Rounds: ${state.totalRoundCount}",
+            text = stringResource(R.string.total_rounds, state.totalRoundCount),
             style = MaterialTheme.typography.bodyLarge,
         )
 
@@ -67,7 +69,7 @@ internal fun GameOverContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         QButton(
-            text = "Back to Rooms",
+            text = stringResource(R.string.back_to_rooms),
             onClick = onNavigateBack,
         )
     }

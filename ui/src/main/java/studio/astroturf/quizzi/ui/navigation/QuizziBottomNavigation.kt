@@ -1,6 +1,7 @@
 package studio.astroturf.quizzi.ui.navigation
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.QuizziIcon
 import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.White
@@ -53,7 +56,7 @@ sealed class BottomNavIcon {
 data class BottomNavItem(
     val route: String,
     val icon: BottomNavIcon,
-    val label: String,
+    @StringRes val labelStringRes: Int,
 )
 
 val bottomNavItems =
@@ -61,7 +64,7 @@ val bottomNavItems =
         BottomNavItem(
             route = QuizziNavDestination.Rooms.route,
             icon = BottomNavIcon.VectorIcon(Icons.Default.Home),
-            label = "Home",
+            labelStringRes = R.string.home,
         ),
 //        BottomNavItem(
 //            route = QuizziNavDestination.Search.route,
@@ -183,7 +186,7 @@ fun QuizziBottomNavigation(
                                 is BottomNavIcon.ResourceIcon -> {
                                     QuizziIcon(
                                         iconResId = icon.resId,
-                                        contentDescription = item.label,
+                                        contentDescription = stringResource(item.labelStringRes),
                                         modifier = Modifier.size(24.dp),
                                     )
                                 }
@@ -191,7 +194,7 @@ fun QuizziBottomNavigation(
                                 is BottomNavIcon.VectorIcon -> {
                                     Icon(
                                         imageVector = icon.imageVector,
-                                        contentDescription = item.label,
+                                        contentDescription = stringResource(item.labelStringRes),
                                         modifier = Modifier.size(24.dp),
                                     )
                                 }

@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,7 +48,7 @@ fun CategorySelectionScreen(
     val categories by viewModel.categoriesUiModel.collectAsState()
 
     AppBarScreen(
-        title = "Choose Category",
+        title = stringResource(R.string.choose_category),
         leadingIcon =
             ClickableIcon(
                 iconResId = R.drawable.ic_back,
@@ -144,7 +145,7 @@ private fun CategorySelectionContent(
         }
 
         QButton.Secondary(
-            text = "Next",
+            text = stringResource(R.string.next),
             modifier = Modifier.align(Alignment.BottomCenter),
             enabled = categories.any { it.isSelected },
             onClick = onNextClick,

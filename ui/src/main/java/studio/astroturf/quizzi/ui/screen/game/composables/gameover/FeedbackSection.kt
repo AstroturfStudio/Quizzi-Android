@@ -24,8 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.domain.model.GameFeedback
+import studio.astroturf.quizzi.ui.R
 
 @Composable
 internal fun FeedbackSection(
@@ -45,20 +47,20 @@ internal fun FeedbackSection(
     ) {
         if (!isSubmitted) {
             Text(
-                text = "Help us improve!",
+                text = stringResource(R.string.help_us_improve),
                 style = MaterialTheme.typography.titleLarge,
             )
 
             // Enjoyment Rating
             RatingQuestion(
-                question = "How enjoyable was the game?",
+                question = stringResource(R.string.how_enjoyable_was_the_game),
                 rating = enjoymentRating,
                 onRatingSelect = { enjoymentRating = it },
             )
 
             // Difficulty Rating
             RatingQuestion(
-                question = "How was the difficulty level?",
+                question = stringResource(R.string.how_was_the_difficulty_level),
                 rating = difficultyRating,
                 onRatingSelect = { difficultyRating = it },
             )
@@ -67,7 +69,7 @@ internal fun FeedbackSection(
             OutlinedTextField(
                 value = additionalFeedback,
                 onValueChange = { additionalFeedback = it },
-                label = { Text("Any additional feedback?") },
+                label = { Text(stringResource(R.string.any_additional_feedback)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
                 maxLines = 5,
@@ -97,7 +99,7 @@ internal fun FeedbackSection(
                     enabled = enjoymentRating != null && difficultyRating != null,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Submit Feedback")
+                    Text(stringResource(R.string.submit_feedback))
                 }
 
                 // Report Bug Button
@@ -110,12 +112,12 @@ internal fun FeedbackSection(
                         contentDescription = null,
                         modifier = Modifier.padding(end = 8.dp),
                     )
-                    Text("Report Bug")
+                    Text(stringResource(R.string.report_bug))
                 }
             }
         } else {
             Text(
-                text = "Thank you for your feedback!",
+                text = stringResource(R.string.thank_you_for_your_feedback),
                 style = MaterialTheme.typography.titleMedium,
             )
         }

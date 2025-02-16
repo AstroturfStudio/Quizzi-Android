@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -119,7 +120,7 @@ fun LandingScreenContent(
                         Modifier
                             .height(36.dp)
                             .fillMaxWidth(),
-                    text = "Login",
+                    text = stringResource(R.string.login),
                     color = Color(0xFF001833),
                     style = Heading3.copy(textAlign = TextAlign.Center),
                 )
@@ -131,7 +132,7 @@ fun LandingScreenContent(
                         Modifier
                             .height(24.dp)
                             .fillMaxWidth(),
-                    text = "Enter your username and join us.",
+                    text = stringResource(R.string.login_username_prompt),
                     style = BodyNormalRegular.copy(textAlign = TextAlign.Center),
                 )
 
@@ -166,7 +167,7 @@ fun LandingScreenContent(
                             Box {
                                 if (name.isEmpty()) {
                                     Text(
-                                        text = "Your username",
+                                        text = stringResource(R.string.your_username),
                                         style = BodyNormalRegular.copy(color = Grey2),
                                     )
                                 }
@@ -180,7 +181,7 @@ fun LandingScreenContent(
                 Spacer(modifier = Modifier.height(21.dp))
 
                 QButton(
-                    text = "Login",
+                    text = stringResource(R.string.login),
                     onClick = {
                         onCreatePlayer(name, avatarUrl)
                     },

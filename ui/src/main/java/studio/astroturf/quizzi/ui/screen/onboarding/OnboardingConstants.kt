@@ -1,25 +1,27 @@
 package studio.astroturf.quizzi.ui.screen.onboarding
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import studio.astroturf.quizzi.ui.R
 
 object OnboardingConstants {
     data class OnboardingPage(
-        val title: String,
-        val imageRes: Int,
+        @StringRes val titleStringRes: Int,
+        @DrawableRes val imageRes: Int,
     )
 
     val onboardingPages =
         listOf(
             OnboardingPage(
-                title = "Create gamified quizzes becomes simple",
+                titleStringRes = R.string.onboarding_page_1_title,
                 imageRes = R.drawable.illustration_onboarding_1,
             ),
             OnboardingPage(
-                title = "Find quizzes to test out your knowledge",
+                titleStringRes = R.string.onboarding_page_2_title,
                 imageRes = R.drawable.illustration_onboarding_2,
             ),
             OnboardingPage(
-                title = "Take part in challenges with friends",
+                titleStringRes = R.string.onboarding_page_3_title,
                 imageRes = R.drawable.illustration_onboarding_3,
             ),
         )

@@ -29,10 +29,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
@@ -81,11 +83,17 @@ fun OnboardingContent(
     onLoginClick: () -> Unit = {},
 ) {
     Column(
-        modifier = modifier.fillMaxSize().background(color = Primary),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(color = Primary),
     ) {
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxWidth().weight(1f),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
         ) { page ->
 
             Box(
@@ -158,7 +166,7 @@ fun OnboardingContent(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = OnboardingConstants.onboardingPages[pagerState.currentPage].title,
+                text = stringResource(OnboardingConstants.onboardingPages[pagerState.currentPage].titleStringRes),
                 style = Heading3,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -167,7 +175,7 @@ fun OnboardingContent(
             Spacer(Modifier.height(24.dp))
 
             QButton(
-                text = "Sign Up",
+                text = stringResource(R.string.sign_up),
                 onClick = { onSignUpClick() },
             )
 
@@ -178,11 +186,11 @@ fun OnboardingContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Already have an account? ",
+                    text = stringResource(R.string.already_have_an_account),
                     style = BodyNormalRegular.copy(color = Grey2),
                 )
                 Text(
-                    text = "Login",
+                    text = stringResource(R.string.login),
                     style = BodyNormalMedium.copy(color = Primary),
                     modifier = Modifier.clickable { onLoginClick() },
                 )
