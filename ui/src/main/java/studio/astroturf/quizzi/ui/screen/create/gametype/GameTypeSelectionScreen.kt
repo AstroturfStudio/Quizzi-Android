@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +29,7 @@ import studio.astroturf.quizzi.domain.model.GameType
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
+import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyXSmallRegular
 import studio.astroturf.quizzi.ui.theme.Grey5
@@ -144,23 +143,12 @@ private fun GameTypeSelectionContent(
             }
         }
 
-        Button(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .align(Alignment.BottomCenter),
-            onClick = onNextClick,
-            colors = ButtonDefaults.buttonColors().copy(containerColor = Secondary),
-            shape = RoundedCornerShape(size = 20.dp),
+        QButton.Secondary(
+            text = "Next",
+            modifier = Modifier.align(Alignment.BottomCenter),
             enabled = gameTypes.any { it.isSelected },
-        ) {
-            Text(
-                modifier = Modifier.wrapContentSize(),
-                text = "Next",
-                style = BodyNormalMedium,
-            )
-        }
+            onClick = onNextClick,
+        )
     }
 }
 

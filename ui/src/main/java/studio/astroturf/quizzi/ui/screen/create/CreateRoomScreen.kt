@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +37,7 @@ import studio.astroturf.quizzi.domain.model.GameType
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
+import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.navigation.QuizziNavDestination
 import studio.astroturf.quizzi.ui.theme.Black
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
@@ -234,23 +234,13 @@ private fun CreateRoomScreenContent(
                 val isButtonEnabled =
                     roomTitle.isNotNullOrBlank() && quizCategory != null && gameType != null
 
-                Button(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
+                QButton(
+                    text = "Create Room",
+                    enabled = isButtonEnabled,
                     onClick = {
                         onCreateRoom(roomTitle!!, quizCategory!!, gameType!!)
                     },
-                    shape = RoundedCornerShape(size = 20.dp),
-                    enabled = isButtonEnabled,
-                ) {
-                    Text(
-                        modifier = Modifier.wrapContentSize(),
-                        text = "Create Room",
-                        style = BodyNormalMedium,
-                    )
-                }
+                )
             }
         }
     }

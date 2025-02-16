@@ -12,10 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +27,7 @@ import studio.astroturf.quizzi.domain.model.PlayerState
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
+import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.theme.Black
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
@@ -150,30 +149,18 @@ fun LobbyScreen(
 
                 val isButtonEnabled = lobbyUiModel.countdown == null
 
-                Button(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                    onClick = {
-                        onReadyToPlay?.invoke()
-                    },
-                    enabled = isButtonEnabled,
-                    shape = RoundedCornerShape(size = 20.dp),
-                ) {
-                    val text =
+                QButton(
+                    text =
                         if (isButtonEnabled) {
                             if (lobbyUiModel.currentUserReady) "Not Ready" else "Ready To Play"
                         } else {
                             "Starting in... ${lobbyUiModel.countdown}"
-                        }
-
-                    Text(
-                        modifier = Modifier.wrapContentSize(),
-                        text = text,
-                        style = BodyNormalMedium,
-                    )
-                }
+                        },
+                    onClick = {
+                        onReadyToPlay?.invoke()
+                    },
+                    enabled = isButtonEnabled,
+                )
             }
         }
     }

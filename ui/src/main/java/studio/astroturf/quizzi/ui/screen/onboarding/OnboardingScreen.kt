@@ -21,7 +21,6 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
 import studio.astroturf.quizzi.ui.theme.Grey2
@@ -166,20 +166,10 @@ fun OnboardingContent(
 
             Spacer(Modifier.height(24.dp))
 
-            Button(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
+            QButton(
+                text = "Sign Up",
                 onClick = { onSignUpClick() },
-                shape = RoundedCornerShape(size = 20.dp),
-            ) {
-                Text(
-                    modifier = Modifier.wrapContentSize(),
-                    style = BodyNormalMedium,
-                    text = "Sign Up",
-                )
-            }
+            )
 
             Spacer(Modifier.height(16.dp))
 

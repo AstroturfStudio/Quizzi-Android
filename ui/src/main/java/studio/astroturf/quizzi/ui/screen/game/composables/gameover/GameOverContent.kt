@@ -4,12 +4,10 @@ import BugReportDialog
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.domain.model.GameFeedback
+import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.screen.game.GameUiState
 
 @Composable
@@ -67,12 +66,10 @@ internal fun GameOverContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
+        QButton(
+            text = "Back to Rooms",
             onClick = onNavigateBack,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Back to Rooms")
-        }
+        )
     }
 
     if (showBugReportDialog) {

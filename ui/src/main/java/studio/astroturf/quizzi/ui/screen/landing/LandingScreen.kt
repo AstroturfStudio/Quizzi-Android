@@ -14,10 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,9 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import studio.astroturf.quizzi.ui.R
+import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.screen.game.LoadingIndicator
 import studio.astroturf.quizzi.ui.theme.Black
-import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
 import studio.astroturf.quizzi.ui.theme.Grey2
 import studio.astroturf.quizzi.ui.theme.Grey5
@@ -181,23 +179,13 @@ fun LandingScreenContent(
 
                 Spacer(modifier = Modifier.height(21.dp))
 
-                Button(
+                QButton(
+                    text = "Login",
                     onClick = {
                         onCreatePlayer(name, avatarUrl)
                     },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                    shape = RoundedCornerShape(size = 20.dp),
                     enabled = name.isNotBlank(),
-                ) {
-                    Text(
-                        modifier = Modifier.wrapContentSize(),
-                        text = "Login",
-                        style = BodyNormalMedium,
-                    )
-                }
+                )
 
                 if (error != null) {
                     Text(
