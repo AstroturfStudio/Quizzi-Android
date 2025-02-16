@@ -2,13 +2,8 @@ package studio.astroturf.quizzi.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary Color
 val Primary = Color(0xFFFF6600)
-
-// Secondary Color
 val Secondary = Color(0xFF091B5A)
-
-// Tertiary Color
 val Tertiary = Color(0xFFF0F0F0)
 
 // Accent Colors

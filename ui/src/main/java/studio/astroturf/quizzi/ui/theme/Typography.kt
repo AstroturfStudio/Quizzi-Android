@@ -1,6 +1,5 @@
 package studio.astroturf.quizzi.ui.theme
 
-import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -182,24 +181,4 @@ val BigLogo =
         fontWeight = FontWeight.ExtraBold,
         fontSize = 36.sp,
         lineHeight = 50.sp,
-    )
-
-// Set of Material typography styles to start with
-val Typography =
-    Typography(
-        displayLarge = Heading1,
-        displayMedium = Heading2,
-        displaySmall = Heading3,
-        headlineLarge = BodyXLarge,
-        headlineMedium = BodyLargeMedium,
-        headlineSmall = BodyLargeRegular,
-        titleLarge = BodyNormalBold,
-        titleMedium = BodyNormalMedium,
-        titleSmall = BodyNormalRegular,
-        bodyLarge = BodyNormalRegular,
-        bodyMedium = BodySmallRegular,
-        bodySmall = BodyXSmallRegular,
-        labelLarge = BodySmallMedium,
-        labelMedium = TextSmall,
-        labelSmall = TextXSmall,
     )

@@ -38,7 +38,6 @@ import studio.astroturf.quizzi.ui.theme.BodyXSmallRegular
 import studio.astroturf.quizzi.ui.theme.Grey2
 import studio.astroturf.quizzi.ui.theme.Grey5
 import studio.astroturf.quizzi.ui.theme.Heading3
-import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
 import studio.astroturf.quizzi.ui.theme.Tertiary
 import studio.astroturf.quizzi.ui.theme.White
@@ -156,13 +155,13 @@ fun LobbyScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
-                            .background(color = if (isButtonEnabled) Primary else Grey2, shape = RoundedCornerShape(size = 20.dp)),
+                            .height(56.dp),
                     onClick = {
                         onReadyToPlay?.invoke()
                     },
-                    colors = ButtonDefaults.buttonColors().copy(containerColor = if (isButtonEnabled) Primary else Grey2),
+                    colors = ButtonDefaults.buttonColors().copy(disabledContainerColor = Grey2),
                     enabled = isButtonEnabled,
+                    shape = RoundedCornerShape(size = 20.dp),
                 ) {
                     val text =
                         if (isButtonEnabled) {

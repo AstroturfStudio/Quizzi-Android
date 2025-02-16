@@ -22,7 +22,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -171,13 +170,13 @@ fun OnboardingContent(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
-                        .background(color = Primary, shape = RoundedCornerShape(size = 20.dp)),
+                        .height(56.dp),
                 onClick = { onSignUpClick() },
-                colors = ButtonDefaults.buttonColors().copy(containerColor = Primary),
+                shape = RoundedCornerShape(size = 20.dp),
             ) {
                 Text(
                     modifier = Modifier.wrapContentSize(),
+                    style = BodyNormalMedium,
                     text = "Sign Up",
                 )
             }

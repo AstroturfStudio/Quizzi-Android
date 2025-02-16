@@ -45,7 +45,6 @@ import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
 import studio.astroturf.quizzi.ui.theme.Grey2
 import studio.astroturf.quizzi.ui.theme.Grey5
-import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
 import studio.astroturf.quizzi.ui.theme.White
 
@@ -240,18 +239,15 @@ private fun CreateRoomScreenContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
-                            .background(
-                                color = if (isButtonEnabled) Primary else Grey2,
-                                shape = RoundedCornerShape(size = 20.dp),
-                            ),
+                            .height(56.dp),
                     onClick = {
                         onCreateRoom(roomTitle!!, quizCategory!!, gameType!!)
                     },
                     colors =
                         ButtonDefaults
                             .buttonColors()
-                            .copy(containerColor = Primary, disabledContainerColor = Grey2),
+                            .copy(disabledContainerColor = Grey2),
+                    shape = RoundedCornerShape(size = 20.dp),
                     enabled = isButtonEnabled,
                 ) {
                     Text(
