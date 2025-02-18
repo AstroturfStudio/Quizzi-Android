@@ -66,8 +66,8 @@ jobs:
               elif latest_tag == "fix":
                   props["patch"] = str(int(props["patch"]) + 1)
               
-              # Update stage to beta
-              props["stage"] = "beta"
+              # Update stage to alpha
+              props["stage"] = "alpha"
               
               # Write back to file
               with open(props_file, "w") as f:
@@ -150,14 +150,14 @@ jobs:
         run: |
           echo '${{ secrets.PLAY_STORE_CREDENTIALS }}' > play-store-credentials.json
 
-      - name: Deploy to Play Store Beta
+      - name: Deploy to Play Store Alpha
         id: play_store_deploy
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: play-store-credentials.json
           packageName: "studio.astroturf.quizzi"
           releaseFiles: app/build/outputs/bundle/prodRelease/app-prod-release.aab
-          track: beta
+          track: alpha
           mappingFile: app/build/outputs/mapping/prodRelease/mapping.txt
           status: completed
 
