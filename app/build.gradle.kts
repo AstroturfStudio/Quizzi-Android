@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +10,12 @@ plugins {
     alias(libs.plugins.firebase.crashlytics)
 }
 
+// Load version properties
+val versionProps =
+    Properties().apply {
+        load(file("../version.properties").inputStream())
+    }
+
 android {
     namespace = "studio.astroturf.quizzi"
     compileSdk = 34
@@ -17,7 +25,13 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 49
-        versionName = "0.1.0-alpha"
+
+        val major = versionProps.getProperty("major").toInt()
+        val minor = versionProps.getProperty("minor").toInt()
+        val patch = versionProps.getProperty("patch").toInt()
+        val stage = versionProps.getProperty("stage")
+
+        versionName = "$major.$minor.$patch-$stage ($versionCode)"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
