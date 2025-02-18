@@ -73,9 +73,6 @@ jobs:
               with open(props_file, "w") as f:
                   for key, value in props.items():
                       f.write(f"{key}={value}\n")
-              
-              version_name = f"{props[\"major\"]}.{props[\"minor\"]}.{props[\"patch\"]}-{props[\"stage\"]}"
-              print(f"version_name={version_name}")
           
           update_version_properties()
           ')"
