@@ -2,6 +2,8 @@ name: Beta Release Pipeline
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'breaking'
       - 'feature'
