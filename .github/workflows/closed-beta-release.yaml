@@ -38,9 +38,13 @@ jobs:
           def get_latest_tag():
               import subprocess
               try:
-                  result = subprocess.run(["git", "describe", "--tags", "--abbrev=0"], 
+                  # Look for the most recent tag that starts with v-
+                  result = subprocess.run(["git", "describe", "--tags", "--match", "v-*", "--abbrev=0"], 
                                         capture_output=True, text=True)
-                  return result.stdout.strip()
+                  tag = result.stdout.strip()
+                  # Extract the type (breaking/feature/fix) from the tag
+                  tag_type = tag.split("-")[1]  # v-feature-20240318123456 -> feature
+                  return tag_type
               except:
                   return None
           
@@ -77,6 +81,17 @@ jobs:
           
           update_version_properties()
           ')"
+
+      - name: Create Versioned Tag
+        run: |
+          # Get the current timestamp in YYYYMMDDHHMMSS format
+          TIMESTAMP=$(date "+%Y%m%d%H%M%S")
+          # Get the tag type from the triggering ref
+          TAG_TYPE=$(echo "${{ github.ref }}" | sed 's/.*\///')
+          # Create a new tag with timestamp
+          NEW_TAG="v-${TAG_TYPE}-${TIMESTAMP}"
+          git tag -a "$NEW_TAG" -m "Auto-generated tag for ${TAG_TYPE} release"
+          git push origin "$NEW_TAG"
 
       - name: Calculate New Version Code
         id: version_code
