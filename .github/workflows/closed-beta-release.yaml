@@ -168,6 +168,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
+          git checkout main
           git add app/build.gradle.kts
           git commit -m "chore: Bump version code to ${{ steps.version_code.outputs.new_version_code }} after successful deploy [skip ci]"
           git push
