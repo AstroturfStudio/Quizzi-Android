@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,6 +33,7 @@ import studio.astroturf.quizzi.domain.model.Question
 import studio.astroturf.quizzi.ui.screen.game.GameUiState
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.screen.game.composables.CachedQuestionImage
+import studio.astroturf.quizzi.ui.theme.BodyLarge
 import studio.astroturf.quizzi.ui.theme.BodyXLarge
 import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
@@ -45,44 +47,65 @@ fun GameRoundContent(
     imageLoader: ImageLoader,
     modifier: Modifier = Modifier,
 ) {
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp
+    
+    // Adjust padding and spacing based on screen size
+    val outerPadding = if (screenHeight < 600) 4.dp else 8.dp
+    val horizontalPadding = if (screenHeight < 600) 12.dp else 16.dp
+    val verticalPadding = if (screenHeight < 600) 24.dp else 36.dp
+    val cornerRadius = if (screenHeight < 600) 24.dp else 32.dp
+    
+    // Adjust spacer heights based on screen size
+    val spacerHeightSmall = if (screenHeight < 600) 8.dp else 16.dp
+    val spacerHeightMedium = if (screenHeight < 600) 12.dp else 22.dp
+    val spacerHeightLarge = if (screenHeight < 600) 24.dp else 48.dp
+    
+    // Adjust image size based on screen size
+    val imageWidth = if (screenHeight < 600) 240.dp else 320.dp
+    val imageHeight = if (screenHeight < 600) 120.dp else 160.dp
+    
+    // Adjust question box height
+    val questionBoxHeight = if (screenHeight < 600) 48.dp else 64.dp
+    
     Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(color = Primary)
-                .padding(8.dp),
+                .padding(outerPadding),
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(color = White, shape = RoundedCornerShape(32.dp))
-                    .padding(horizontal = 16.dp, vertical = 36.dp)
-                    .padding(bottom = 8.dp),
+                    .background(color = White, shape = RoundedCornerShape(cornerRadius))
+                    .padding(horizontal = horizontalPadding, vertical = verticalPadding)
+                    .padding(bottom = outerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             state.question.countryCode?.let {
                 CachedQuestionImage(
                     countryCode = it,
-                    modifier = Modifier.width(320.dp).height(160.dp),
+                    modifier = Modifier.width(imageWidth).height(imageHeight),
                 )
             }
 
             Box(
                 modifier =
                     Modifier
-                        .height(64.dp)
+                        .height(questionBoxHeight)
                         .fillMaxWidth(),
             ) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
                     text = state.question.content,
-                    style = BodyXLarge,
-                    textAlign = TextAlign.Center, // Still useful for horizontal alignment
+                    style = if (screenHeight < 600) BodyLarge else BodyXLarge,
+                    textAlign = TextAlign.Center,
                 )
             }
 
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(spacerHeightMedium))
 
             if (state.player2 != null) {
                 VersusDisplay(state.player1, state.player2, state.timeRemainingInSeconds, imageLoader)
@@ -94,23 +117,22 @@ fun GameRoundContent(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(spacerHeightSmall))
 
             GameBar(
                 modifier =
                     Modifier
-                        .padding(horizontal = 36.dp)
+                        .padding(horizontal = if (screenHeight < 600) 24.dp else 36.dp)
                         .fillMaxWidth()
-                        .height(8.dp),
+                        .height(if (screenHeight < 600) 6.dp else 8.dp),
                 cursorPosition = 1 - state.gameBarPercentage,
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(spacerHeightLarge))
 
             Box(
                 modifier = Modifier
-                    .weight(1f, fill = false)
-                    .padding(bottom = 8.dp),
+                    .weight(1f, fill = false),
                 contentAlignment = Alignment.Center,
             ) {
                 AnswerGrid(

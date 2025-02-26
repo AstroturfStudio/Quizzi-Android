@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -29,16 +27,23 @@ internal fun AnswerGrid(
     val screenHeight = configuration.screenHeightDp
     
     // Calculate button height and spacing based on screen size
-    // For smaller screens, reduce the button height and spacing
-    val buttonHeight = if (screenHeight < 600) 48.dp else 56.dp
-    val buttonSpacing = if (screenHeight < 600) 8.dp else 10.dp
+    // For smaller screens, reduce the button height and spacing significantly
+    val buttonHeight = when {
+        screenHeight < 600 -> 40.dp
+        screenHeight < 720 -> 48.dp
+        else -> 56.dp
+    }
     
-    // Use a scrollable container to ensure buttons don't overlap
+    val buttonSpacing = when {
+        screenHeight < 600 -> 6.dp
+        screenHeight < 720 -> 8.dp
+        else -> 10.dp
+    }
+    
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(bottom = 8.dp),
+            .padding(bottom = if (screenHeight < 600) 4.dp else 8.dp),
         verticalArrangement = Arrangement.spacedBy(buttonSpacing),
     ) {
         question.options.forEach { option ->

@@ -16,11 +16,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.theme.Accent1
 import studio.astroturf.quizzi.ui.theme.Black
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
+import studio.astroturf.quizzi.ui.theme.BodySmallMedium
+import studio.astroturf.quizzi.ui.theme.BodySmallRegular
 import studio.astroturf.quizzi.ui.theme.Grey5
 import studio.astroturf.quizzi.ui.theme.White
 
@@ -36,10 +39,24 @@ internal fun AnswerButton(
     val isSelected = selectedAnswerId == optionId
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
+    val screenHeight = configuration.screenHeightDp
     
-    // Adjust padding based on screen width
-    val horizontalPadding = if (screenWidth < 360) 12.dp else 24.dp
-    val cornerRadius = if (screenWidth < 360) 16.dp else 20.dp
+    // Adjust padding based on screen dimensions
+    val horizontalPadding = when {
+        screenWidth < 360 || screenHeight < 600 -> 8.dp
+        screenWidth < 400 -> 12.dp
+        else -> 24.dp
+    }
+    
+    // Adjust corner radius based on screen dimensions
+    val cornerRadius = when {
+        screenWidth < 360 || screenHeight < 600 -> 12.dp
+        screenWidth < 400 -> 16.dp
+        else -> 20.dp
+    }
+    
+    // Adjust border width based on screen dimensions
+    val borderWidth = if (screenWidth < 360 || screenHeight < 600) 1.dp else 2.dp
 
     val containerColor =
         when {
@@ -58,6 +75,13 @@ internal fun AnswerButton(
         }
 
     val alpha = if (playerRoundResult == null && isSelected) 0.5f else 1f
+    
+    // Choose text style based on screen size
+    val textStyle = if (screenHeight < 600) {
+        if (isSelected) BodySmallMedium else BodySmallRegular
+    } else {
+        if (isSelected) BodyNormalMedium else BodyNormalRegular
+    }
 
     Button(
         onClick = onClick,
@@ -69,16 +93,16 @@ internal fun AnswerButton(
             ),
         modifier =
             modifier
-                .border(width = 2.dp, color = Grey5, shape = RoundedCornerShape(cornerRadius)),
+                .border(width = borderWidth, color = Grey5, shape = RoundedCornerShape(cornerRadius)),
         shape = RoundedCornerShape(cornerRadius),
     ) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = horizontalPadding),
+                .padding(start = horizontalPadding, end = 4.dp),
             textAlign = TextAlign.Start,
             text = text,
-            style = if (isSelected) BodyNormalMedium else BodyNormalRegular,
+            style = textStyle,
             color = Black,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
