@@ -39,6 +39,8 @@ sealed class QuizziNavDestination(
         fun createRouteForJoining(
             roomId: String,
             roomName: String,
-        ): String = "game?$ARG_ROOM_ID=$roomId&$ARG_ROOM_NAME=$roomName"
+            categoryId: String,
+            gameType: String,
+        ): String = "game?$ARG_ROOM_ID=$roomId&$ARG_ROOM_NAME=$roomName&$ARG_CATEGORY_ID=$categoryId&$ARG_GAME_TYPE=$gameType"
     }
 }

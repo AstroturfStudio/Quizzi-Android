@@ -230,13 +230,15 @@ class GameViewModel
 
         private fun createLobbyState(gameRoomState: GameRoomState.Waiting): GameUiState.Lobby {
             val currentPlayer = gameRoomState.players.first { it.id == authRepository.getCurrentPlayerId() }
+            val category = gameRoomState.category
+            val gameType = gameRoomState.gameType
 
             return GameUiState.Lobby(
                 lobbyUiModel =
                     LobbyUiModel(
                         roomTitle = roomName ?: "",
-                        categoryName = categoryId.toString(),
-                        gameType = gameType ?: "",
+                        categoryName = category.name,
+                        gameType = gameType,
                         players =
                             gameRoomState.players.mapIndexed { index, it ->
                                 LobbyPlayerUiModel(

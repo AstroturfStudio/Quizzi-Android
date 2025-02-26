@@ -1,13 +1,14 @@
 package studio.astroturf.quizzi.data.remote.websocket.model
 
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
 import studio.astroturf.quizzi.data.remote.rest.model.GameRoomDto
 import studio.astroturf.quizzi.domain.model.RoomState
 
-@OptIn(ExperimentalSerializationApi::class)
+@OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("type")
 sealed class ServerSocketMessage {
@@ -43,7 +44,7 @@ sealed class ServerSocketMessage {
     data class RoomUpdate(
         val players: List<PlayerInRoomDto>,
         val state: RoomState,
-        val gameRoomDto: GameRoomDto,
+        val gameRoom: GameRoomDto,
     ) : ServerSocketMessage()
 
     @Serializable

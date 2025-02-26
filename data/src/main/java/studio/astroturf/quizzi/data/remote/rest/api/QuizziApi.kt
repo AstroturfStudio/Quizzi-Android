@@ -23,10 +23,10 @@ interface QuizziApi {
 
     @GET("api/room/all")
     suspend fun getRooms(): RoomsDto
-    
+
     @GET("api/game/all")
     suspend fun getGameTypes(): GameTypesDto
-    
-    @GET("api/game/category/all") 
+
+    @GET("api/game/category/all")
     suspend fun getCategories(): CategoriesDto
 }

@@ -1,5 +1,6 @@
 package studio.astroturf.quizzi.domain.model.statemachine
 
+import studio.astroturf.quizzi.domain.model.Category
 import studio.astroturf.quizzi.domain.model.PlayerInRoom
 
 sealed interface GameRoomState {
@@ -7,6 +8,8 @@ sealed interface GameRoomState {
 
     data class Waiting(
         val players: List<PlayerInRoom>,
+        val category: Category,
+        val gameType: String,
     ) : GameRoomState
 
     object Countdown : GameRoomState

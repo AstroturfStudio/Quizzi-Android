@@ -37,7 +37,7 @@ class CategoryViewModel
             }
 
         /**
-         * toggles the selection of the category in the list,
+         * toggles the selection of the categoryName in the list,
          * and deselects all other categories
          */
         fun selectCategory(category: CategoryUiModel) {

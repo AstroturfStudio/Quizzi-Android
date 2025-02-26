@@ -1,11 +1,12 @@
 package studio.astroturf.quizzi.data.remote.websocket.model
 
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
 
-@OptIn(ExperimentalSerializationApi::class)
+@OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("type")
 sealed class ClientSocketMessage {

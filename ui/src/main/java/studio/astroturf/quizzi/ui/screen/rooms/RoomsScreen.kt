@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import studio.astroturf.quizzi.domain.model.Category
 import studio.astroturf.quizzi.domain.model.GameRoom
 import studio.astroturf.quizzi.domain.model.RoomState
 import studio.astroturf.quizzi.ui.R
@@ -483,30 +484,55 @@ private fun RoomsScreenContentPreview() {
                         name = "Room1",
                         roomState = RoomState.Waiting,
                         players = listOf("Player1", "Player2"),
+                        gameType = "ResistanceGame",
+                        category = Category(
+                            id = 1,
+                            name = "Flag Quiz",
+                        ),
                     ),
                     GameRoom(
                         id = "Room2",
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
+                        gameType = "ResistanceGame",
+                        category = Category(
+                            id = 1,
+                            name = "Flag Quiz",
+                        ),
                     ),
                     GameRoom(
                         id = "Room2",
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
+                        gameType = "ResistanceGame",
+                        category = Category(
+                            id = 1,
+                            name = "Flag Quiz",
+                        ),
                     ),
                     GameRoom(
                         id = "Room2",
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
+                        gameType = "ResistanceGame",
+                        category = Category(
+                            id = 1,
+                            name = "Flag Quiz",
+                        ),
                     ),
                     GameRoom(
                         id = "Room2",
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
+                        gameType = "ResistanceGame",
+                        category = Category(
+                            id = 1,
+                            name = "Flag Quiz",
+                        ),
                     ),
                 ),
             isConnected = true,

@@ -162,7 +162,12 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
-            RoomState.Waiting -> GameRoomState.Waiting(updateMessage.players)
+            RoomState.Waiting ->
+                GameRoomState.Waiting(
+                    updateMessage.players,
+                    updateMessage.gameRoom.category,
+                    updateMessage.gameRoom.gameType,
+                )
             else -> throw IllegalStateException(getInvalidTransitionMessage("Idle", updateMessage))
         }
 
@@ -171,7 +176,12 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
-            RoomState.Waiting -> GameRoomState.Waiting(players = updateMessage.players) // 2nd player joins
+            RoomState.Waiting ->
+                GameRoomState.Waiting(
+                    players = updateMessage.players,
+                    category = updateMessage.gameRoom.category,
+                    gameType = updateMessage.gameRoom.gameType,
+                )
             RoomState.Countdown -> GameRoomState.Countdown
             else -> throw IllegalStateException(getInvalidTransitionMessage("Waiting", updateMessage))
         }
