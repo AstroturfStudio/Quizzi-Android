@@ -108,13 +108,15 @@ fun GameRoundContent(
             Spacer(modifier = Modifier.height(48.dp))
 
             Box(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .padding(bottom = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 AnswerGrid(
-                    modifier =
-                        Modifier
-                            .wrapContentHeight(),
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .fillMaxWidth(),
                     question = state.question,
                     selectedAnswerId = state.selectedAnswerId,
                     playerRoundResult = state.playerRoundResult,

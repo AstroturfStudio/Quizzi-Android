@@ -11,7 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
@@ -32,6 +34,12 @@ internal fun AnswerButton(
     modifier: Modifier = Modifier,
 ) {
     val isSelected = selectedAnswerId == optionId
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    
+    // Adjust padding based on screen width
+    val horizontalPadding = if (screenWidth < 360) 12.dp else 24.dp
+    val cornerRadius = if (screenWidth < 360) 16.dp else 20.dp
 
     val containerColor =
         when {
@@ -61,16 +69,19 @@ internal fun AnswerButton(
             ),
         modifier =
             modifier
-                .height(56.dp)
-                .border(width = 2.dp, color = Grey5, shape = RoundedCornerShape(20.dp)),
-        shape = RoundedCornerShape(20.dp),
+                .border(width = 2.dp, color = Grey5, shape = RoundedCornerShape(cornerRadius)),
+        shape = RoundedCornerShape(cornerRadius),
     ) {
         Text(
-            modifier = Modifier.fillMaxWidth().padding(start = 24.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = horizontalPadding),
             textAlign = TextAlign.Start,
             text = text,
             style = if (isSelected) BodyNormalMedium else BodyNormalRegular,
             color = Black,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -87,6 +98,22 @@ private fun AnswerButtonPreview() {
         onClick = {},
         optionId = 1,
         selectedAnswerId = 1,
+        playerRoundResult = null,
+    )
+}
+
+@Preview
+@Composable
+private fun AnswerButtonLongTextPreview() {
+    AnswerButton(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+        text = "This is a very long option text that might need to be displayed on multiple lines",
+        onClick = {},
+        optionId = 1,
+        selectedAnswerId = null,
         playerRoundResult = null,
     )
 }
