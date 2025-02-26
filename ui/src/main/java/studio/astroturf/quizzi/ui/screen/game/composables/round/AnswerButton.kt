@@ -1,6 +1,7 @@
 package studio.astroturf.quizzi.ui.screen.game.composables.round
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,7 +17,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.theme.Accent1
 import studio.astroturf.quizzi.ui.theme.Black
@@ -24,6 +24,8 @@ import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
 import studio.astroturf.quizzi.ui.theme.BodyNormalRegular
 import studio.astroturf.quizzi.ui.theme.BodySmallMedium
 import studio.astroturf.quizzi.ui.theme.BodySmallRegular
+import studio.astroturf.quizzi.ui.theme.BodyXSmallMedium
+import studio.astroturf.quizzi.ui.theme.BodyXSmallRegular
 import studio.astroturf.quizzi.ui.theme.Grey5
 import studio.astroturf.quizzi.ui.theme.White
 
@@ -40,23 +42,17 @@ internal fun AnswerButton(
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val screenHeight = configuration.screenHeightDp
-    
+
+    // More aggressive adjustments for very small screens
+    val isVerySmallScreen = screenHeight < 600
+    val isSmallScreen = screenHeight < 720 && !isVerySmallScreen
+
     // Adjust padding based on screen dimensions
-    val horizontalPadding = when {
-        screenWidth < 360 || screenHeight < 600 -> 8.dp
-        screenWidth < 400 -> 12.dp
-        else -> 24.dp
-    }
-    
-    // Adjust corner radius based on screen dimensions
-    val cornerRadius = when {
-        screenWidth < 360 || screenHeight < 600 -> 12.dp
-        screenWidth < 400 -> 16.dp
-        else -> 20.dp
-    }
-    
-    // Adjust border width based on screen dimensions
-    val borderWidth = if (screenWidth < 360 || screenHeight < 600) 1.dp else 2.dp
+    val horizontalPadding =
+        when {
+            screenWidth < 400 -> 16.dp
+            else -> 24.dp
+        }
 
     val containerColor =
         when {
@@ -75,13 +71,14 @@ internal fun AnswerButton(
         }
 
     val alpha = if (playerRoundResult == null && isSelected) 0.5f else 1f
-    
+
     // Choose text style based on screen size
-    val textStyle = if (screenHeight < 600) {
-        if (isSelected) BodySmallMedium else BodySmallRegular
-    } else {
-        if (isSelected) BodyNormalMedium else BodyNormalRegular
-    }
+    val textStyle =
+        when {
+            isVerySmallScreen -> if (isSelected) BodyXSmallMedium else BodyXSmallRegular
+            isSmallScreen -> if (isSelected) BodySmallMedium else BodySmallRegular
+            else -> if (isSelected) BodyNormalMedium else BodyNormalRegular
+        }
 
     Button(
         onClick = onClick,
@@ -93,19 +90,27 @@ internal fun AnswerButton(
             ),
         modifier =
             modifier
-                .border(width = borderWidth, color = Grey5, shape = RoundedCornerShape(cornerRadius)),
-        shape = RoundedCornerShape(cornerRadius),
+                .border(width = 2.dp, color = Grey5, shape = RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        contentPadding =
+            PaddingValues(
+                start = 8.dp,
+                end = 8.dp,
+                top = 4.dp,
+                bottom = 4.dp,
+            ),
     ) {
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = horizontalPadding, end = 4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = horizontalPadding, end = 4.dp),
             textAlign = TextAlign.Start,
             text = text,
             style = textStyle,
             color = Black,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            maxLines = if (isVerySmallScreen) 1 else 2,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -116,8 +121,7 @@ private fun AnswerButtonPreview() {
     AnswerButton(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .height(56.dp),
+                .fillMaxWidth(),
         text = "Option 1",
         onClick = {},
         optionId = 1,
@@ -135,6 +139,25 @@ private fun AnswerButtonLongTextPreview() {
                 .fillMaxWidth()
                 .height(56.dp),
         text = "This is a very long option text that might need to be displayed on multiple lines",
+        onClick = {},
+        optionId = 1,
+        selectedAnswerId = null,
+        playerRoundResult = null,
+    )
+}
+
+@Preview
+@Composable
+private fun AnswerButtonSmallScreenPreview() {
+    val configuration = LocalConfiguration.current
+    configuration.screenHeightDp = 580 // Simulate small screen
+
+    AnswerButton(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(36.dp),
+        text = "Option for small screen",
         onClick = {},
         optionId = 1,
         selectedAnswerId = null,

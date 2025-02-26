@@ -33,7 +33,7 @@ import studio.astroturf.quizzi.domain.model.Question
 import studio.astroturf.quizzi.ui.screen.game.GameUiState
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.screen.game.composables.CachedQuestionImage
-import studio.astroturf.quizzi.ui.theme.BodyLarge
+import studio.astroturf.quizzi.ui.theme.BodyLargeMedium
 import studio.astroturf.quizzi.ui.theme.BodyXLarge
 import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
@@ -49,25 +49,71 @@ fun GameRoundContent(
 ) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp
-    
+
+    // More aggressive adjustments for very small screens
+    val isVerySmallScreen = screenHeight < 600
+    val isSmallScreen = screenHeight < 720 && !isVerySmallScreen
+
     // Adjust padding and spacing based on screen size
-    val outerPadding = if (screenHeight < 600) 4.dp else 8.dp
-    val horizontalPadding = if (screenHeight < 600) 12.dp else 16.dp
-    val verticalPadding = if (screenHeight < 600) 24.dp else 36.dp
-    val cornerRadius = if (screenHeight < 600) 24.dp else 32.dp
-    
+    val outerPadding =
+        when {
+            isSmallScreen or isVerySmallScreen -> 4.dp
+            else -> 8.dp
+        }
+
+    val horizontalPadding = 16.dp
+
+    val verticalPadding =
+        when {
+            isSmallScreen or isVerySmallScreen -> 24.dp
+            else -> 36.dp
+        }
+
+    val cornerRadius =
+        when {
+            isSmallScreen or isVerySmallScreen -> 24.dp
+            else -> 32.dp
+        }
+
     // Adjust spacer heights based on screen size
-    val spacerHeightSmall = if (screenHeight < 600) 8.dp else 16.dp
-    val spacerHeightMedium = if (screenHeight < 600) 12.dp else 22.dp
-    val spacerHeightLarge = if (screenHeight < 600) 24.dp else 48.dp
-    
-    // Adjust image size based on screen size
-    val imageWidth = if (screenHeight < 600) 240.dp else 320.dp
-    val imageHeight = if (screenHeight < 600) 120.dp else 160.dp
-    
+    val spacerHeightSmall =
+        when {
+            isSmallScreen or isVerySmallScreen -> 8.dp
+            else -> 16.dp
+        }
+
+    val spacerHeightMedium =
+        when {
+            isSmallScreen or isVerySmallScreen -> 12.dp
+            else -> 22.dp
+        }
+
+    val spacerHeightLarge =
+        when {
+            isSmallScreen or isVerySmallScreen -> 36.dp
+            else -> 48.dp
+        }
+
+    // Adjust image size based on screen size - more aggressive reduction
+    val imageWidth =
+        when {
+            isSmallScreen or isVerySmallScreen -> 240.dp
+            else -> 320.dp
+        }
+
+    val imageHeight =
+        when {
+            isSmallScreen or isVerySmallScreen -> 120.dp
+            else -> 160.dp
+        }
+
     // Adjust question box height
-    val questionBoxHeight = if (screenHeight < 600) 48.dp else 64.dp
-    
+    val questionBoxHeight =
+        when {
+            isSmallScreen or isVerySmallScreen -> 48.dp
+            else -> 64.dp
+        }
+
     Box(
         modifier =
             modifier
@@ -100,7 +146,7 @@ fun GameRoundContent(
                 Text(
                     modifier = Modifier.align(Alignment.Center),
                     text = state.question.content,
-                    style = if (screenHeight < 600) BodyLarge else BodyXLarge,
+                    style = if (isVerySmallScreen || isSmallScreen) BodyLargeMedium else BodyXLarge,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -108,12 +154,19 @@ fun GameRoundContent(
             Spacer(modifier = Modifier.height(spacerHeightMedium))
 
             if (state.player2 != null) {
-                VersusDisplay(state.player1, state.player2, state.timeRemainingInSeconds, imageLoader)
+                VersusDisplay(
+                    player1 = state.player1,
+                    player2 = state.player2,
+                    timeRemainingInSeconds = state.timeRemainingInSeconds,
+                    imageLoader = imageLoader,
+                    isSmallScreen = isVerySmallScreen || isSmallScreen,
+                )
             } else {
                 TimeDisplay(
                     totalTime = getTotalTime(gameType),
                     timeLeft = state.timeRemainingInSeconds,
                     modifier = Modifier.wrapContentSize(),
+                    isSmallScreen = isVerySmallScreen || isSmallScreen,
                 )
             }
 
@@ -122,23 +175,36 @@ fun GameRoundContent(
             GameBar(
                 modifier =
                     Modifier
-                        .padding(horizontal = if (screenHeight < 600) 24.dp else 36.dp)
-                        .fillMaxWidth()
-                        .height(if (screenHeight < 600) 6.dp else 8.dp),
+                        .padding(
+                            horizontal =
+                                when {
+                                    isSmallScreen or isVerySmallScreen -> 24.dp
+                                    else -> 36.dp
+                                },
+                        ).fillMaxWidth()
+                        .height(
+                            when {
+                                isSmallScreen or isVerySmallScreen -> 6.dp
+                                else -> 8.dp
+                            },
+                        ),
                 cursorPosition = 1 - state.gameBarPercentage,
             )
 
             Spacer(modifier = Modifier.height(spacerHeightLarge))
 
+            // Give more weight to the answer grid on small screens
             Box(
-                modifier = Modifier
-                    .weight(1f, fill = false),
+                modifier =
+                    Modifier
+                        .weight(if (isVerySmallScreen) 1.2f else 1f, fill = false),
                 contentAlignment = Alignment.Center,
             ) {
                 AnswerGrid(
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .wrapContentHeight()
+                            .fillMaxWidth(),
                     question = state.question,
                     selectedAnswerId = state.selectedAnswerId,
                     playerRoundResult = state.playerRoundResult,
@@ -162,29 +228,33 @@ private fun VersusDisplay(
     player2: PlayerInRoom,
     timeRemainingInSeconds: Int,
     imageLoader: ImageLoader,
+    isSmallScreen: Boolean = false,
 ) {
     Row(
         modifier =
             Modifier
                 .wrapContentWidth()
                 .wrapContentHeight(),
-        horizontalArrangement = Arrangement.spacedBy(56.dp),
+        horizontalArrangement = Arrangement.spacedBy(if (isSmallScreen) 48.dp else 56.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         PlayerDisplay(
             player = player1,
             imageLoader = imageLoader,
+            isSmallScreen = isSmallScreen,
         )
 
         TimeDisplay(
             totalTime = 10,
             timeLeft = timeRemainingInSeconds,
             modifier = Modifier.wrapContentSize(),
+            isSmallScreen = isSmallScreen,
         )
 
         PlayerDisplay(
             player = player2,
             imageLoader = imageLoader,
+            isSmallScreen = isSmallScreen,
         )
     }
 }

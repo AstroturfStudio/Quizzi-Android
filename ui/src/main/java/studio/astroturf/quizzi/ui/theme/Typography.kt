@@ -50,6 +50,15 @@ val Heading3 =
         letterSpacing = 0.sp,
     )
 
+val Heading4 =
+    TextStyle(
+        fontFamily = Rubik,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp,
+    )
+
 val BodyXLarge =
     TextStyle(
         fontFamily = Rubik,

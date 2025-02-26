@@ -16,6 +16,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import studio.astroturf.quizzi.ui.theme.Heading3
+import studio.astroturf.quizzi.ui.theme.Heading4
 import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
 import studio.astroturf.quizzi.ui.theme.Tertiary
@@ -26,9 +27,13 @@ internal fun TimeDisplay(
     totalTime: Int,
     timeLeft: Int,
     modifier: Modifier = Modifier,
+    isSmallScreen: Boolean = false,
     onTimeChange: (Int) -> Unit = {},
 ) {
     val animatedSweepAngle = remember { Animatable(360f - (360f * (timeLeft.toFloat() / totalTime))) }
+
+    // Adjust size based on screen size
+    val timerSize = if (isSmallScreen) 48.dp else 64.dp
 
     LaunchedEffect(key1 = timeLeft) {
         animatedSweepAngle.animateTo(
@@ -38,7 +43,7 @@ internal fun TimeDisplay(
     }
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Canvas(modifier = Modifier.size(64.dp)) {
+        Canvas(modifier = Modifier.size(timerSize)) {
             val sweepAngle = animatedSweepAngle.value
             val startAngle = -90f // Clockwise
 
@@ -64,7 +69,7 @@ internal fun TimeDisplay(
         }
         Text(
             text = timeLeft.toString(),
-            style = Heading3,
+            style = if (isSmallScreen) Heading4 else Heading3,
             color = White,
         )
     }
@@ -78,6 +83,19 @@ private fun TimeDisplayPreview() {
             totalTime = 10,
             timeLeft = 8,
             onTimeChange = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun TimeDisplaySmallScreenPreview() {
+    QuizziTheme {
+        TimeDisplay(
+            totalTime = 10,
+            timeLeft = 8,
+            onTimeChange = {},
+            isSmallScreen = true,
         )
     }
 }

@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -25,26 +24,24 @@ internal fun AnswerGrid(
     // Get screen height to make the component responsive
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp
-    
+
+    // More aggressive adjustments for very small screens
+    val isVerySmallScreen = screenHeight < 600
+    val isSmallScreen = screenHeight < 720 && !isVerySmallScreen
+
     // Calculate button height and spacing based on screen size
     // For smaller screens, reduce the button height and spacing significantly
-    val buttonHeight = when {
-        screenHeight < 600 -> 40.dp
-        screenHeight < 720 -> 48.dp
-        else -> 56.dp
-    }
-    
-    val buttonSpacing = when {
-        screenHeight < 600 -> 6.dp
-        screenHeight < 720 -> 8.dp
-        else -> 10.dp
-    }
-    
+    val buttonHeight =
+        when {
+            isVerySmallScreen or isSmallScreen -> 48.dp
+            else -> 56.dp
+        }
+
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = if (screenHeight < 600) 4.dp else 8.dp),
-        verticalArrangement = Arrangement.spacedBy(buttonSpacing),
+        modifier =
+            modifier
+                .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         question.options.forEach { option ->
             AnswerButton(
@@ -53,9 +50,10 @@ internal fun AnswerGrid(
                 selectedAnswerId = selectedAnswerId,
                 playerRoundResult = playerRoundResult,
                 onClick = { onAnswerSelect(option.id) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(buttonHeight),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(buttonHeight),
             )
         }
     }
