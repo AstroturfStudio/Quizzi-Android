@@ -1,5 +1,6 @@
 package studio.astroturf.quizzi.domain.model.websocket
 
+import studio.astroturf.quizzi.domain.model.GameRoom
 import studio.astroturf.quizzi.domain.model.PlayerInRoom
 import studio.astroturf.quizzi.domain.model.Question
 import studio.astroturf.quizzi.domain.model.RoomState
@@ -23,6 +24,7 @@ sealed class ServerMessage {
     data class RoomUpdate(
         val players: List<PlayerInRoom>,
         val state: RoomState,
+        val gameRoom: GameRoom,
     ) : ServerMessage()
 
     data class CountdownTimeUpdate(

@@ -14,6 +14,8 @@ data class GameRoomDto(
     val id: String,
     val name: String,
     val playerCount: Int,
+    val gameType: String,
+    val category: String,
     val roomState: RoomState,
     val players: List<String>,
 ) {
@@ -21,6 +23,8 @@ data class GameRoomDto(
         GameRoom(
             id = id,
             name = name,
+            gameType = gameType,
+            category = category,
             roomState = roomState,
             players = players,
         )

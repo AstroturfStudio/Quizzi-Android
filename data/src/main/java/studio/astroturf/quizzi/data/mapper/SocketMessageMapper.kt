@@ -23,6 +23,7 @@ fun ServerSocketMessage.toDomain(): ServerMessage =
             ServerMessage.RoomUpdate(
                 players = players.map { it.toDomain() },
                 state = state,
+                gameRoom = gameRoomDto.toDomain(),
             )
 
         is ServerSocketMessage.AnswerResult ->
