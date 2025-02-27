@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import navigateSafely
 import studio.astroturf.quizzi.ui.screen.create.CreateRoomScreen
 import studio.astroturf.quizzi.ui.screen.create.category.CategorySelectionScreen
 import studio.astroturf.quizzi.ui.screen.create.gametype.GameTypeSelectionScreen
@@ -59,7 +60,7 @@ fun QuizziNavHost(
         composable(QuizziNavDestination.Rooms.route) {
             RoomsScreen(
                 onNavigateToRoom = { room ->
-                    navController.navigate(
+                    navController.navigateSafely(
                         QuizziNavDestination.Game.createRouteForJoining(
                             roomId = room.id,
                             roomName = room.name,
@@ -93,6 +94,10 @@ fun QuizziNavHost(
                         type = NavType.StringType
                         nullable = true
                     },
+                    navArgument(QuizziNavDestination.Game.ARG_ROOM_NAME) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
                     navArgument(QuizziNavDestination.Game.ARG_CATEGORY_ID) {
                         type = NavType.StringType
                         nullable = true
@@ -100,6 +105,13 @@ fun QuizziNavHost(
                     navArgument(QuizziNavDestination.Game.ARG_GAME_TYPE) {
                         type = NavType.StringType
                         nullable = true
+                    },
+                ),
+            deepLinks =
+                listOf(
+                    androidx.navigation.navDeepLink {
+                        uriPattern =
+                            "android-app://androidx.navigation/game?roomName={roomName}&categoryId={categoryId}&gameType={gameType}"
                     },
                 ),
         ) {
@@ -132,7 +144,7 @@ private fun NavGraphBuilder.addCreateRoomGraph(navController: NavHostController)
                     navController.navigate(QuizziNavDestination.GameTypeSelection.route)
                 },
                 onCreateRoom = { roomName, category, gameType ->
-                    navController.navigate(
+                    navController.navigateSafely(
                         QuizziNavDestination.Game.createRouteForCreating(roomName, category.id.toString(), gameType.name),
                     ) {
                         popUpTo(QuizziNavGraph.CreateRoom.route) { inclusive = true }

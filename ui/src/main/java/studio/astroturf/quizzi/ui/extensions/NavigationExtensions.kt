@@ -1,5 +1,7 @@
+
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
+import timber.log.Timber
 
 fun NavController.navigateSafely(
     route: String,
@@ -8,7 +10,8 @@ fun NavController.navigateSafely(
     try {
         navigate(route, builder)
     } catch (e: IllegalArgumentException) {
-        // Handle navigation error
+        // Log the error with details to help debugging
+        Timber.tag("Navigation").e("Failed to navigate to $route: ${e.message}")
     }
 }
 
