@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import timber.log.Timber
 
 @Composable
@@ -63,3 +64,12 @@ fun CachedQuestionImage(
 
 private const val IMAGE_WIDTH_PX_LARGE = 320
 private const val IMAGE_WIDTH_PX_SMALL = 160
+
+
+@Preview
+@Composable
+fun CachedQuestionImagePreview() {
+    CachedQuestionImage(
+        countryCode = "us",
+    )
+}
