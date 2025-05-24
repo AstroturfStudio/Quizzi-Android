@@ -110,7 +110,14 @@ private fun CategorySelectionContent(
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_math),
+                                painter = painterResource(
+                                    id = when (it.category.name) {
+                                        "Flag Quiz" -> R.drawable.ic_flag
+                                        "Country Capitals Quiz" -> R.drawable.ic_capital
+                                        "Hollywood Stars Quiz" -> R.drawable.ic_star
+                                        else -> R.drawable.ic_math
+                                    }
+                                ),
                                 tint = if (it.isSelected) White else Secondary,
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),

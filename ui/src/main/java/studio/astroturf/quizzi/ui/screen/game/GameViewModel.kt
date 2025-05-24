@@ -407,10 +407,12 @@ class GameViewModel
                 val gameState = currentGameRoomState as? GameRoomState.Playing ?: return@launchMain
                 val winner = gameState.players.firstOrNull { it.id == effect.message.winnerPlayerId }
                 updateUiState {
+                    val gameId: String = roomId!!
+                    disconnectFromRoom()
                     GameUiState.GameOver(
                         totalRoundCount = 0, // TODO:
                         winnerName = winner?.name ?: "Quizzi Bot",
-                        gameId = roomId!!,
+                        gameId = gameId,
                     )
                 }
             }
@@ -497,9 +499,13 @@ class GameViewModel
         override fun onCleared() {
             super.onCleared()
             launchIO {
-                gameRepository.disconnect()
-                roomId = null
+                disconnectFromRoom()
             }
+        }
+
+        private fun disconnectFromRoom() {
+            gameRepository.disconnect()
+            roomId = null
         }
 
         fun readyToPlay() {
