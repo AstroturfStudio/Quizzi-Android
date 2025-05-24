@@ -41,6 +41,7 @@ import studio.astroturf.quizzi.ui.theme.White
 
 @Composable
 fun GameRoundContent(
+    categoryId: Int,
     gameType: String,
     state: GameUiState.RoundOn,
     onSubmitAnswer: (Int) -> Unit,
@@ -132,8 +133,11 @@ fun GameRoundContent(
         ) {
             state.question.countryCode?.let {
                 CachedQuestionImage(
-                    countryCode = it,
-                    modifier = Modifier.width(imageWidth).height(imageHeight),
+                    categoryId = categoryId,
+                    imageCode = it,
+                    modifier = Modifier
+                        .width(imageWidth)
+                        .height(imageHeight),
                 )
             }
 
@@ -181,7 +185,8 @@ fun GameRoundContent(
                                     isSmallScreen or isVerySmallScreen -> 24.dp
                                     else -> 36.dp
                                 },
-                        ).fillMaxWidth()
+                        )
+                        .fillMaxWidth()
                         .height(
                             when {
                                 isSmallScreen or isVerySmallScreen -> 6.dp
@@ -265,6 +270,7 @@ private fun GameRoundContentPreview() {
     val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
+            1,
             gameType = "ResistanceGame",
             state = previewGameState(),
             onSubmitAnswer = {},
@@ -279,6 +285,7 @@ private fun GameRoundContentWithSelectedAnswerPreview() {
     val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
+            1,
             gameType = "ResistanceGame",
             state = previewGameState(selectedAnswerId = 1),
             onSubmitAnswer = {},
@@ -293,6 +300,7 @@ private fun GameRoundContentWithCorrectAnswerPreview() {
     val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
+            1,
             gameType = "ResistanceGame",
             state =
                 previewGameState(
@@ -311,6 +319,7 @@ private fun GameRoundContentWithWrongAnswerPreview() {
     val context = LocalContext.current
     QuizziTheme {
         GameRoundContent(
+            categoryId = 1,
             gameType = "ResistanceGame",
             state =
                 previewGameState(
