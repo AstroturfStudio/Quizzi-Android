@@ -501,6 +501,11 @@ class GameViewModel
             exitGameRoom()
         }
 
+        fun exitGameRoom() {
+            gameStateMachine.sideEffect(GameRoomStateUpdater.ExitGameRoom)
+            disconnectFromRoom()
+        }
+
         private fun disconnectFromRoom() {
             gameRepository.disconnect()
             roomId = null
@@ -513,13 +518,6 @@ class GameViewModel
         fun getCategoryId(): Int? = categoryId?.toIntOrNull()
 
         fun getGameType(): String? = gameType
-
-        fun exitGameRoom() {
-            gameStateMachine.sideEffect(GameRoomStateUpdater.ExitGameRoom)
-            launchIO {
-                disconnectFromRoom()
-            }
-        }
 
         companion object {
             private const val INITIAL_GAMEBAR_PERCENTAGE = 0.5f
