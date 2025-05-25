@@ -163,6 +163,7 @@ fun LandingScreenContent(
                         value = name,
                         onValueChange = { name = it },
                         textStyle = BodyNormalRegular.copy(color = Black),
+                        singleLine = true,
                         decorationBox = { innerTextField ->
                             Box {
                                 if (name.isEmpty()) {
