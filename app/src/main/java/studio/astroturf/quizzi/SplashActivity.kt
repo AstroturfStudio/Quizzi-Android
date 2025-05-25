@@ -99,7 +99,7 @@ private fun SplashScreen(onSplashComplete: () -> Unit) {
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Primary),
+                .background(if (showAnimation) Color.White else Primary),
     ) {
         // Lottie Animation
         if (showAnimation && composition != null) {
