@@ -485,7 +485,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room1",
                         roomState = RoomState.Waiting,
                         players = listOf("Player1", "Player2"),
-                        gameType = "ResistanceGame",
+                        gameType = "Resistance Game",
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,
@@ -497,7 +497,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
-                        gameType = "ResistanceGame",
+                        gameType = "Resistance Game",
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,
@@ -509,7 +509,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
-                        gameType = "ResistanceGame",
+                        gameType = "Resistance Game",
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,
@@ -521,7 +521,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
-                        gameType = "ResistanceGame",
+                        gameType = "Resistance Game",
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,
@@ -533,7 +533,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
-                        gameType = "ResistanceGame",
+                        gameType = "Resistance Game",
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,
