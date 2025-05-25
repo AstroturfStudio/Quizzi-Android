@@ -43,4 +43,4 @@ class AuthExceptionStrategy : ExceptionStrategy<QuizziException.AuthException> {
             AuthErrorCode.UNKNOWN ->
                 ExceptionResult.Silent("Unspecified auth error: ${exception.message}")
         }
-} 
+}

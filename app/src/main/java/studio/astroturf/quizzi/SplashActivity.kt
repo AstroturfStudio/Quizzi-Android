@@ -52,16 +52,17 @@ private fun SplashScreen() {
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Primary)
+                .background(Primary),
     ) {
         SplashLogo(modifier = Modifier.align(Alignment.Center))
 
         Text(
             text = "v${BuildConfig.VERSION_NAME}",
             color = Color.White,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp),
         )
     }
 }
@@ -69,7 +70,7 @@ private fun SplashScreen() {
 @Composable
 private fun SplashLogo(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
+        modifier = modifier,
     ) {
         Image(
             painter = painterResource(id = uiR.drawable.quizzi),
@@ -85,7 +86,6 @@ private fun SplashLogo(modifier: Modifier = Modifier) {
             style = BigLogo.copy(color = Color.White),
         )
     }
-
 }
 
 @Preview

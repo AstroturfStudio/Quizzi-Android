@@ -498,9 +498,7 @@ class GameViewModel
 
         override fun onCleared() {
             super.onCleared()
-            launchIO {
-                disconnectFromRoom()
-            }
+            exitGameRoom()
         }
 
         private fun disconnectFromRoom() {
@@ -515,6 +513,13 @@ class GameViewModel
         fun getCategoryId(): Int? = categoryId?.toIntOrNull()
 
         fun getGameType(): String? = gameType
+
+        fun exitGameRoom() {
+            gameStateMachine.sideEffect(GameRoomStateUpdater.ExitGameRoom)
+            launchIO {
+                disconnectFromRoom()
+            }
+        }
 
         companion object {
             private const val INITIAL_GAMEBAR_PERCENTAGE = 0.5f

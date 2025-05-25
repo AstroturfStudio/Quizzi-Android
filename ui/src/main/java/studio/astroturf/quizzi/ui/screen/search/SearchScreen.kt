@@ -19,4 +19,4 @@ fun SearchScreen(modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center,
         )
     }
-} 
+}

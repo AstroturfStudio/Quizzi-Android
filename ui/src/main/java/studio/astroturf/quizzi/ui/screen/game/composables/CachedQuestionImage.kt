@@ -10,13 +10,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import timber.log.Timber
 
-val categoryIdPrefixMap = mapOf(
-    1 to "flags",
-    2 to "flags",
-    3 to "hollywood",
-    4 to "movieposters",
-    5 to "footballclublogos",
-)
+val categoryIdPrefixMap =
+    mapOf(
+        1 to "flags",
+        2 to "flags",
+        3 to "hollywood",
+        4 to "movieposters",
+        5 to "footballclublogos",
+    )
 
 @Composable
 fun CachedQuestionImage(
@@ -49,13 +50,13 @@ fun CachedQuestionImage(
         painter = painterResource(id = resourceId),
         contentDescription = "Question Image",
         modifier = modifier,
-        contentScale = ContentScale.Fit
+        contentScale = ContentScale.Fit,
     )
 }
 
 @Preview
 @Composable
-fun CachedQuestionImagePreview() {
+private fun CachedQuestionImagePreview() {
     CachedQuestionImage(
         categoryId = 1,
         imageCode = "us",

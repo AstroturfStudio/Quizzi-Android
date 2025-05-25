@@ -9,4 +9,4 @@ import studio.astroturf.quizzi.domain.exceptionhandling.QuizziException
 class UnexpectedExceptionStrategy : ExceptionStrategy<QuizziException.UnexpectedException> {
     override fun resolve(exception: QuizziException.UnexpectedException): ExceptionResult =
         ExceptionResult.Fatal("An unexpected error occurred. Please try again.", exception.cause ?: exception)
-} 
+}

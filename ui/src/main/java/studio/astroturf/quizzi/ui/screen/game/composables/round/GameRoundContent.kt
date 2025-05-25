@@ -128,9 +128,10 @@ fun GameRoundContent(
                 CachedQuestionImage(
                     categoryId = categoryId,
                     imageCode = it,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(imageHeight),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(imageHeight),
                 )
             }
 
@@ -178,8 +179,7 @@ fun GameRoundContent(
                                     isSmallScreen or isVerySmallScreen -> 24.dp
                                     else -> 36.dp
                                 },
-                        )
-                        .fillMaxWidth()
+                        ).fillMaxWidth()
                         .height(
                             when {
                                 isSmallScreen or isVerySmallScreen -> 6.dp

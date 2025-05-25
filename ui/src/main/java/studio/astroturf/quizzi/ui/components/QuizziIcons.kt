@@ -20,4 +20,4 @@ fun QuizziIcon(
         modifier = modifier,
         tint = tint,
     )
-} 
+}

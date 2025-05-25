@@ -52,9 +52,36 @@ class GameRoomStateMachine(
 
     override fun getCurrentState(): GameRoomState = _state.value
 
+    fun resetState() {
+        coroutineScope.launch(defaultDispatcher) {
+            resetToIdle()
+        }
+    }
+
     override fun sideEffect(effect: GameRoomStateUpdater) {
         coroutineScope.launch(defaultDispatcher) {
-            _effects.send(effect)
+            // Handle effects that can change state directly
+            when (effect) {
+                is GameRoomStateUpdater.ExitGameRoom -> {
+                    resetToIdle()
+                }
+                is GameRoomStateUpdater.CloseRoom -> {
+                    resetToIdle()
+                }
+                else -> {
+                    _effects.send(effect)
+                }
+            }
+        }
+    }
+
+    private suspend fun resetToIdle() {
+        stateMutex.withLock {
+            val currentState = getCurrentState()
+            if (currentState != GameRoomState.Idle) {
+                Timber.tag(TAG).d("Resetting state machine to Idle from ${currentState::class.simpleName}")
+                _state.value = GameRoomState.Idle
+            }
         }
     }
 
@@ -218,6 +245,12 @@ class GameRoomStateMachine(
         updateMessage: ServerMessage.RoomUpdate,
     ): GameRoomState =
         when (updateMessage.state) {
+            RoomState.Waiting ->
+                GameRoomState.Waiting(
+                    updateMessage.players,
+                    updateMessage.gameRoom.category,
+                    updateMessage.gameRoom.gameType,
+                )
             else -> throw IllegalStateException(getInvalidTransitionMessage("Closed", updateMessage))
         }
 

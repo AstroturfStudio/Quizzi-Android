@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -45,8 +46,9 @@ class QuizziWebSocketService
 
         private var webSocket: WebSocket? = null
         private var playerId: String? = null
+        private var isDisconnecting = false
 
-        private val serviceScope = CoroutineScope(serviceDispatcher + SupervisorJob())
+        private var serviceScope = CoroutineScope(serviceDispatcher + SupervisorJob())
 
         private val _messageFlow =
             MutableSharedFlow<ServerSocketMessage>(
@@ -62,6 +64,13 @@ class QuizziWebSocketService
 
         fun connect(playerId: String? = null) {
             this.playerId = playerId
+            isDisconnecting = false
+
+            // Recreate scope if it was cancelled
+            if (!serviceScope.isActive) {
+                serviceScope = CoroutineScope(serviceDispatcher + SupervisorJob())
+            }
+
             val request =
                 Request
                     .Builder()
@@ -71,6 +80,7 @@ class QuizziWebSocketService
         }
 
         fun disconnect() {
+            isDisconnecting = true
             webSocket?.close(NORMAL_CLOSURE_STATUS, "User disconnected")
             webSocket = null
             serviceScope.cancel()
@@ -84,8 +94,11 @@ class QuizziWebSocketService
                 webSocket?.send(jsonString)
             } catch (e: Exception) {
                 Timber.e(e, "Error sending message")
-                serviceScope.launch {
-                    _messageFlow.emit(ServerSocketMessage.Error("Failed to send message: ${e.message}"))
+                // Check if scope is still active before launching
+                if (serviceScope.isActive) {
+                    serviceScope.launch {
+                        _messageFlow.emit(ServerSocketMessage.Error("Failed to send message: ${e.message}"))
+                    }
                 }
             }
         }
@@ -105,16 +118,28 @@ class QuizziWebSocketService
                     webSocket: WebSocket,
                     text: String,
                 ) {
+                    // Ignore messages if we're disconnecting
+                    if (isDisconnecting) {
+                        Timber.d("Ignoring message during disconnect: $text")
+                        return
+                    }
+
                     try {
                         Timber.d("Incoming WebSocket Message:\n$text")
                         val message = json.decodeFromString<ServerSocketMessage>(text)
-                        serviceScope.launch {
-                            _messageFlow.emit(message)
+                        // Check if scope is still active before launching
+                        if (serviceScope.isActive) {
+                            serviceScope.launch {
+                                _messageFlow.emit(message)
+                            }
                         }
                     } catch (e: Exception) {
                         Timber.e(e, "Error parsing WebSocket message: $text")
-                        serviceScope.launch {
-                            _messageFlow.emit(ServerSocketMessage.Error("Failed to parse message: ${e.message}"))
+                        // Check if scope is still active before launching
+                        if (serviceScope.isActive) {
+                            serviceScope.launch {
+                                _messageFlow.emit(ServerSocketMessage.Error("Failed to parse message: ${e.message}"))
+                            }
                         }
                     }
                 }
@@ -168,10 +193,13 @@ class QuizziWebSocketService
             reconnectAttempts++
             val delayMillis = initialDelayMillis * 2.0.pow(reconnectAttempts.toDouble()).toLong()
             Timber.d("Attempting to reconnect in $delayMillis ms")
-            serviceScope.launch {
-                delay(delayMillis)
-                _connectionStatus.value = GameConnectionStatus.Reconnecting(attempt = reconnectAttempts)
-                connect(playerId)
+            // Check if scope is still active before launching
+            if (serviceScope.isActive) {
+                serviceScope.launch {
+                    delay(delayMillis)
+                    _connectionStatus.value = GameConnectionStatus.Reconnecting(attempt = reconnectAttempts)
+                    connect(playerId)
+                }
             }
         }
 

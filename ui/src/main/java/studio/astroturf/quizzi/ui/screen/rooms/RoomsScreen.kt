@@ -485,10 +485,11 @@ private fun RoomsScreenContentPreview() {
                         roomState = RoomState.Waiting,
                         players = listOf("Player1", "Player2"),
                         gameType = "ResistanceGame",
-                        category = Category(
-                            id = 1,
-                            name = "Flag Quiz",
-                        ),
+                        category =
+                            Category(
+                                id = 1,
+                                name = "Flag Quiz",
+                            ),
                     ),
                     GameRoom(
                         id = "Room2",
@@ -496,10 +497,11 @@ private fun RoomsScreenContentPreview() {
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
                         gameType = "ResistanceGame",
-                        category = Category(
-                            id = 1,
-                            name = "Flag Quiz",
-                        ),
+                        category =
+                            Category(
+                                id = 1,
+                                name = "Flag Quiz",
+                            ),
                     ),
                     GameRoom(
                         id = "Room2",
@@ -507,10 +509,11 @@ private fun RoomsScreenContentPreview() {
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
                         gameType = "ResistanceGame",
-                        category = Category(
-                            id = 1,
-                            name = "Flag Quiz",
-                        ),
+                        category =
+                            Category(
+                                id = 1,
+                                name = "Flag Quiz",
+                            ),
                     ),
                     GameRoom(
                         id = "Room2",
@@ -518,10 +521,11 @@ private fun RoomsScreenContentPreview() {
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
                         gameType = "ResistanceGame",
-                        category = Category(
-                            id = 1,
-                            name = "Flag Quiz",
-                        ),
+                        category =
+                            Category(
+                                id = 1,
+                                name = "Flag Quiz",
+                            ),
                     ),
                     GameRoom(
                         id = "Room2",
@@ -529,10 +533,11 @@ private fun RoomsScreenContentPreview() {
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
                         gameType = "ResistanceGame",
-                        category = Category(
-                            id = 1,
-                            name = "Flag Quiz",
-                        ),
+                        category =
+                            Category(
+                                id = 1,
+                                name = "Flag Quiz",
+                            ),
                     ),
                 ),
             isConnected = true,

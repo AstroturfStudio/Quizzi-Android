@@ -35,7 +35,7 @@ internal fun PlayerDisplay(
     val avatarSize = if (isSmallScreen) 32.dp else 44.dp
     val spacerSize = if (isSmallScreen) 2.dp else 4.dp
     val textBoxHeight = if (isSmallScreen) 18.dp else 22.dp
-    
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -63,7 +63,7 @@ internal fun PlayerDisplay(
                 color = Black,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
