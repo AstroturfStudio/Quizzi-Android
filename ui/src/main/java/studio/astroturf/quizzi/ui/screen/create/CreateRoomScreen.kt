@@ -34,6 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import isNotNullOrBlank
 import studio.astroturf.quizzi.domain.model.Category
+import studio.astroturf.quizzi.domain.model.CategoryId
 import studio.astroturf.quizzi.domain.model.GameType
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
@@ -255,7 +256,7 @@ private fun CreateRoomPreview() {
             onBackPress = {},
             roomTitle = "Room Title",
             onCategoryClick = {},
-            quizCategory = Category(0, "Category"),
+            quizCategory = Category(CategoryId.COUNTRY_FLAGS, "Category"),
             onGameTypeClick = {},
             gameType = GameType("Resistence Game"),
             onCreateRoom = { _, _, _ -> },

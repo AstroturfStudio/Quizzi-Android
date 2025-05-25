@@ -49,6 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import studio.astroturf.quizzi.domain.model.Category
+import studio.astroturf.quizzi.domain.model.CategoryId
 import studio.astroturf.quizzi.domain.model.GameRoom
 import studio.astroturf.quizzi.domain.model.RoomState
 import studio.astroturf.quizzi.ui.R
@@ -487,7 +488,7 @@ private fun RoomsScreenContentPreview() {
                         gameType = "ResistanceGame",
                         category =
                             Category(
-                                id = 1,
+                                id = CategoryId.COUNTRY_FLAGS,
                                 name = "Flag Quiz",
                             ),
                     ),
@@ -499,7 +500,7 @@ private fun RoomsScreenContentPreview() {
                         gameType = "ResistanceGame",
                         category =
                             Category(
-                                id = 1,
+                                id = CategoryId.COUNTRY_FLAGS,
                                 name = "Flag Quiz",
                             ),
                     ),
@@ -511,7 +512,7 @@ private fun RoomsScreenContentPreview() {
                         gameType = "ResistanceGame",
                         category =
                             Category(
-                                id = 1,
+                                id = CategoryId.COUNTRY_FLAGS,
                                 name = "Flag Quiz",
                             ),
                     ),
@@ -523,7 +524,7 @@ private fun RoomsScreenContentPreview() {
                         gameType = "ResistanceGame",
                         category =
                             Category(
-                                id = 1,
+                                id = CategoryId.COUNTRY_FLAGS,
                                 name = "Flag Quiz",
                             ),
                     ),
@@ -535,7 +536,7 @@ private fun RoomsScreenContentPreview() {
                         gameType = "ResistanceGame",
                         category =
                             Category(
-                                id = 1,
+                                id = CategoryId.COUNTRY_FLAGS,
                                 name = "Flag Quiz",
                             ),
                     ),

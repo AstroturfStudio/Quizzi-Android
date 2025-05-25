@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import studio.astroturf.quizzi.domain.model.Category
+import studio.astroturf.quizzi.domain.model.CategoryId
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
@@ -115,12 +116,11 @@ private fun CategorySelectionContent(
                                     painterResource(
                                         id =
                                             when (it.category.id) {
-                                                1 -> R.drawable.ic_flag
-                                                2 -> R.drawable.ic_capital
-                                                3 -> R.drawable.ic_star
-                                                4 -> R.drawable.ic_movie
-                                                5 -> R.drawable.ic_football
-                                                else -> R.drawable.ic_math
+                                                CategoryId.COUNTRY_FLAGS -> R.drawable.ic_flag
+                                                CategoryId.COUNTRY_CAPITALS -> R.drawable.ic_capital
+                                                CategoryId.HOLLYWOOD_STARS -> R.drawable.ic_star
+                                                CategoryId.MOVIE_POSTERS -> R.drawable.ic_movie
+                                                CategoryId.FOOTBALL_CLUB_LOGOS -> R.drawable.ic_football
                                             },
                                     ),
                                 tint = if (it.isSelected) White else Secondary,
@@ -162,19 +162,19 @@ private fun CategorySelectionScreenPreview() {
             categories =
                 listOf(
                     CategoryUiModel(
-                        category = Category(0, "Math"),
+                        category = Category(CategoryId.COUNTRY_FLAGS, "Math"),
                         isSelected = false,
                     ),
                     CategoryUiModel(
-                        category = Category(1, "Science"),
+                        category = Category(CategoryId.COUNTRY_CAPITALS, "Science"),
                         isSelected = true,
                     ),
                     CategoryUiModel(
-                        category = Category(2, "History"),
+                        category = Category(CategoryId.HOLLYWOOD_STARS, "History"),
                         isSelected = false,
                     ),
                     CategoryUiModel(
-                        category = Category(3, "Geography"),
+                        category = Category(CategoryId.MOVIE_POSTERS, "Geography"),
                         isSelected = false,
                     ),
                 ),
