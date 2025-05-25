@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -95,17 +94,11 @@ fun GameRoundContent(
             else -> 48.dp
         }
 
-    // Adjust image size based on screen size - more aggressive reduction
-    val imageWidth =
-        when {
-            isSmallScreen or isVerySmallScreen -> 240.dp
-            else -> 320.dp
-        }
-
     val imageHeight =
         when {
-            isSmallScreen or isVerySmallScreen -> 120.dp
-            else -> 160.dp
+            isVerySmallScreen -> 120.dp
+            isSmallScreen -> 180.dp
+            else -> 240.dp
         }
 
     // Adjust question box height
@@ -136,7 +129,7 @@ fun GameRoundContent(
                     categoryId = categoryId,
                     imageCode = it,
                     modifier = Modifier
-                        .width(imageWidth)
+                        .fillMaxWidth()
                         .height(imageHeight),
                 )
             }

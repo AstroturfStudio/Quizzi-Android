@@ -4,6 +4,7 @@ import android.content.res.Resources
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,6 +49,7 @@ fun CachedQuestionImage(
         painter = painterResource(id = resourceId),
         contentDescription = "Question Image",
         modifier = modifier,
+        contentScale = ContentScale.Fit
     )
 }
 
