@@ -23,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,7 +34,6 @@ import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
 import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
-import studio.astroturf.quizzi.ui.theme.BodyXSmallRegular
 import studio.astroturf.quizzi.ui.theme.Grey5
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
 import studio.astroturf.quizzi.ui.theme.Secondary
@@ -113,10 +114,12 @@ private fun CategorySelectionContent(
                                 painter =
                                     painterResource(
                                         id =
-                                            when (it.category.name) {
-                                                "Flag Quiz" -> R.drawable.ic_flag
-                                                "Country Capitals Quiz" -> R.drawable.ic_capital
-                                                "Hollywood Stars Quiz" -> R.drawable.ic_star
+                                            when (it.category.id) {
+                                                1 -> R.drawable.ic_flag
+                                                2 -> R.drawable.ic_capital
+                                                3 -> R.drawable.ic_star
+                                                4 -> R.drawable.ic_movie
+                                                5 -> R.drawable.ic_football
                                                 else -> R.drawable.ic_math
                                             },
                                     ),
@@ -127,26 +130,15 @@ private fun CategorySelectionContent(
                         }
 
                         Text(
-                            modifier = Modifier.wrapContentSize(),
+                            modifier =
+                                Modifier
+                                    .wrapContentSize()
+                                    .fillMaxWidth(),
                             text = it.category.name,
                             style = BodyNormalMedium.copy(color = if (it.isSelected) White else Secondary),
-                            maxLines = 1,
-                        )
-
-                        Text(
-                            modifier = Modifier.wrapContentSize(),
-                            text = "2 Quizzes",
-                            style =
-                                BodyXSmallRegular.copy(
-                                    color =
-                                        if (it.isSelected) {
-                                            White.copy(
-                                                alpha = 0.8f,
-                                            )
-                                        } else {
-                                            Secondary
-                                        },
-                                ),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
