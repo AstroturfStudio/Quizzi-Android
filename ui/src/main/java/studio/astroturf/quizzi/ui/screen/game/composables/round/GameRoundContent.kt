@@ -215,8 +215,8 @@ fun GameRoundContent(
 
 fun getTotalTime(gameType: String): Int =
     when (gameType) {
-        "ResistanceGame" -> 10
-        "ResistToTimeGame" -> 3
+        "Resistance Game" -> 10
+        "Resist To Time Game" -> 3
         else -> 10
     }
 
@@ -264,7 +264,7 @@ private fun GameRoundContentPreview() {
     QuizziTheme {
         GameRoundContent(
             1,
-            gameType = "ResistanceGame",
+            gameType = "Resistance Game",
             state = previewGameState(),
             onSubmitAnswer = {},
             imageLoader = previewImageLoader(context),
@@ -279,7 +279,7 @@ private fun GameRoundContentWithSelectedAnswerPreview() {
     QuizziTheme {
         GameRoundContent(
             1,
-            gameType = "ResistanceGame",
+            gameType = "Resistance Game",
             state = previewGameState(selectedAnswerId = 1),
             onSubmitAnswer = {},
             imageLoader = previewImageLoader(context),
@@ -294,7 +294,7 @@ private fun GameRoundContentWithCorrectAnswerPreview() {
     QuizziTheme {
         GameRoundContent(
             1,
-            gameType = "ResistanceGame",
+            gameType = "Resistance Game",
             state =
                 previewGameState(
                     selectedAnswerId = 1,
@@ -313,7 +313,7 @@ private fun GameRoundContentWithWrongAnswerPreview() {
     QuizziTheme {
         GameRoundContent(
             categoryId = 1,
-            gameType = "ResistanceGame",
+            gameType = "Resistance Game",
             state =
                 previewGameState(
                     selectedAnswerId = 1,

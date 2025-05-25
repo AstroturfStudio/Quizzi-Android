@@ -64,7 +64,9 @@ fun QuizziNavHost(
                         QuizziNavDestination.Game.createRouteForJoining(
                             roomId = room.id,
                             roomName = room.name,
-                            categoryId = room.category.id.toString(),
+                            categoryId =
+                                room.category.id.id
+                                    .toString(),
                             gameType = room.gameType,
                         ),
                     )
@@ -145,7 +147,7 @@ private fun NavGraphBuilder.addCreateRoomGraph(navController: NavHostController)
                 },
                 onCreateRoom = { roomName, category, gameType ->
                     navController.navigateSafely(
-                        QuizziNavDestination.Game.createRouteForCreating(roomName, category.id.toString(), gameType.name),
+                        QuizziNavDestination.Game.createRouteForCreating(roomName, category.id.id.toString(), gameType.name),
                     ) {
                         popUpTo(QuizziNavGraph.CreateRoom.route) { inclusive = true }
                     }

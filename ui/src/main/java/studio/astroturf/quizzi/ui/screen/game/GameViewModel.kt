@@ -374,8 +374,8 @@ class GameViewModel
 
         private fun getInitialRoundCountdownSec(): Int =
             when (gameType) {
-                "ResistanceGame" -> 10
-                "ResistToTimeGame" -> 3
+                "Resistance Game" -> 10
+                "Resist To Time Game" -> 5
                 else -> 10
             }
 

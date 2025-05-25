@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,7 +33,6 @@ import studio.astroturf.quizzi.ui.components.AppBarScreen
 import studio.astroturf.quizzi.ui.components.ClickableIcon
 import studio.astroturf.quizzi.ui.components.QButton
 import studio.astroturf.quizzi.ui.theme.BodyNormalMedium
-import studio.astroturf.quizzi.ui.theme.BodyXSmallRegular
 import studio.astroturf.quizzi.ui.theme.Grey5
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
 import studio.astroturf.quizzi.ui.theme.Secondary
@@ -109,8 +109,14 @@ private fun GameTypeSelectionContent(
                                     ),
                             contentAlignment = Alignment.Center,
                         ) {
+                            val iconRes =
+                                when (it.gameType.name) {
+                                    "Resistance Game" -> R.drawable.ic_resistance_game
+                                    "Resist To Time Game" -> R.drawable.ic_resist_to_time_game
+                                    else -> R.drawable.ic_math
+                                }
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_math),
+                                painter = painterResource(id = iconRes),
                                 tint = if (it.isSelected) White else Secondary,
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),
@@ -118,26 +124,13 @@ private fun GameTypeSelectionContent(
                         }
 
                         Text(
-                            modifier = Modifier.wrapContentSize(),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentSize(align = Alignment.Center),
                             text = it.gameType.name,
-                            style = BodyNormalMedium.copy(color = if (it.isSelected) White else Secondary),
-                            maxLines = 1,
-                        )
-
-                        Text(
-                            modifier = Modifier.wrapContentSize(),
-                            text = "2 Quizzes",
-                            style =
-                                BodyXSmallRegular.copy(
-                                    color =
-                                        if (it.isSelected) {
-                                            White.copy(
-                                                alpha = 0.8f,
-                                            )
-                                        } else {
-                                            Secondary
-                                        },
-                                ),
+                            style = BodyNormalMedium.copy(color = if (it.isSelected) White else Secondary, textAlign = TextAlign.Center),
+                            maxLines = 2,
                         )
                     }
                 }
