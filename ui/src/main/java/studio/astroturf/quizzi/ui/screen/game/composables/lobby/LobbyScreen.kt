@@ -113,7 +113,7 @@ fun LobbyScreen(
                                     color = Tertiary,
                                     shape = CircleShape,
                                 ).clip(CircleShape),
-                        painter = painterResource(id = R.drawable.de_160),
+                        painter = painterResource(id = R.drawable.flags_de),
                         contentDescription = null,
                     )
 

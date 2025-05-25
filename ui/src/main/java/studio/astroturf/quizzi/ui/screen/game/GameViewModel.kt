@@ -512,6 +512,8 @@ class GameViewModel
             sendPlayerReady()
         }
 
+        fun getCategoryId(): Int? = categoryId?.toIntOrNull()
+
         fun getGameType(): String? = gameType
 
         companion object {
