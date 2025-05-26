@@ -67,6 +67,7 @@ import studio.astroturf.quizzi.ui.theme.Grey5
 import studio.astroturf.quizzi.ui.theme.Heading3
 import studio.astroturf.quizzi.ui.theme.Primary
 import studio.astroturf.quizzi.ui.theme.White
+import studio.astroturf.quizzi.ui.utils.TimeBasedGreetingProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -153,9 +154,11 @@ private fun RoomsScreenContent(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
+                    val currentGreeting = TimeBasedGreetingProvider.getCurrentGreeting()
+
                     Image(
-                        painter = painterResource(id = R.drawable.ic_sun),
-                        contentDescription = "Quizzi Logo",
+                        painter = painterResource(id = currentGreeting.iconRes),
+                        contentDescription = "Time of day icon",
                         modifier = Modifier.height(20.dp),
                     )
 
@@ -164,7 +167,7 @@ private fun RoomsScreenContent(
                             Modifier
                                 .wrapContentHeight()
                                 .align(Alignment.CenterVertically),
-                        text = stringResource(R.string.good_morning),
+                        text = stringResource(currentGreeting.greetingRes),
                         textAlign = TextAlign.Center,
                         style =
                             BodyXSmallMedium.copy(
@@ -243,14 +246,15 @@ private fun RoomsScreenContent(
                     style = BodyXLarge.copy(color = Black),
                     textAlign = TextAlign.Center,
                 )
-                
+
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Create Room",
                     tint = Primary,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clickable { onCreateRoom() }
+                    modifier =
+                        Modifier
+                            .size(32.dp)
+                            .clickable { onCreateRoom() },
                 )
             }
 

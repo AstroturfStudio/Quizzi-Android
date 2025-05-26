@@ -2,6 +2,9 @@
 <resources>
     <string name="connecting">Connecting…</string>
     <string name="good_morning">GOOD MORNING</string>
+    <string name="good_afternoon">GOOD AFTERNOON</string>
+    <string name="good_evening">GOOD EVENING</string>
+    <string name="good_night">GOOD NIGHT</string>
     <string name="rooms">Rooms</string>
     <string name="search_rooms">Search Rooms</string>
     <string name="no_rooms_available">No rooms available.\n Would you like to create one?</string>

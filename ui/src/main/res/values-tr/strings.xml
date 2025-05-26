@@ -1,6 +1,9 @@
 <resources>
     <string name="connecting">Bağlanıyor…</string>
     <string name="good_morning">GÜNAYDIN</string>
+    <string name="good_afternoon">İYİ ÖĞLEDEN SONRALAR</string>
+    <string name="good_evening">İYİ AKŞAMLAR</string>
+    <string name="good_night">İYİ GECELER</string>
     <string name="rooms">Odalar</string>
     <string name="search_rooms">Oda Ara</string>
     <string name="no_rooms_available">Mevcut oda yok. \n Bir tane oluşturmak ister misiniz\?</string>
