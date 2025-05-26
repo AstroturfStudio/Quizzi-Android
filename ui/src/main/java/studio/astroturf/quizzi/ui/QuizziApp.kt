@@ -11,11 +11,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import studio.astroturf.quizzi.domain.exceptionhandling.UiNotification
 import studio.astroturf.quizzi.ui.exceptionhandling.NotificationHandler
-import studio.astroturf.quizzi.ui.navigation.QuizziBottomNavigation
 import studio.astroturf.quizzi.ui.navigation.QuizziNavDestination
 import studio.astroturf.quizzi.ui.navigation.QuizziNavHost
 import studio.astroturf.quizzi.ui.theme.QuizziTheme
@@ -29,39 +27,10 @@ fun QuizziApp(
         val navController = rememberNavController()
         var currentNotification by remember { mutableStateOf<UiNotification?>(null) }
 
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentDestination = navBackStackEntry?.destination
 
-        val showBottomBar =
-            when {
-                currentDestination?.route in
-                    listOf(
-                        QuizziNavDestination.Onboarding.route,
-                        QuizziNavDestination.Landing.route,
-                        QuizziNavDestination.CreateRoom.route,
-                        QuizziNavDestination.CategorySelection.route,
-                        QuizziNavDestination.GameTypeSelection.route,
-                        QuizziNavDestination.Game.route,
-                        null,
-                    )
-                -> false
-                currentDestination?.route?.startsWith(QuizziNavDestination.Game.route) == true -> false
-                else -> true
-            }
 
         Scaffold(
             modifier = modifier.fillMaxSize(),
-            bottomBar = {
-                if (showBottomBar) {
-                    QuizziBottomNavigation(
-                        navController = navController,
-                        currentDestination = currentDestination,
-                        onFabClick = {
-                            navController.navigate(QuizziNavDestination.CreateRoom.route)
-                        },
-                    )
-                }
-            },
         ) { innerPadding ->
             Box(modifier = Modifier.fillMaxSize()) {
                 QuizziNavHost(

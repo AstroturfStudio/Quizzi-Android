@@ -16,10 +16,7 @@ import studio.astroturf.quizzi.ui.screen.create.gametype.GameTypeSelectionScreen
 import studio.astroturf.quizzi.ui.screen.game.GameScreen
 import studio.astroturf.quizzi.ui.screen.landing.LandingScreen
 import studio.astroturf.quizzi.ui.screen.onboarding.OnboardingScreen
-import studio.astroturf.quizzi.ui.screen.profile.ProfileScreen
 import studio.astroturf.quizzi.ui.screen.rooms.RoomsScreen
-import studio.astroturf.quizzi.ui.screen.search.SearchScreen
-import studio.astroturf.quizzi.ui.screen.statistics.StatisticsScreen
 
 @Composable
 fun QuizziNavHost(
@@ -71,20 +68,13 @@ fun QuizziNavHost(
                         ),
                     )
                 },
+                onNavigateToCreateRoom = {
+                    navController.navigate(QuizziNavDestination.CreateRoom.route)
+                },
             )
         }
 
-        composable(QuizziNavDestination.Search.route) {
-            SearchScreen()
-        }
 
-        composable(QuizziNavDestination.Statistics.route) {
-            StatisticsScreen()
-        }
-
-        composable(QuizziNavDestination.Profile.route) {
-            ProfileScreen()
-        }
 
         addCreateRoomGraph(navController)
 

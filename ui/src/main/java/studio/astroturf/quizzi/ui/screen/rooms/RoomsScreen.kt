@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -70,6 +72,7 @@ import studio.astroturf.quizzi.ui.theme.White
 @Composable
 fun RoomsScreen(
     onNavigateToRoom: (GameRoom) -> Unit,
+    onNavigateToCreateRoom: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: RoomsViewModel = hiltViewModel(),
 ) {
@@ -96,6 +99,7 @@ fun RoomsScreen(
             viewModel.stopPeriodicRequests()
             onNavigateToRoom(room)
         },
+        onCreateRoom = onNavigateToCreateRoom,
         modifier = modifier,
     )
 }
@@ -111,6 +115,7 @@ private fun RoomsScreenContent(
     onRefresh: () -> Unit,
     onSearch: (String) -> Unit,
     onJoinRoom: (GameRoom) -> Unit,
+    onCreateRoom: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -237,6 +242,15 @@ private fun RoomsScreenContent(
                     text = stringResource(R.string.rooms),
                     style = BodyXLarge.copy(color = Black),
                     textAlign = TextAlign.Center,
+                )
+                
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Create Room",
+                    tint = Primary,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable { onCreateRoom() }
                 )
             }
 
@@ -548,6 +562,7 @@ private fun RoomsScreenContentPreview() {
             onRefresh = {},
             onSearch = {},
             onJoinRoom = {},
+            onCreateRoom = {},
         )
     }
 }
@@ -566,6 +581,7 @@ private fun RoomsScreenContentPreview_NoRooms() {
             onRefresh = {},
             onSearch = {},
             onJoinRoom = {},
+            onCreateRoom = {},
         )
     }
 }

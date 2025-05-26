@@ -7,11 +7,7 @@ sealed class QuizziNavDestination(
 
     data object Landing : QuizziNavDestination("landing")
 
-    data object Search : QuizziNavDestination("search")
 
-    data object Statistics : QuizziNavDestination("statistics")
-
-    data object Profile : QuizziNavDestination("profile")
 
     data object Rooms : QuizziNavDestination("rooms")
 
