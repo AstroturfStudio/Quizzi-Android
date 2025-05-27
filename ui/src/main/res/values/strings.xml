@@ -55,6 +55,9 @@
     <string name="category_movie_posters">Movie Posters</string>
     <string name="category_football_club_logos">Football Club Logos</string>
     <string name="gametype_resistance">Resistance Game</string>
-    <string name="gametype_resist_to_time">Resist to Time Game</string>
+    <string name="gametype_resistance_description">Try to answer the questions before the other player. Whoever answers first breaks the other’s defense. Show resilience against your opponent!</string>
+    <string name="gametype_resist_to_time">Resist To Time Game</string>
+    <string name="gametype_resist_to_time_description">Try to answer the questions before the time runs out. Show resilience against time!</string>
+    <string name="lobby_description_title">DESCRIPTION</string>
 
 </resources>

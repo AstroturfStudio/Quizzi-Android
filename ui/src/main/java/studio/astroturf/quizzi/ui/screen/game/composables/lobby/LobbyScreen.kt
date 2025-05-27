@@ -126,17 +126,14 @@ fun LobbyScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "DESCRIPTION",
+                    text = stringResource(R.string.lobby_description_title),
                     style = BodySmallMedium.copy(color = Grey2),
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text =
-                        "Try to answer the questions before the other player. " +
-                            "Whoever answers first breaks the other’s defense. " +
-                            "Show resilience against your opponent!",
+                    text = stringResource(lobbyUiModel.gameTypeDescriptionResId),
                     style = BodyNormalRegular.copy(color = Black),
                 )
 
@@ -228,6 +225,7 @@ private fun LobbyScreenPreview() {
                     roomTitle = "Guven’s Room",
                     categoryNameResId = R.string.category_country_flags,
                     gameTypeResId = R.string.gametype_resistance,
+                    gameTypeDescriptionResId = R.string.gametype_resistance_description,
                     gameTypeIconResId = R.drawable.ic_resistance_game,
                     currentUserReady = false,
                     players =

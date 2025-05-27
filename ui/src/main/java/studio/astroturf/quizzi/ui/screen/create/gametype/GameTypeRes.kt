@@ -13,6 +13,14 @@ fun GameType.getGameTypeNameResId(): Int =
         else -> throw IllegalArgumentException("Unknown game type: $name")
     }
 
+@StringRes
+fun GameType.getDescriptionResId(): Int =
+    when (name) {
+        "Resistance Game" -> R.string.gametype_resistance_description
+        "Resist To Time Game" -> R.string.gametype_resist_to_time_description
+        else -> throw IllegalArgumentException("Unknown game type: $name")
+    }
+
 @DrawableRes
 fun GameType.getGameTypeDrawableResId(): Int =
     when (name) {
