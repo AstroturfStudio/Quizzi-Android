@@ -24,7 +24,7 @@ android {
         applicationId = "studio.astroturf.quizzi"
         minSdk = 26
         targetSdk = 34
-        versionCode = 67
+        versionCode = 68
 
         val major = versionProps.getProperty("major").toInt()
         val minor = versionProps.getProperty("minor").toInt()
