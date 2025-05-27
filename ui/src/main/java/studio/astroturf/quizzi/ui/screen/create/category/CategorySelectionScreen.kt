@@ -134,7 +134,7 @@ private fun CategorySelectionContent(
                                 Modifier
                                     .wrapContentSize()
                                     .fillMaxWidth(),
-                            text = it.category.name,
+                            text = stringResource(it.categoryNameResId),
                             style = BodyNormalMedium.copy(color = if (it.isSelected) White else Secondary),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
@@ -163,18 +163,22 @@ private fun CategorySelectionScreenPreview() {
                 listOf(
                     CategoryUiModel(
                         category = Category(CategoryId.COUNTRY_FLAGS, "Math"),
+                        categoryNameResId = R.string.category_country_flags,
                         isSelected = false,
                     ),
                     CategoryUiModel(
                         category = Category(CategoryId.COUNTRY_CAPITALS, "Science"),
+                        categoryNameResId = R.string.category_country_capitals,
                         isSelected = true,
                     ),
                     CategoryUiModel(
                         category = Category(CategoryId.HOLLYWOOD_STARS, "History"),
+                        categoryNameResId = R.string.category_hollywood_stars,
                         isSelected = false,
                     ),
                     CategoryUiModel(
                         category = Category(CategoryId.MOVIE_POSTERS, "Geography"),
+                        categoryNameResId = R.string.category_movie_posters,
                         isSelected = false,
                     ),
                 ),

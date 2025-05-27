@@ -53,6 +53,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import studio.astroturf.quizzi.domain.model.Category
 import studio.astroturf.quizzi.domain.model.CategoryId
 import studio.astroturf.quizzi.domain.model.GameRoom
+import studio.astroturf.quizzi.domain.model.GameType
 import studio.astroturf.quizzi.domain.model.RoomState
 import studio.astroturf.quizzi.ui.R
 import studio.astroturf.quizzi.ui.theme.Accent1
@@ -503,7 +504,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room1",
                         roomState = RoomState.Waiting,
                         players = listOf("Player1", "Player2"),
-                        gameType = "Resistance Game",
+                        gameType = GameType("Resistance Game"),
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,
@@ -515,7 +516,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
-                        gameType = "Resistance Game",
+                        gameType = GameType("Resistance Game"),
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,
@@ -527,7 +528,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
-                        gameType = "Resistance Game",
+                        gameType = GameType("Resistance Game"),
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,
@@ -539,7 +540,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
-                        gameType = "Resistance Game",
+                        gameType = GameType("Resistance Game"),
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,
@@ -551,7 +552,7 @@ private fun RoomsScreenContentPreview() {
                         name = "Room2",
                         roomState = RoomState.Playing,
                         players = listOf("Player3", "Player4", "Player5"),
-                        gameType = "Resistance Game",
+                        gameType = GameType("Resistance Game"),
                         category =
                             Category(
                                 id = CategoryId.COUNTRY_FLAGS,

@@ -49,4 +49,12 @@
     <string name="send_email">Send Email</string>
     <string name="send_whatsapp_message">Send WhatsApp Message</string>
     <string name="cancel">Cancel</string>
+    <string name="category_country_flags">Country Flags</string>
+    <string name="category_country_capitals">Country Capitals</string>
+    <string name="category_hollywood_stars">Hollywood Stars</string>
+    <string name="category_movie_posters">Movie Posters</string>
+    <string name="category_football_club_logos">Football Club Logos</string>
+    <string name="gametype_resistance">Resistance Game</string>
+    <string name="gametype_resist_to_time">Resist to Time Game</string>
+
 </resources>

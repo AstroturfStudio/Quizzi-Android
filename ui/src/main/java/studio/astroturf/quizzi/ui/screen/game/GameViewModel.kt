@@ -32,6 +32,9 @@ import studio.astroturf.quizzi.domain.repository.GameRepository
 import studio.astroturf.quizzi.ui.base.BaseViewModel
 import studio.astroturf.quizzi.ui.extensions.resolve
 import studio.astroturf.quizzi.ui.navigation.QuizziNavDestination
+import studio.astroturf.quizzi.ui.screen.create.category.getCategoryNameResId
+import studio.astroturf.quizzi.ui.screen.create.gametype.getGameTypeDrawableResId
+import studio.astroturf.quizzi.ui.screen.create.gametype.getGameTypeNameResId
 import studio.astroturf.quizzi.ui.screen.game.GameUiState.RoundOn.PlayerRoundResult
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyPlayerUiModel
 import studio.astroturf.quizzi.ui.screen.game.composables.lobby.LobbyUiModel
@@ -237,8 +240,9 @@ class GameViewModel
                 lobbyUiModel =
                     LobbyUiModel(
                         roomTitle = roomName ?: "",
-                        categoryName = category.name,
-                        gameType = gameType,
+                        categoryNameResId = category.id.getCategoryNameResId(),
+                        gameTypeResId = gameType.getGameTypeNameResId(),
+                        gameTypeIconResId = gameType.getGameTypeDrawableResId(),
                         players =
                             gameRoomState.players.mapIndexed { index, it ->
                                 LobbyPlayerUiModel(

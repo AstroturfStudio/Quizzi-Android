@@ -48,4 +48,11 @@
     <string name="send_email">E-posta Gönder</string>
     <string name="send_whatsapp_message">WhatsApp Mesajı Gönder</string>
     <string name="cancel">İptal et</string>
+    <string name="category_country_flags">Ülke Bayrakları</string>
+    <string name="category_country_capitals">Ülke Başkentleri</string>
+    <string name="category_hollywood_stars">Hollywood Yıldızları</string>
+    <string name="category_movie_posters">Film Posterleri</string>
+    <string name="category_football_club_logos">Futbol Kulübü Logoları</string>
+    <string name="gametype_resistance">Karşılıklı Direnç Oyunu</string>
+    <string name="gametype_resist_to_time">Zamana Karşı Direnç Oyunu</string>
 </resources>

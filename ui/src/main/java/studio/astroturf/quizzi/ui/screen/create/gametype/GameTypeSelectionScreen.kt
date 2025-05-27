@@ -128,7 +128,7 @@ private fun GameTypeSelectionContent(
                                 Modifier
                                     .fillMaxWidth()
                                     .wrapContentSize(align = Alignment.Center),
-                            text = it.gameType.name,
+                            text = stringResource(it.gameTypeNameResId),
                             style = BodyNormalMedium.copy(color = if (it.isSelected) White else Secondary, textAlign = TextAlign.Center),
                             maxLines = 2,
                         )
@@ -154,36 +154,14 @@ private fun GameTypeSelectionScreenPreview() {
             gameTypes =
                 listOf(
                     GameTypeUiModel(
-                        GameType("Math"),
+                        gameType = GameType(name = "Resistance Game"),
+                        gameTypeNameResId = R.string.gametype_resistance,
                         isSelected = false,
                     ),
                     GameTypeUiModel(
-                        GameType("Science"),
+                        gameType = GameType(name = "Resist to Time Game"),
+                        gameTypeNameResId = R.string.gametype_resist_to_time,
                         isSelected = true,
-                    ),
-                    GameTypeUiModel(
-                        GameType("History"),
-                        isSelected = false,
-                    ),
-                    GameTypeUiModel(
-                        GameType("Geography"),
-                        isSelected = false,
-                    ),
-                    GameTypeUiModel(
-                        GameType("Art"),
-                        isSelected = false,
-                    ),
-                    GameTypeUiModel(
-                        GameType("Music"),
-                        isSelected = false,
-                    ),
-                    GameTypeUiModel(
-                        GameType("Sports"),
-                        isSelected = false,
-                    ),
-                    GameTypeUiModel(
-                        GameType("Movies"),
-                        isSelected = false,
                     ),
                 ),
         )

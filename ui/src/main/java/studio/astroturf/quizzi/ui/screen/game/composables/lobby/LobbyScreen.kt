@@ -81,7 +81,7 @@ fun LobbyScreen(
                         .padding(horizontal = 16.dp, vertical = 24.dp),
             ) {
                 Text(
-                    text = lobbyUiModel.categoryName,
+                    text = stringResource(lobbyUiModel.categoryNameResId),
                     style = BodySmallMedium.copy(color = Grey2),
                 )
 
@@ -113,12 +113,12 @@ fun LobbyScreen(
                                     color = Tertiary,
                                     shape = CircleShape,
                                 ).clip(CircleShape),
-                        painter = painterResource(id = R.drawable.flags_de),
+                        painter = painterResource(id = lobbyUiModel.gameTypeIconResId),
                         contentDescription = null,
                     )
 
                     Text(
-                        text = lobbyUiModel.gameType,
+                        text = stringResource(lobbyUiModel.gameTypeResId),
                         style = BodySmallMedium.copy(color = Black),
                     )
                 }
@@ -226,8 +226,9 @@ private fun LobbyScreenPreview() {
             lobbyUiModel =
                 LobbyUiModel(
                     roomTitle = "Guven’s Room",
-                    categoryName = "Flag Quiz",
-                    gameType = "Resistance Game",
+                    categoryNameResId = R.string.category_country_flags,
+                    gameTypeResId = R.string.gametype_resistance,
+                    gameTypeIconResId = R.drawable.ic_resistance_game,
                     currentUserReady = false,
                     players =
                         listOf(

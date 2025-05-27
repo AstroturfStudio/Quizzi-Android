@@ -3,6 +3,7 @@ package studio.astroturf.quizzi.data.remote.rest.model
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 import studio.astroturf.quizzi.domain.model.GameRoom
+import studio.astroturf.quizzi.domain.model.GameType
 import studio.astroturf.quizzi.domain.model.RoomState
 
 @OptIn(InternalSerializationApi::class)
@@ -26,7 +27,7 @@ data class GameRoomDto(
         GameRoom(
             id = id,
             name = name,
-            gameType = gameType,
+            gameType = GameType(gameType),
             category = category.toDomain(),
             roomState = roomState,
             players = players,

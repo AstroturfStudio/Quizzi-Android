@@ -64,7 +64,7 @@ fun QuizziNavHost(
                             categoryId =
                                 room.category.id.id
                                     .toString(),
-                            gameType = room.gameType,
+                            gameType = room.gameType.name,
                         ),
                     )
                 },
@@ -73,8 +73,6 @@ fun QuizziNavHost(
                 },
             )
         }
-
-
 
         addCreateRoomGraph(navController)
 
